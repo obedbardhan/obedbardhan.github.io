@@ -1,0 +1,138 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+header {
+    background-color: #4CAF50;
+    color: white;
+    padding: 1em;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+h1, h2 {
+    margin: 0.5em 0;
+}
+
+.controls {
+    margin-top: 1em;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+}
+
+.controls label, .controls select, .controls button {
+    padding: 8px 12px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    font-size: 1em;
+}
+
+.controls button {
+    background-color: #007BFF;
+    color: white;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.2s ease;
+}
+
+.controls button:hover {
+    background-color: #0056b3;
+}
+
+main {
+    padding: 20px;
+    max-width: 900px;
+    margin: 20px auto;
+    background-color: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border-radius: 8px;
+}
+
+.verse-container {
+    padding: 15px;
+    border: 1px solid #eee;
+    border-radius: 5px;
+    background-color: #fff;
+}
+
+.verse-pair {
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px dashed #eee;
+}
+
+.verse-pair:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.english-verse, .indian-verse {
+    margin-bottom: 5px;
+    line-height: 1.6;
+}
+
+.english-verse {
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #2196F3; /* English verse color */
+}
+
+.indian-verse {
+    font-size: 1.0em;
+    color: #4CAF50; /* Indian language verse color */
+}
+
+.verse-number {
+    font-weight: bold;
+    margin-right: 5px;
+}
+
+.audio-icon {
+    cursor: pointer;
+    margin-left: 10px;
+    color: #6c757d;
+    font-size: 0.9em;
+}
+
+.audio-icon:hover {
+    color: #007BFF;
+}
+
+.word-highlight {
+    background-color: yellow;
+    cursor: pointer;
+}
+
+.word-info-container {
+    margin-top: 20px;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+.word-info-container h3 {
+    margin-top: 0;
+    color: #333;
+}
+
+.word-info-container button {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.word-info-container button:hover {
+    background-color: #c82333;
+}

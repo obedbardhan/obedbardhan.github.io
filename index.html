@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interleaved Bible Viewer</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f0f0f0; }
+        header {
+            background-color: #333;
+            color: white;
+            padding: 10px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+        .controls label, .controls select, .controls button, .controls input {
+            margin-bottom: 5px; /* For wrapping */
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        .controls select { background-color: white; }
+        .controls button {
+            background-color: #5cb85c;
+            color: white;
+            cursor: pointer;
+            border: none;
+        }
+        .controls button:hover { background-color: #4cae4c; }
+        .controls input[type="text"] { width: 150px; }
+        #quickSearchInput { min-width: 180px; }
+
+        main { padding: 20px; }
+        .verse-container {
+            background-color: white;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            max-height: calc(100vh - 150px); /* Adjust based on header height */
+            overflow-y: auto;
+        }
+        .verse-block {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-left: 4px solid #007bff;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+        }
+        .verse-block.highlighted-verse {
+            background-color: #fff3cd; /* Yellowish highlight */
+            border-left-color: #ffc107;
+        }
+        .verse-number {
+            font-weight: bold;
+            color: #007bff;
+            margin-right: 8px;
+            display: inline-block;
+        }
+        .english-verse {
+            color: #333;
+            margin-bottom: 5px;
+            display: block;
+        }
+        .indian-lang-verse {
+            color: #28a745;
+            font-style: italic;
+            display: block;
+        }
+        .chapter-title {
+            color: #333;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        /* Modal Styles (from previous) */
+        .modal {
+            display: none; position: fixed; z-index: 1001;
+            left: 0; top: 0; width: 100%; height: 100%;
+            overflow: auto; background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: #fefefe; margin: 10% auto; padding: 20px;
+            border: 1px solid #888; width: 80%; max-width: 700px;
+            border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            position: relative;
+        }
+        .modal .close-button {
+            color: #aaa; float: right; font-size: 28px;
+            font-weight: bold; cursor: pointer;
+        }
+        .modal .close-button:hover, .modal .close-button:focus {
+            color: black; text-decoration: none;
+        }
+        #loadingIndicator {
+            font-size: 1.2em;
+            color: #555;
+            text-align: center;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="controls">
+            <label for="bookSelect">Book:</label>
+            <select id="bookSelect"></select>
+
+            <label for="chapterSelect">Chapter:</label>
+            <select id="chapterSelect"></select>
+
+            <label for="languageSelect">Indian Language:</label>
+            <select id="languageSelect">
+                <option value="irv_hindi">Hindi (IRV)</option>
+                <option value="odia_all_books">Odia</option>
+            </select>
+
+            <button id="goButton">Go</button>
+            <button id="playEnglishButton">Play English Chapter</button>
+            <button id="playIndianLangButton">Play Indian Language Chapter</button>
+            
+            <button id="pauseResumeButton" style="display: none;">Pause</button>
+            <button id="stopAudioButton" style="display: none;">Stop Audio</button> <input type="text" id="quickSearchInput" placeholder="e.g., John 3:16 or 'love'">
+            <button id="searchButton">Search</button>
+            <button id="voiceSearchButton" title="Voice Search">🎤</button>
+        </div>
+    </header>
+
+    <main>
+        <div id="bibleTextDiv" class="verse-container">
+            <p id="loadingIndicator">Loading Bible data, please wait...</p>
+        </div>
+
+        <div id="wordStudyModal" class="modal">
+            <div class="modal-content">
+                <span class="close-button" id="closeModalButton">&times;</span>
+                <h3 id="selectedWordHeader">Word Details:</h3>
+                <div id="dictionaryMeaning"></div>
+                <div id="occurrences"></div>
+            </div>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
