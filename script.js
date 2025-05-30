@@ -391,6 +391,102 @@ function attachWordStudyListeners() {
     });
 }
 
+async function fetchWordDefinition(word) {
+  const dictionaryMeaning = document.getElementById('dictionaryMeaning'); // Assuming you have an element with this ID
+  if (!dictionaryMeaning) {
+    console.error("Element with ID 'dictionaryMeaning' not found.");
+    return;
+  }
+
+  dictionaryMeaning.innerHTML = `<p>Searching for "${word}"...</p>`; // Placeholder while fetching
+
+  try {
+    const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+    if (!response.ok) {
+      if (response.status === 404) {
+        dictionaryMeaning.innerHTML = `<p>Sorry, the definition for "<strong>${word}</strong>" could not be found.</p>`;
+      } else {
+        dictionaryMeaning.innerHTML = `<p>Sorry, there was an error fetching the definition for "<strong>${word}</strong>". (Status: ${response.status})</p>`;
+      }
+      return;
+    }
+
+    const data = await response.json();
+
+    if (data && data.length > 0) {
+      const wordData = data[0]; // Use the first result
+      let htmlContent = `<h2>${wordData.word}</h2>`;
+
+      if (wordData.phonetics && wordData.phonetics.length > 0) {
+        const phonetic = wordData.phonetics.find(p => p.text);
+        if (phonetic) {
+          htmlContent += `<p><em>${phonetic.text}</em></p>`;
+        }
+      }
+
+      wordData.meanings.forEach(meaning => {
+        htmlContent += `<h3>${meaning.partOfSpeech}</h3>`;
+        meaning.definitions.forEach((definitionObj, index) => {
+          htmlContent += `<p><strong>Definition ${index + 1}:</strong> ${definitionObj.definition}</p>`;
+          if (definitionObj.example) {
+            htmlContent += `<p><em>Example: ${definitionObj.example}</em></p>`;
+          }
+        });
+      });
+
+      // Attempt to find a couple of general usage examples if not directly available in definitions
+      let usageExamples = [];
+      if (wordData.meanings) {
+        for (const meaning of wordData.meanings) {
+          if (meaning.definitions) {
+            for (const def of meaning.definitions) {
+              if (def.example) {
+                usageExamples.push(def.example);
+                if (usageExamples.length >= 2) break;
+              }
+            }
+          }
+          if (usageExamples.length >= 2) break;
+        }
+      }
+
+      // If specific examples from definitions are less than 2, try to find more generic ones if the API provides them at a higher level (though this API structure usually nests examples within definitions)
+      // This API's structure is more definition-centric for examples.
+      // The above code already extracts examples tied to specific definitions.
+
+      if (usageExamples.length > 0) {
+        htmlContent += `<h3>Usage Examples:</h3>`;
+        usageExamples.slice(0, 2).forEach(example => { // Show up to 2 examples
+          htmlContent += `<p>- ${example}</p>`;
+        });
+      } else if (wordData.sourceUrls && wordData.sourceUrls.length > 0){
+        // Fallback if no examples are found but source URLs exist
+        htmlContent += `<p>No direct usage examples found in the data. You can check <a href="${wordData.sourceUrls[0]}" target="_blank">Wiktionary</a> for more details.</p>`
+      } else {
+        htmlContent += `<p>No usage examples found for this word in the provided data.</p>`;
+      }
+
+
+      dictionaryMeaning.innerHTML = htmlContent;
+    } else {
+      dictionaryMeaning.innerHTML = `<p>No definition data found for "<strong>${word}</strong>".</p>`;
+    }
+
+  } catch (error) {
+    console.error('Error fetching definition:', error);
+    dictionaryMeaning.innerHTML = `<p>An error occurred while trying to fetch the definition. Please check your internet connection or try again later.</p>`;
+  }
+}
+
+// Example of how you might call this function, assuming 'clickedWord' is defined elsewhere
+// For instance, in an event listener:
+// someElement.addEventListener('click', () => {
+//   const clickedWord = "hello"; // This would be dynamically set
+ // fetchWordDefinition(clickedWord);
+// });
+
+
+
 function handleWordClick(event) {
     const clickedWord = event.target.dataset.word; // Get the cleaned word from data-word attribute
     if (!clickedWord) return;
@@ -399,12 +495,13 @@ function handleWordClick(event) {
     dictionaryMeaning.innerHTML = `<p>Loading definition for "${clickedWord}"...</p>`;
     occurrencesDiv.innerHTML = `<p>Searching for occurrences...</p>`;
     wordStudyModal.style.display = 'block';
-
+    fetchWordDefinition(clickedWord);
     // --- Dummy Dictionary Lookup ---
-    setTimeout(() => {
-        const dummyMeaning = `<strong>${clickedWord}:</strong> This is a placeholder definition for the word. In a real application, this would come from a dictionary API. It provides a brief explanation of the term's common use and context. For example, "love" (n) - an intense feeling of deep affection. "love" (v) - feel a deep romantic or sexual attachment to (someone).`;
-        dictionaryMeaning.innerHTML = `<p>${dummyMeaning}</p>`;
-    }, 500);
+    // setTimeout(() => {
+    //     const dummyMeaning = `<strong>${clickedWord}:</strong> This is a placeholder definition for the word. In a real application, this would come from a dictionary API. It provides a brief explanation of the term's common use and context. For example, "love" (n) - an intense feeling of deep affection. "love" (v) - feel a deep romantic or sexual attachment to (someone).`;
+    //     dictionaryMeaning.innerHTML = `<p>${dummyMeaning}</p>`;
+    // }, 500);
+    
 
     // Find occurrences in all English books
     const occurrences = [];
