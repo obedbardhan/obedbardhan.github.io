@@ -16,6 +16,8 @@ let currentSpeech = {
 
 // Global reference for SpeechSynthesis voices
 let availableVoices = [];
+let preferredVoiceURI = localStorage.getItem('preferredVoiceURI') || null;
+
 
 const bibleBooks = [
     "Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy", "Joshua", "Judges", "Ruth",
@@ -59,16 +61,51 @@ async function initializeApp() {
         populateChapterSelect(bibleBooks[0]); // Populate chapters for the first book
     }
 
+    // const loadVoices = () => {
+    //     availableVoices = speechSynthesis.getVoices();
+    //     if (availableVoices.length === 0) {
+    //         console.warn("No SpeechSynthesis voices detected yet. Retrying...");
+    //         setTimeout(loadVoices, 200);
+    //     } else {
+    //         console.log("SpeechSynthesis voices loaded. Total:", availableVoices.length);
+    //         availableVoices.forEach(voice => console.log(`Voice: ${voice.name} (${voice.lang}) - Default: ${voice.default}`));
+    //     }
+    // };
+
     const loadVoices = () => {
-        availableVoices = speechSynthesis.getVoices();
-        if (availableVoices.length === 0) {
-            console.warn("No SpeechSynthesis voices detected yet. Retrying...");
-            setTimeout(loadVoices, 200);
+    availableVoices = speechSynthesis.getVoices();
+
+    if (availableVoices.length === 0) {
+        console.warn("No SpeechSynthesis voices detected yet. Retrying...");
+        setTimeout(loadVoices, 200);
+        return;
+    }
+
+    console.log("SpeechSynthesis voices loaded. Total:", availableVoices.length);
+    availableVoices.forEach(voice => console.log(`Voice: ${voice.name} (${voice.lang}) - Default: ${voice.default}`));
+
+    if (preferredVoiceURI) {
+        const matched = availableVoices.find(v => v.voiceURI === preferredVoiceURI);
+        if (matched) {
+            console.log(`Using stored preferred voice: ${matched.name}`);
         } else {
-            console.log("SpeechSynthesis voices loaded. Total:", availableVoices.length);
-            availableVoices.forEach(voice => console.log(`Voice: ${voice.name} (${voice.lang}) - Default: ${voice.default}`));
+            console.warn("Stored preferred voice not found in available voices.");
+            preferredVoiceURI = null;
+            localStorage.removeItem('preferredVoiceURI');
         }
+    }
+
+    // Default fallback setup if not set
+    if (!preferredVoiceURI) {
+        const defaultVoice = availableVoices.find(v => v.default) || availableVoices[0];
+        if (defaultVoice) {
+            preferredVoiceURI = defaultVoice.voiceURI;
+            localStorage.setItem('preferredVoiceURI', preferredVoiceURI);
+            console.log(`Default voice set and stored: ${defaultVoice.name}`);
+        }
+    }
     };
+
 
     if ('speechSynthesis' in window) {
         speechSynthesis.onvoiceschanged = loadVoices;
@@ -630,7 +667,16 @@ function speakText(text, lang, source) {
         currentSpeech.isPaused = false;
         currentSpeech.source = source; // 'english_chapter', 'indian_chapter', 'verse_audio'
 
-        const desiredVoice = availableVoices.find(v => v.lang === lang && v.localService);
+        // const desiredVoice = availableVoices.find(v => v.lang === lang && v.localService);
+        let desiredVoice = availableVoices.find(v => v.voiceURI === preferredVoiceURI);
+        if (!desiredVoice || desiredVoice.lang !== lang) {
+        desiredVoice = availableVoices.find(v => v.lang === lang && v.localService);
+        if (desiredVoice) {
+        preferredVoiceURI = desiredVoice.voiceURI;
+        localStorage.setItem('preferredVoiceURI', preferredVoiceURI);
+        }
+        }
+
         const fallbackVoice = availableVoices.find(v => v.lang === lang);
         const defaultVoice = availableVoices.find(v => v.default);
 
