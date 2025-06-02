@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interleaved Bible Viewer</title>
+    <title>India Bible Project</title>
     <link rel="stylesheet" href="style.css">
     <style>
         body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f0f0f0; }
@@ -122,6 +122,9 @@
             <select id="languageSelect">
                 <option value="irv_hindi">Hindi (IRV)</option>
                 <option value="odia_all_books">Odia</option>
+                <option value="te_irv_updated">Telugu (IRV)</option>
+                <option value="ta_oitce_updated">Tamil (OITCE)</option>
+                <option value="kn_irv_updated">Kannada (IRV)</option>
             </select>
 
             <button id="goButton">Go</button>
@@ -129,7 +132,8 @@
             <button id="playIndianLangButton">Play Indian Language Chapter</button>
             
             <button id="pauseResumeButton" style="display: none;">Pause</button>
-            <button id="stopAudioButton" style="display: none;">Stop Audio</button> <input type="text" id="quickSearchInput" placeholder="e.g., John 3:16 or 'love'">
+            <button id="stopAudioButton" style="display: none;">Stop Audio</button>
+            <input type="text" id="quickSearchInput" placeholder="e.g., John 3:16 or 'love'">
             <button id="searchButton">Search</button>
             <button id="voiceSearchButton" title="Voice Search">🎤</button>
         </div>
