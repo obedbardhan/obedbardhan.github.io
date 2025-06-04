@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', initializeApp);
 
 // Data arrays
-let netBibleData = []; // For English (assuming 'all_web_bible.json' or similar)
+let netBibleData = []; // For English (assuming 'all_web_bible_updated.json' or similar)
 let hindiBibleData = [];
 let odiaBibleData = [];
 let teluguBibleData = [];
@@ -121,7 +121,7 @@ async function initializeApp() {
     try {
         console.log("Starting to load all Bible data...");
         await Promise.allSettled([
-            fetchAndProcessBibleData('all_web_bible.json', 'english'),
+            fetchAndProcessBibleData('all_web_bible_updated.json', 'english'),
             fetchAndProcessBibleData('irv_hindi.json', 'hindi'),
             fetchAndProcessBibleData('odia_all_books.json', 'odia'),
             fetchAndProcessBibleData('te_irv_updated.json', 'telugu'),
@@ -430,7 +430,7 @@ function displayChapter(scrollToVerseNum = null) {
     if (englishVerses.length === 0 && indianLanguageVerses.length === 0) {
         let message = `<p>No verses found for ${selectedBook} chapter ${selectedChapter}. `;
         if (netBibleData.length === 0) {
-            message += "English Bible data ('all_web_bible.json') was not loaded or is empty. Please check the console for file loading errors.";
+            message += "English Bible data ('all_web_bible_updated.json') was not loaded or is empty. Please check the console for file loading errors.";
         } else if (englishVerses.length === 0 && netBibleData.length > 0) {
              message += "No English verses found for this specific chapter. Ensure 'englishBookName' matches your JSON data and the chapter number is correct.";
         }
@@ -1038,7 +1038,7 @@ function handleSearch() {
             searchResultsHTML += `<p>${limitedResults.length} (of ${foundVerses.length}) verses found containing "${query}":</p>`;
             limitedResults.forEach(v => {
                 searchResultsHTML += `<div class="verse-block">
-                    <p><small><a href="#" class="occurrence-link" data-book="${v.englishBookName}" data-chapter="${v.chapter}" data-verse="${v.verse}" data-lang-source="${v.sourceLang === 'English' ? 'all_web_bible' : languageSelect.options[Array.from(languageSelect.options).findIndex(opt => opt.text.toLowerCase().includes(v.sourceLang.toLowerCase()))]?.value || ''}">${v.englishBookName} ${v.chapter}:${v.verse}</a> (${v.sourceLang})</small></p>
+                    <p><small><a href="#" class="occurrence-link" data-book="${v.englishBookName}" data-chapter="${v.chapter}" data-verse="${v.verse}" data-lang-source="${v.sourceLang === 'English' ? 'all_web_bible_updated' : languageSelect.options[Array.from(languageSelect.options).findIndex(opt => opt.text.toLowerCase().includes(v.sourceLang.toLowerCase()))]?.value || ''}">${v.englishBookName} ${v.chapter}:${v.verse}</a> (${v.sourceLang})</small></p>
                     <p>${v.text.replace(new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), (matchText) => `<mark>${matchText}</mark>`)}</p>
                 </div>`;
             });
@@ -1066,7 +1066,7 @@ function handleSearchResultLinkClick(e) {
     const langSourceHint = e.target.dataset.langSource; // e.g., "English", "हिन्दी", etc.
 
     // Attempt to switch language if the result is from a non-active Indian language
-    if (langSourceHint && langSourceHint !== 'all_web_bible') {
+    if (langSourceHint && langSourceHint !== 'all_web_bible_updated') {
         const targetLangOption = Array.from(languageSelect.options).find(opt => {
             // This is a bit heuristic; ideally, store the value like 'irv_hindi' in data-lang-source
             if (langSourceHint.toLowerCase().includes('hindi') && opt.value === 'irv_hindi') return true;
