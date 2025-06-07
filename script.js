@@ -6,6 +6,14 @@ let availableVoices = [];
 let currentSpeech = { utterance: null, isPlaying: false, isPaused: false, source: null };
 let currentPlaybackRate = parseFloat(localStorage.getItem('playbackRate')) || 1.0;
 
+// [NEW] Local dictionary for overriding incorrect translations from the API
+const localTranslations = {
+    'or': { // Odia
+        'entice': 'ପ୍ରଲୋଭିତ କରିବା'
+    }
+    // Other languages and words can be added here
+};
+
 const bibleBooks = ["Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy", "Joshua", "Judges", "Ruth", "1 Samuel", "2 Samuel", "1 Kings", "2 Kings", "1 Chronicles", "2 Chronicles", "Ezra", "Nehemiah", "Esther", "Job", "Psalms", "Proverbs", "Ecclesiastes", "Song of Solomon", "Isaiah", "Jeremiah", "Lamentations", "Ezekiel", "Daniel", "Hosea", "Joel", "Amos", "Obadiah", "Jonah", "Micah", "Nahum", "Habakkuk", "Zephaniah", "Haggai", "Zechariah", "Malachi", "Matthew", "Mark", "Luke", "John", "Acts", "Romans", "1 Corinthians", "2 Corinthians", "Galatians", "Ephesians", "Philippians", "Colossians", "1 Thessalonians", "2 Thessalonians", "1 Timothy", "2 Timothy", "Titus", "Philemon", "Hebrews", "James", "1 Peter", "2 Peter", "1 John", "2 John", "3 John", "Jude", "Revelation"];
 
 // DOM Elements
@@ -354,50 +362,150 @@ function handlePlayIndianLangChapter() {
     }
 }
 
+/**
+ * [NEW FUNCTION] Gets the language code and name for the currently selected Indian language.
+ * @returns {object} An object containing the language code {code} and name {name}.
+ */
+function getCurrentIndianLangInfo() {
+    const langValue = languageSelect.value;
+    switch(langValue) {
+        case 'irv_hindi': return { code: 'hi', name: 'Hindi' };
+        case 'odia_all_books': return { code: 'or', name: 'Odia' };
+        case 'te_irv_updated': return { code: 'te', name: 'Telugu' };
+        case 'ta_oitce_updated': return { code: 'ta', name: 'Tamil' };
+        case 'kn_irv_updated': return { code: 'kn', 'name': 'Kannada' };
+        default: return { code: null, name: 'Indian Language' };
+    }
+}
+
+/**
+ * [MODIFIED FUNCTION] Handles clicking on a word to show definitions, translations, and occurrences.
+ * It now checks a local dictionary before calling the external translation API.
+ * @param {Event} event The click event.
+ */
 async function handleWordClick(event) {
     const word = event.target.dataset.word.replace(/[^a-zA-Z]/g, '').toLowerCase();
     if (!word) return;
 
     selectedWordHeader.textContent = `Word Details: "${word}"`;
-    dictionaryMeaning.innerHTML = `<p>Loading definition...</p>`;
+    // Set up the new structure for displaying meanings
+    dictionaryMeaning.innerHTML = `
+        <div id="englishMeaningContainer">
+            <h4>English Definition</h4>
+            <div id="englishMeaningContent"><p>Loading definition...</p></div>
+        </div>
+        <hr>
+        <div id="indianLangMeaningContainer">
+            <h4 id="indianLangMeaningHeader">Meaning</h4>
+            <div id="indianLangMeaningContent"><p>Loading translation...</p></div>
+        </div>
+    `;
     occurrencesDiv.innerHTML = `<p>Searching for occurrences...</p>`;
     wordStudyModal.style.display = 'block';
 
-    // Fetch and display definition
-    try {
-        const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
-        const data = await response.json();
-        if (response.ok && data.length > 0 && !data.title) { // Check for data.title which indicates an error from the API
-            let html = '';
-            // Show definitions and examples from up to 2 meanings
-            data[0].meanings.slice(0, 2).forEach(meaning => {
-                html += `<h3>${meaning.partOfSpeech}</h3>`;
-                // Show up to 2 definitions per part of speech
-                meaning.definitions.slice(0, 2).forEach(def => {
-                    html += `<p><strong>Definition:</strong> ${def.definition}</p>`;
-                    if (def.example) html += `<p><em>Usage: ${def.example}</em></p>`;
-                });
-            });
-            dictionaryMeaning.innerHTML = html;
-        } else {
-            dictionaryMeaning.innerHTML = `<p>No definition found for "${word}".</p>`;
-        }
-    } catch (e) {
-        console.error("Error fetching dictionary meaning:", e);
-        dictionaryMeaning.innerHTML = `<p>Error fetching definition.</p>`;
+    const { code: langCode, name: langName } = getCurrentIndianLangInfo();
+    
+    // Update the Indian language header and visibility
+    const indianLangHeader = document.getElementById('indianLangMeaningHeader');
+    if (langName && langCode) {
+        indianLangHeader.textContent = `${langName} Meaning`;
+        document.getElementById('indianLangMeaningContainer').style.display = 'block';
+    } else {
+        document.getElementById('indianLangMeaningContainer').style.display = 'none';
     }
 
-    // Find and display occurrences
-    const regex = new RegExp(`\\b${word}\\b`, 'i');
-    const occurrences = netBibleData.filter(v => v.text && regex.test(v.text));
-    if (occurrences.length > 0) {
-        occurrencesDiv.innerHTML = `<h4>Occurrences (${occurrences.length}):</h4><ul>` +
-            occurrences.map(occ => `<li><a href="#" class="occurrence-link" data-book="${occ.englishBookName}" data-chapter="${occ.chapter}" data-verse="${occ.verse}">${occ.englishBookName} ${occ.chapter}:${occ.verse}</a>: ${occ.text.replace(regex, `<mark>${occ.text.match(regex)[0]}</mark>`)}</li>`).join('') + `</ul>`;
-        document.querySelectorAll('.occurrence-link').forEach(link => link.addEventListener('click', handleOccurrenceLinkClick));
-    } else {
-        occurrencesDiv.innerHTML = `<p>No other occurrences found.</p>`;
-    }
+    // --- Task 1: Fetch English Definition (from dictionaryapi.dev) ---
+    const fetchEnglishDef = async () => {
+        const englishMeaningContent = document.getElementById('englishMeaningContent');
+        try {
+            const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+            const data = await response.json();
+            if (response.ok && data.length > 0 && !data.title) {
+                let html = '';
+                data[0].meanings.slice(0, 2).forEach(meaning => {
+                    html += `<h3>${meaning.partOfSpeech}</h3>`;
+                    meaning.definitions.slice(0, 2).forEach(def => {
+                        html += `<p><strong>Definition:</strong> ${def.definition}</p>`;
+                        if (def.example) html += `<p><em>Usage: ${def.example}</em></p>`;
+                    });
+                });
+                englishMeaningContent.innerHTML = html;
+            } else {
+                englishMeaningContent.innerHTML = `<p>No definition found for "${word}".</p>`;
+            }
+        } catch (e) {
+            console.error("Error fetching dictionary meaning:", e);
+            englishMeaningContent.innerHTML = `<p>Error fetching definition.</p>`;
+        }
+    };
+
+    // --- Task 2: Fetch Indian Language Meaning (from local dictionary or MyMemory API) ---
+    const fetchIndianLangMeaning = async () => {
+        if (!langCode) return; // Don't fetch if no valid language is selected
+        const indianMeaningContent = document.getElementById('indianLangMeaningContent');
+
+        // [MODIFICATION] First, check our local dictionary for a translation.
+        const localTranslation = localTranslations[langCode]?.[word];
+        if (localTranslation) {
+            indianMeaningContent.innerHTML = `<p>${localTranslation}</p>`;
+            return; // Exit the function since we found a local translation.
+        }
+
+        // If not in the local dictionary, call the external API.
+        try {
+            const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(word)}&langpair=en|${langCode}`);
+            if (!response.ok) throw new Error(`API responded with status ${response.status}`);
+            const data = await response.json();
+            if (data.responseData && data.responseStatus === 200) {
+                indianMeaningContent.innerHTML = `<p>${data.responseData.translatedText}</p>`;
+            } else {
+                indianMeaningContent.innerHTML = `<p>Could not find a translation for "${word}".</p>`;
+            }
+        } catch (e) {
+            console.error("Error fetching translation:", e);
+            indianMeaningContent.innerHTML = `<p>Error fetching translation.</p>`;
+        }
+    };
+
+    // --- Task 3: Find and display occurrences ---
+    const findOccurrences = () => {
+        const occurrences = netBibleData.filter(v => v.text && v.text.toLowerCase().includes(word));
+        if (occurrences.length > 0) {
+            const occurrencesHtml = occurrences.map(occ => {
+                const wordToHighlight = word;
+                const highlightRegex = new RegExp(`(\\b${wordToHighlight}\\b)`, 'gi');
+                const parts = occ.text.split(highlightRegex);
+
+                const finalHtml = parts.map(part => {
+                    if (part.toLowerCase() === wordToHighlight.toLowerCase()) {
+                        return `<mark><span class="word-clickable" data-word="${part.replace(/'/g, '&apos;')}">${part}</span></mark>`;
+                    } else {
+                        return part.replace(/([a-zA-Z0-9']+)/g, `<span class="word-clickable" data-word="$1">$1</span>`);
+                    }
+                }).join('');
+
+                return `<li><a href="#" class="occurrence-link" data-book="${occ.englishBookName}" data-chapter="${occ.chapter}" data-verse="${occ.verse}">${occ.englishBookName} ${occ.chapter}:${occ.verse}</a>: ${finalHtml}</li>`;
+            }).join('');
+            
+            occurrencesDiv.innerHTML = `<h4>Occurrences (${occurrences.length}):</h4><ul>${occurrencesHtml}</ul>`;
+            
+            // Re-attach event listeners for newly created elements within the modal
+            occurrencesDiv.querySelectorAll('.occurrence-link').forEach(link => link.addEventListener('click', handleOccurrenceLinkClick));
+            occurrencesDiv.querySelectorAll('.word-clickable').forEach(span => span.addEventListener('click', handleWordClick));
+
+        } else {
+            occurrencesDiv.innerHTML = `<p>No other occurrences found.</p>`;
+        }
+    };
+
+    // Run all tasks concurrently for better performance
+    Promise.allSettled([
+        fetchEnglishDef(),
+        fetchIndianLangMeaning(),
+        Promise.resolve().then(findOccurrences) 
+    ]);
 }
+
 
 function handleOccurrenceLinkClick(e) {
     e.preventDefault();
@@ -409,23 +517,38 @@ function handleOccurrenceLinkClick(e) {
     displayChapter(verse);
 }
 
+
 function handleSearch(query) {
-    const searchTerm = query.trim().toLowerCase();
+    const searchTerm = query.trim();
     if (!searchTerm) {
         displayChapter(); // Go back to current chapter view if search is empty
         return;
     }
-    const results = netBibleData.filter(v => v.text && v.text.toLowerCase().includes(searchTerm));
+    const results = netBibleData.filter(v => v.text && v.text.toLowerCase().includes(searchTerm.toLowerCase()));
     
     bibleTextDiv.innerHTML = `<h2 class="chapter-title">Search Results for "${searchTerm}"</h2>`;
     if(results.length > 0) {
-        // Limit results to prevent overwhelming the UI
+        let resultsHtml = '';
         results.slice(0, 100).forEach(v => {
-            // Escape special characters in searchTerm for regex if needed, but for simple includes it's often fine
-            const highlightedText = v.text.replace(new RegExp(`(${searchTerm})`, 'gi'), `<mark>$1</mark>`);
-            bibleTextDiv.innerHTML += `<div class="verse-block"><p><a href="#" class="occurrence-link" data-book="${v.englishBookName}" data-chapter="${v.chapter}" data-verse="${v.verse}">${v.englishBookName} ${v.chapter}:${v.verse}</a>: ${highlightedText}</p></div>`;
+            const termForRegex = searchTerm.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+            const highlightRegex = new RegExp(`(${termForRegex})`, 'gi');
+            const parts = v.text.split(highlightRegex);
+
+            const finalHtml = parts.map(part => {
+                if (part.toLowerCase() === searchTerm.toLowerCase()) {
+                     return `<mark><span class="word-clickable" data-word="${part.replace(/'/g, '&apos;')}">${part}</span></mark>`;
+                } else {
+                    return part.replace(/([a-zA-Z0-9']+)/g, `<span class="word-clickable" data-word="$1">$1</span>`);
+                }
+            }).join('');
+
+            resultsHtml += `<div class="verse-block"><p><a href="#" class="occurrence-link" data-book="${v.englishBookName}" data-chapter="${v.chapter}" data-verse="${v.verse}">${v.englishBookName} ${v.chapter}:${v.verse}</a>: ${finalHtml}</p></div>`;
         });
+        bibleTextDiv.innerHTML += resultsHtml;
+
+        // Attach event listeners to the newly created links and clickable words
         document.querySelectorAll('.occurrence-link').forEach(link => link.addEventListener('click', handleOccurrenceLinkClick));
+        document.querySelectorAll('.word-clickable').forEach(span => span.addEventListener('click', handleWordClick));
     } else {
         bibleTextDiv.innerHTML += `<p>No results found.</p>`;
     }
