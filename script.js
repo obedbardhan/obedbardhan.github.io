@@ -6,7 +6,7 @@ let availableVoices = [];
 let currentSpeech = { utterance: null, isPlaying: false, isPaused: false, source: null };
 let currentPlaybackRate = parseFloat(localStorage.getItem('playbackRate')) || 1.0;
 
-// [NEW] Local dictionary for overriding incorrect translations from the API
+// Local dictionary for overriding incorrect translations from the API
 const localTranslations = {
     'or': { // Odia
         'entice': 'ପ୍ରଲୋଭିତ କରିବା'
@@ -57,25 +57,19 @@ function setupEventListeners() {
     nextChapterButton.addEventListener('click', navigateToNextChapter);
     playEnglishButton.addEventListener('click', handlePlayEnglishChapter);
     playIndianLangButton.addEventListener('click', handlePlayIndianLangChapter);
-    pauseResumeButton.addEventListener('click', togglePauseResume); // Added event listener for pause/resume
+    pauseResumeButton.addEventListener('click', togglePauseResume);
     stopAudioButton.addEventListener('click', stopCurrentAudio);
     playbackRateSlider.addEventListener('input', e => {
         currentPlaybackRate = parseFloat(e.target.value);
         playbackRateValue.textContent = `${currentPlaybackRate.toFixed(1)}x`;
         localStorage.setItem('playbackRate', currentPlaybackRate);
         if (currentSpeech.utterance && currentSpeech.isPlaying) {
-            // If playing, re-set the rate (may require re-speaking or just updates next utterance)
-            // Note: Changing rate mid-speech is not natively supported by all browsers for SpeechSynthesis
-            // For active speech, you'd typically need to stop and restart with new rate.
-            // For this app, it will apply to the NEXT verse/chapter spoken.
             currentSpeech.utterance.rate = currentPlaybackRate;
         }
     });
     closeModalButton.addEventListener('click', () => wordStudyModal.style.display = 'none');
     searchButton.addEventListener('click', () => handleSearch(quickSearchInput.value));
     quickSearchInput.addEventListener('keypress', e => { if (e.key === 'Enter') handleSearch(quickSearchInput.value); });
-
-    // Ensure initial state of audio control buttons
     resetChapterAudioButtons();
 }
 
@@ -115,18 +109,16 @@ function populateBookSelect() {
 function populateChapterSelect(bookName) {
     chapterSelect.innerHTML = '';
     const bookData = netBibleData.filter(v => v.englishBookName === bookName);
-    // Ensure chapters are unique and sorted
     const chapters = [...new Set(bookData.map(v => v.chapter))].sort((a,b) => a - b);
-
     if (chapters.length > 0) {
         chapters.forEach(chap => chapterSelect.add(new Option(chap, chap)));
     } else {
-        chapterSelect.add(new Option('No Chapters', '')); // Fallback if no chapters found
+        chapterSelect.add(new Option('No Chapters', ''));
     }
 }
 
 function displayChapter(scrollToVerseNum = null) {
-    stopCurrentAudio(); // Stop any ongoing audio when chapter changes
+    stopCurrentAudio();
     updateNavButtonsState();
     const selectedBook = bookSelect.value;
     const selectedChapter = parseInt(chapterSelect.value);
@@ -140,7 +132,6 @@ function displayChapter(scrollToVerseNum = null) {
     
     bibleTextDiv.innerHTML = `<h2 class="chapter-title">${selectedBook} ${selectedChapter}</h2>`;
     
-    // Find the maximum verse number present in either language for correct iteration
     const allVerses = [...englishVerses.map(v => v.verse), ...indianLanguageVerses.map(v => v.verse)];
     const maxVerseNum = allVerses.length > 0 ? Math.max(...allVerses) : 0;
 
@@ -153,27 +144,25 @@ function displayChapter(scrollToVerseNum = null) {
         const engVerse = englishVerses.find(v => v.verse === i);
         const indVerse = indianLanguageVerses.find(v => v.verse === i);
         
-        if (engVerse || indVerse) { // Only create a block if at least one language has the verse
+        if (engVerse || indVerse) {
             const verseBlock = document.createElement('div');
             verseBlock.className = 'verse-block';
             verseBlock.id = `verse-${i}`;
             verseBlock.innerHTML = `<p class="verse-number">${i}</p>`;
             
             if (engVerse?.text) {
-                // Sanitize text for data-text attribute to prevent issues with quotes
                 const cleanEngText = engVerse.text.replace(/"/g, '&quot;');
                 verseBlock.innerHTML += `<p class="english-verse">${engVerse.text.replace(/([a-zA-Z0-9']+)/g, `<span class="word-clickable" data-word="$1">$1</span>`)} <button class="play-verse-audio-btn" data-lang="en-US" data-text="${cleanEngText}">🔊</button></p>`;
             }
             if (indVerse?.text) {
                 let langInfo = {};
-                // Determine the correct language code for SpeechSynthesis
                 switch(languageSelect.value) {
                     case 'irv_hindi': langInfo = {name: 'हिन्दी', code: 'hi-IN'}; break;
-                    case 'odia_all_books': langInfo = {name: 'ଓଡିଆ', code: 'or-IN'}; break; // Assuming or-IN for Odia
+                    case 'odia_all_books': langInfo = {name: 'ଓଡିଆ', code: 'or-IN'}; break;
                     case 'te_irv_updated': langInfo = {name: 'తెలుగు', code: 'te-IN'}; break;
                     case 'ta_oitce_updated': langInfo = {name: 'தமிழ்', code: 'ta-IN'}; break;
                     case 'kn_irv_updated': langInfo = {name: 'ಕನ್ನಡ', code: 'kn-IN'}; break;
-                    default: langInfo = {name: 'Indian Language', code: 'en-US'}; // Fallback
+                    default: langInfo = {name: 'Indian Language', code: 'en-US'};
                 }
                 const cleanIndText = indVerse.text.replace(/"/g, '&quot;');
                 verseBlock.innerHTML += `<p class="indian-lang-verse">(${langInfo.name}): ${indVerse.text} <button class="play-verse-audio-btn" data-lang="${langInfo.code}" data-text="${cleanIndText}">🔊</button></p>`;
@@ -204,9 +193,8 @@ function navigateToNextChapter() {
         if (currentBookIndex < bibleBooks.length - 1) {
             bookSelect.value = bibleBooks[currentBookIndex + 1];
             populateChapterSelect(bookSelect.value);
-            chapterSelect.selectedIndex = 0; // First chapter of the new book
+            chapterSelect.selectedIndex = 0;
         } else {
-            // Already on the last chapter of the last book
             return;
         }
     }
@@ -223,9 +211,8 @@ function navigateToPreviousChapter() {
         if (currentBookIndex > 0) {
             bookSelect.value = bibleBooks[currentBookIndex - 1];
             populateChapterSelect(bookSelect.value);
-            chapterSelect.selectedIndex = chapterSelect.options.length - 1; // Last chapter of the previous book
+            chapterSelect.selectedIndex = chapterSelect.options.length - 1;
         } else {
-            // Already on the first chapter of the first book
             return;
         }
     }
@@ -251,7 +238,6 @@ function resetChapterAudioButtons() {
 }
 
 function speakText(text, lang = 'en-US', source = 'verse') {
-    // Stop any existing speech first
     stopCurrentAudio(); 
 
     if (!('speechSynthesis' in window) || !text) {
@@ -262,11 +248,8 @@ function speakText(text, lang = 'en-US', source = 'verse') {
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = lang;
     utterance.rate = currentPlaybackRate;
-    
-    // Attempt to find a local service voice first, then any voice for the language.
     utterance.voice = availableVoices.find(v => v.lang === lang && v.localService) || availableVoices.find(v => v.lang === lang);
 
-    // If no specific voice found, it will use the default for the language.
     if (!utterance.voice) {
         console.warn(`No specific voice found for ${lang}. Using default.`);
     }
@@ -275,12 +258,11 @@ function speakText(text, lang = 'en-US', source = 'verse') {
         currentSpeech = { utterance, isPlaying: true, isPaused: false, source };
         if (source === 'english_chapter') {
             playEnglishButton.textContent = 'Stop English Chapter';
-            playIndianLangButton.textContent = `Play ${languageSelect.options[languageSelect.selectedIndex]?.text.split('(')[0].trim()} Chapter`; // Reset other button
+            playIndianLangButton.textContent = `Play ${languageSelect.options[languageSelect.selectedIndex]?.text.split('(')[0].trim()} Chapter`;
         } else if (source === 'indian_chapter') {
             playIndianLangButton.textContent = `Stop ${languageSelect.options[languageSelect.selectedIndex]?.text.split('(')[0].trim()} Chapter`;
-            playEnglishButton.textContent = 'Play English Chapter'; // Reset other button
+            playEnglishButton.textContent = 'Play English Chapter';
         } else if (source === 'verse') {
-            // If playing a single verse, reset chapter play buttons
             resetChapterAudioButtons();
         }
         pauseResumeButton.textContent = 'Pause';
@@ -288,13 +270,10 @@ function speakText(text, lang = 'en-US', source = 'verse') {
         stopAudioButton.style.display = 'inline-block';
     };
     
-    utterance.onend = () => {
-        stopCurrentAudio(); // This will reset everything to default 'Play' state
-    };
-    
+    utterance.onend = () => stopCurrentAudio();
     utterance.onerror = (event) => {
         console.error('SpeechSynthesis Utterance Error:', event.error);
-        stopCurrentAudio(); // Reset on error too
+        stopCurrentAudio();
     };
     
     speechSynthesis.speak(utterance);
@@ -305,7 +284,7 @@ function stopCurrentAudio() {
         speechSynthesis.cancel();
     }
     currentSpeech = { utterance: null, isPlaying: false, isPaused: false, source: null };
-    resetChapterAudioButtons(); // Ensures buttons revert to "Play" state
+    resetChapterAudioButtons();
 }
 
 function togglePauseResume() {
@@ -322,13 +301,10 @@ function togglePauseResume() {
     }
 }
 
-
 function handlePlayEnglishChapter() {
-    // If English chapter is currently playing, stop it.
     if (currentSpeech.isPlaying && currentSpeech.source === 'english_chapter') {
         stopCurrentAudio();
     } else {
-        // Otherwise, start playing English chapter.
         const verses = netBibleData.filter(v => v.englishBookName === bookSelect.value && v.chapter === parseInt(chapterSelect.value)).sort((a,b) => a.verse - b.verse).map(v => v.text);
         if (verses.length > 0) {
             speakText(verses.join(" "), 'en-US', 'english_chapter');
@@ -339,20 +315,16 @@ function handlePlayEnglishChapter() {
 }
 
 function handlePlayIndianLangChapter() {
-    // If Indian language chapter is currently playing, stop it.
     if (currentSpeech.isPlaying && currentSpeech.source === 'indian_chapter') {
         stopCurrentAudio();
     } else {
-        // Otherwise, start playing Indian language chapter.
         const verses = currentIndianLanguageData.filter(v => v.englishBookName === bookSelect.value && v.chapter === parseInt(chapterSelect.value)).sort((a,b) => a.verse - b.verse).map(v => v.text);
-        let langCode = languageSelect.options[languageSelect.selectedIndex]?.dataset.code || 'en-US'; // Use data-code if set, otherwise default
-        // If data-code is not reliably set in HTML, derive it here based on value
+        let langCode = 'en-US';
         if (languageSelect.value === 'irv_hindi') langCode = 'hi-IN';
         else if (languageSelect.value === 'odia_all_books') langCode = 'or-IN';
         else if (languageSelect.value === 'te_irv_updated') langCode = 'te-IN';
         else if (languageSelect.value === 'ta_oitce_updated') langCode = 'ta-IN';
         else if (languageSelect.value === 'kn_irv_updated') langCode = 'kn-IN';
-
 
         if (verses.length > 0) {
             speakText(verses.join(" "), langCode, 'indian_chapter');
@@ -362,10 +334,6 @@ function handlePlayIndianLangChapter() {
     }
 }
 
-/**
- * [NEW FUNCTION] Gets the language code and name for the currently selected Indian language.
- * @returns {object} An object containing the language code {code} and name {name}.
- */
 function getCurrentIndianLangInfo() {
     const langValue = languageSelect.value;
     switch(langValue) {
@@ -373,26 +341,32 @@ function getCurrentIndianLangInfo() {
         case 'odia_all_books': return { code: 'or', name: 'Odia' };
         case 'te_irv_updated': return { code: 'te', name: 'Telugu' };
         case 'ta_oitce_updated': return { code: 'ta', name: 'Tamil' };
-        case 'kn_irv_updated': return { code: 'kn', 'name': 'Kannada' };
+        case 'kn_irv_updated': return { code: 'kn', name: 'Kannada' };
         default: return { code: null, name: 'Indian Language' };
     }
 }
 
 /**
- * [MODIFIED FUNCTION] Handles clicking on a word to show definitions, translations, and occurrences.
- * It now checks a local dictionary before calling the external translation API.
- * @param {Event} event The click event.
+ * [REFACTORED FUNCTION] Handles all aspects of the word study modal.
+ * This function was significantly refactored to fix a recursive bug. It now fetches all data
+ * first, then updates the UI in a single, synchronized step.
+ * @param {Event} event The click event that triggered the study.
  */
 async function handleWordClick(event) {
     const word = event.target.dataset.word.replace(/[^a-zA-Z]/g, '').toLowerCase();
     if (!word) return;
 
+    // 1. Set up the modal with "Loading..." placeholders
     selectedWordHeader.textContent = `Word Details: "${word}"`;
-    // Set up the new structure for displaying meanings
     dictionaryMeaning.innerHTML = `
         <div id="englishMeaningContainer">
             <h4>English Definition</h4>
             <div id="englishMeaningContent"><p>Loading definition...</p></div>
+        </div>
+        <hr>
+        <div id="wikipediaSummaryContainer">
+            <h4>Wikipedia Summary</h4>
+            <div id="wikipediaSummaryContent"><p>Loading summary...</p></div>
         </div>
         <hr>
         <div id="indianLangMeaningContainer">
@@ -404,8 +378,6 @@ async function handleWordClick(event) {
     wordStudyModal.style.display = 'block';
 
     const { code: langCode, name: langName } = getCurrentIndianLangInfo();
-    
-    // Update the Indian language header and visibility
     const indianLangHeader = document.getElementById('indianLangMeaningHeader');
     if (langName && langCode) {
         indianLangHeader.textContent = `${langName} Meaning`;
@@ -414,9 +386,8 @@ async function handleWordClick(event) {
         document.getElementById('indianLangMeaningContainer').style.display = 'none';
     }
 
-    // --- Task 1: Fetch English Definition (from dictionaryapi.dev) ---
+    // 2. Define all data-fetching tasks. They now return HTML content instead of updating the DOM directly.
     const fetchEnglishDef = async () => {
-        const englishMeaningContent = document.getElementById('englishMeaningContent');
         try {
             const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
             const data = await response.json();
@@ -429,81 +400,83 @@ async function handleWordClick(event) {
                         if (def.example) html += `<p><em>Usage: ${def.example}</em></p>`;
                     });
                 });
-                englishMeaningContent.innerHTML = html;
-            } else {
-                englishMeaningContent.innerHTML = `<p>No definition found for "${word}".</p>`;
+                return html;
             }
+            return `<p>No dictionary definition found for "${word}".</p>`;
         } catch (e) {
-            console.error("Error fetching dictionary meaning:", e);
-            englishMeaningContent.innerHTML = `<p>Error fetching definition.</p>`;
+            return `<p>Error fetching definition.</p>`;
         }
     };
 
-    // --- Task 2: Fetch Indian Language Meaning (from local dictionary or MyMemory API) ---
-    const fetchIndianLangMeaning = async () => {
-        if (!langCode) return; // Don't fetch if no valid language is selected
-        const indianMeaningContent = document.getElementById('indianLangMeaningContent');
-
-        // [MODIFICATION] First, check our local dictionary for a translation.
-        const localTranslation = localTranslations[langCode]?.[word];
-        if (localTranslation) {
-            indianMeaningContent.innerHTML = `<p>${localTranslation}</p>`;
-            return; // Exit the function since we found a local translation.
+    const fetchWikipediaSummary = async () => {
+        try {
+            const response = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(word)}`);
+            if (!response.ok) return { html: `<p>No Wikipedia summary found for "${word}".</p>` };
+            const data = await response.json();
+            if (data.type === 'standard' && data.extract) {
+                const clickableSummary = data.extract.replace(/([a-zA-Z0-9']+)/g, `<span class="word-clickable" data-word="$1">$1</span>`);
+                return { html: `<p>${clickableSummary}</p>`, needsListeners: true };
+            }
+            return { html: `<p>No Wikipedia summary found for "${word}".</p>` };
+        } catch (e) {
+            return { html: `<p>Error fetching summary.</p>` };
         }
+    };
 
-        // If not in the local dictionary, call the external API.
+    const fetchIndianLangMeaning = async () => {
+        if (!langCode) return '';
+        const localTranslation = localTranslations[langCode]?.[word];
+        if (localTranslation) return `<p>${localTranslation}</p>`;
         try {
             const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(word)}&langpair=en|${langCode}`);
             if (!response.ok) throw new Error(`API responded with status ${response.status}`);
             const data = await response.json();
-            if (data.responseData && data.responseStatus === 200) {
-                indianMeaningContent.innerHTML = `<p>${data.responseData.translatedText}</p>`;
-            } else {
-                indianMeaningContent.innerHTML = `<p>Could not find a translation for "${word}".</p>`;
-            }
+            return data.responseData ? `<p>${data.responseData.translatedText}</p>` : `<p>Could not find a translation for "${word}".</p>`;
         } catch (e) {
-            console.error("Error fetching translation:", e);
-            indianMeaningContent.innerHTML = `<p>Error fetching translation.</p>`;
+            return `<p>Error fetching translation.</p>`;
         }
     };
 
-    // --- Task 3: Find and display occurrences ---
     const findOccurrences = () => {
         const occurrences = netBibleData.filter(v => v.text && v.text.toLowerCase().includes(word));
         if (occurrences.length > 0) {
             const occurrencesHtml = occurrences.map(occ => {
-                const wordToHighlight = word;
-                const highlightRegex = new RegExp(`(\\b${wordToHighlight}\\b)`, 'gi');
-                const parts = occ.text.split(highlightRegex);
-
-                const finalHtml = parts.map(part => {
-                    if (part.toLowerCase() === wordToHighlight.toLowerCase()) {
-                        return `<mark><span class="word-clickable" data-word="${part.replace(/'/g, '&apos;')}">${part}</span></mark>`;
-                    } else {
-                        return part.replace(/([a-zA-Z0-9']+)/g, `<span class="word-clickable" data-word="$1">$1</span>`);
-                    }
-                }).join('');
-
+                const highlightRegex = new RegExp(`(\\b${word}\\b)`, 'gi');
+                const finalHtml = occ.text.split(highlightRegex).map(part =>
+                    part.toLowerCase() === word.toLowerCase()
+                        ? `<mark><span class="word-clickable" data-word="${part.replace(/'/g, '&apos;')}">${part}</span></mark>`
+                        : part.replace(/([a-zA-Z0-9']+)/g, `<span class="word-clickable" data-word="$1">$1</span>`)
+                ).join('');
                 return `<li><a href="#" class="occurrence-link" data-book="${occ.englishBookName}" data-chapter="${occ.chapter}" data-verse="${occ.verse}">${occ.englishBookName} ${occ.chapter}:${occ.verse}</a>: ${finalHtml}</li>`;
             }).join('');
-            
-            occurrencesDiv.innerHTML = `<h4>Occurrences (${occurrences.length}):</h4><ul>${occurrencesHtml}</ul>`;
-            
-            // Re-attach event listeners for newly created elements within the modal
-            occurrencesDiv.querySelectorAll('.occurrence-link').forEach(link => link.addEventListener('click', handleOccurrenceLinkClick));
-            occurrencesDiv.querySelectorAll('.word-clickable').forEach(span => span.addEventListener('click', handleWordClick));
-
-        } else {
-            occurrencesDiv.innerHTML = `<p>No other occurrences found.</p>`;
+            return `<h4>Occurrences (${occurrences.length}):</h4><ul>${occurrencesHtml}</ul>`;
         }
+        return `<p>No other occurrences found.</p>`;
     };
-
-    // Run all tasks concurrently for better performance
-    Promise.allSettled([
+    
+    // 3. Run all tasks and wait for them to complete.
+    const [engDefHtml, wikiResult, indianMeaningHtml, occurrencesHtml] = await Promise.all([
         fetchEnglishDef(),
+        fetchWikipediaSummary(),
         fetchIndianLangMeaning(),
-        Promise.resolve().then(findOccurrences) 
+        Promise.resolve(findOccurrences())
     ]);
+
+    // 4. Update the DOM with all the results at once.
+    document.getElementById('englishMeaningContent').innerHTML = engDefHtml;
+    document.getElementById('indianLangMeaningContent').innerHTML = indianMeaningHtml;
+    
+    const wikipediaSummaryContent = document.getElementById('wikipediaSummaryContent');
+    wikipediaSummaryContent.innerHTML = wikiResult.html;
+    
+    occurrencesDiv.innerHTML = occurrencesHtml;
+
+    // 5. Attach all necessary event listeners to the new content.
+    if (wikiResult.needsListeners) {
+        wikipediaSummaryContent.querySelectorAll('.word-clickable').forEach(span => span.addEventListener('click', handleWordClick));
+    }
+    occurrencesDiv.querySelectorAll('.occurrence-link').forEach(link => link.addEventListener('click', handleOccurrenceLinkClick));
+    occurrencesDiv.querySelectorAll('.word-clickable').forEach(span => span.addEventListener('click', handleWordClick));
 }
 
 
@@ -517,11 +490,10 @@ function handleOccurrenceLinkClick(e) {
     displayChapter(verse);
 }
 
-
 function handleSearch(query) {
     const searchTerm = query.trim();
     if (!searchTerm) {
-        displayChapter(); // Go back to current chapter view if search is empty
+        displayChapter();
         return;
     }
     const results = netBibleData.filter(v => v.text && v.text.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -533,7 +505,6 @@ function handleSearch(query) {
             const termForRegex = searchTerm.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
             const highlightRegex = new RegExp(`(${termForRegex})`, 'gi');
             const parts = v.text.split(highlightRegex);
-
             const finalHtml = parts.map(part => {
                 if (part.toLowerCase() === searchTerm.toLowerCase()) {
                      return `<mark><span class="word-clickable" data-word="${part.replace(/'/g, '&apos;')}">${part}</span></mark>`;
@@ -541,12 +512,10 @@ function handleSearch(query) {
                     return part.replace(/([a-zA-Z0-9']+)/g, `<span class="word-clickable" data-word="$1">$1</span>`);
                 }
             }).join('');
-
             resultsHtml += `<div class="verse-block"><p><a href="#" class="occurrence-link" data-book="${v.englishBookName}" data-chapter="${v.chapter}" data-verse="${v.verse}">${v.englishBookName} ${v.chapter}:${v.verse}</a>: ${finalHtml}</p></div>`;
         });
         bibleTextDiv.innerHTML += resultsHtml;
 
-        // Attach event listeners to the newly created links and clickable words
         document.querySelectorAll('.occurrence-link').forEach(link => link.addEventListener('click', handleOccurrenceLinkClick));
         document.querySelectorAll('.word-clickable').forEach(span => span.addEventListener('click', handleWordClick));
     } else {
