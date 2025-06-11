@@ -1,50 +1,70 @@
+/* General Body and Layout */
 body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f4f4f4;
+    background-color: #f0f0f0;
     color: #333;
 }
 
 header {
-    background-color: #4CAF50;
+    background-color: #333;
     color: white;
-    padding: 1em;
-    text-align: center;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-h1, h2 {
-    margin: 0.5em 0;
+    padding: 10px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
 .controls {
-    margin-top: 1em;
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
     gap: 10px;
+    align-items: center;
+    justify-content: center; /* Centering the controls */
 }
 
-.controls label, .controls select, .controls button {
-    padding: 8px 12px;
+.controls label, .controls select, .controls button, .controls input {
+    margin-bottom: 5px;
+    padding: 8px;
     border-radius: 4px;
-    border: 1px solid #ddd;
+    border: 1px solid #ccc;
     font-size: 1em;
 }
 
+.controls select {
+    background-color: white;
+}
+
 .controls button {
-    background-color: #007BFF;
-    color: white;
+    background-color: #0fe3eb;
+    color: rgb(20, 20, 1);
     cursor: pointer;
     border: none;
     transition: background-color 0.2s ease;
 }
 
 .controls button:hover {
-    background-color: #0056b3;
+    background-color: #05e8f0;
 }
 
+.controls button:disabled {
+    background-color: #999;
+    cursor: not-allowed;
+}
+
+#quickSearchInput {
+    min-width: 180px;
+}
+
+.playback-speed-control {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* Main Content Area */
 main {
     padding: 20px;
     max-width: 900px;
@@ -54,85 +74,154 @@ main {
     border-radius: 8px;
 }
 
+/* Bible Text Display Area */
 .verse-container {
+    background-color: white;
     padding: 15px;
-    border: 1px solid #eee;
     border-radius: 5px;
-    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    max-height: calc(100vh - 150px); /* Adjust based on header height */
+    overflow-y: auto; /* CRITICAL: Makes the container scrollable */
+    position: relative; /* CRITICAL: Establishes positioning context for #scrollToTopBtn */
+    /* temporary background to visualize scrollable area */
+    /* background-color: #e6ffe6; */
 }
 
-.verse-pair {
+/* Verse Styling */
+.verse-block {
     margin-bottom: 15px;
-    padding-bottom: 15px;
-    border-bottom: 1px dashed #eee;
+    padding: 10px;
+    border-left: 4px solid #007bff;
+    background-color: #f9f9f9;
+    border-radius: 4px;
 }
 
-.verse-pair:last-child {
-    border-bottom: none;
-    margin-bottom: 0;
-    padding-bottom: 0;
-}
-
-.english-verse, .indian-verse {
-    margin-bottom: 5px;
-    line-height: 1.6;
-}
-
-.english-verse {
-    font-size: 1.1em;
-    font-weight: bold;
-    color: #2196F3; /* English verse color */
-}
-
-.indian-verse {
-    font-size: 1.0em;
-    color: #4CAF50; /* Indian language verse color */
+.verse-block.highlighted-verse {
+    background-color: #fff3cd;
+    border-left-color: #ffc107;
 }
 
 .verse-number {
     font-weight: bold;
-    margin-right: 5px;
+    color: #ff1e00;
+    margin-right: 8px;
+    display: inline-block;
 }
 
-.audio-icon {
-    cursor: pointer;
-    margin-left: 10px;
-    color: #6c757d;
-    font-size: 0.9em;
-}
-
-.audio-icon:hover {
-    color: #007BFF;
-}
-
-.word-highlight {
-    background-color: yellow;
-    cursor: pointer;
-}
-
-.word-info-container {
-    margin-top: 20px;
-    padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    background-color: #f9f9f9;
-}
-
-.word-info-container h3 {
-    margin-top: 0;
+.english-verse {
     color: #333;
+    margin-bottom: 5px;
+    display: block;
 }
 
-.word-info-container button {
-    background-color: #dc3545;
-    color: white;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 4px;
+.indian-lang-verse {
+    color: #2a28a7;
+    font-style: italic;
+    display: block;
+}
+
+/* Word Clickable Spans */
+.english-verse .word-clickable {
     cursor: pointer;
-    margin-top: 10px;
+}
+.english-verse .word-clickable:hover {
+    color: #0056b3;
+    background-color: #e9ecef;
 }
 
-.word-info-container button:hover {
-    background-color: #c82333;
+/* Chapter Title */
+.chapter-title {
+    color: #333;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+/* Modal for Word Study */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1001;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 10% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 700px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    position: relative;
+}
+
+.modal .close-button {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* Loading Indicator */
+#loadingIndicator {
+    font-size: 1.2em;
+    color: #555;
+    text-align: center;
+    padding: 20px;
+}
+
+/* Scroll-to-Top Button SPECIFIC STYLES */
+#scrollToTopBtn {
+    /* Initially hidden using opacity and controlled by JS adding 'show' class */
+    display: block; /* Keep as block so transition works */
+    opacity: 0;
+    pointer-events: none; /* Disables clicks when hidden */
+    
+    position: absolute; /* Positioned relative to .verse-container */
+    bottom: 20px;
+    right: 20px;
+    z-index: 99; /* Ensure it's above other content */
+
+    border: none;
+    outline: none;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    padding: 10px 15px;
+    border-radius: 50%; /* Circular button */
+    font-size: 18px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+    transform: translateY(10px); /* Slightly off-screen when hidden */
+}
+
+#scrollToTopBtn.show {
+    opacity: 1;
+    pointer-events: auto; /* Enables clicks when visible */
+    transform: translateY(0); /* Slides into view */
+}
+
+/* Audio button for individual verses */
+.play-verse-audio-btn {
+    background-color: #28a745 !important; /* Green */
+    color: white !important;
+    border: none !important;
+    border-radius: 4px !important;
+    padding: 3px 8px !important;
+    font-size: 0.8em !important;
+    cursor: pointer !important;
+    margin-left: 5px !important;
+    vertical-align: middle !important;
+}
+
+.play-verse-audio-btn:hover {
+    background-color: #218838 !important;
 }

@@ -17,7 +17,8 @@ const localTranslations = {
 const bibleBooks = ["Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy", "Joshua", "Judges", "Ruth", "1 Samuel", "2 Samuel", "1 Kings", "2 Kings", "1 Chronicles", "2 Chronicles", "Ezra", "Nehemiah", "Esther", "Job", "Psalms", "Proverbs", "Ecclesiastes", "Song of Solomon", "Isaiah", "Jeremiah", "Lamentations", "Ezekiel", "Daniel", "Hosea", "Joel", "Amos", "Obadiah", "Jonah", "Micah", "Nahum", "Habakkuk", "Zephaniah", "Haggai", "Zechariah", "Malachi", "Matthew", "Mark", "Luke", "John", "Acts", "Romans", "1 Corinthians", "2 Corinthians", "Galatians", "Ephesians", "Philippians", "Colossians", "1 Thessalonians", "2 Thessalonians", "1 Timothy", "2 Timothy", "Titus", "Philemon", "Hebrews", "James", "1 Peter", "2 Peter", "1 John", "2 John", "3 John", "Jude", "Revelation"];
 
 // DOM Elements
-const bookSelect = document.getElementById('bookSelect'), chapterSelect = document.getElementById('chapterSelect'), languageSelect = document.getElementById('languageSelect'), goButton = document.getElementById('goButton'), prevChapterButton = document.getElementById('prevChapterButton'), nextChapterButton = document.getElementById('nextChapterButton'), playEnglishButton = document.getElementById('playEnglishButton'), playIndianLangButton = document.getElementById('playIndianLangButton'), pauseResumeButton = document.getElementById('pauseResumeButton'), stopAudioButton = document.getElementById('stopAudioButton'), playbackRateSlider = document.getElementById('playbackRateSlider'), playbackRateValue = document.getElementById('playbackRateValue'), bibleTextDiv = document.getElementById('bibleTextDiv'), loadingIndicator = document.getElementById('loadingIndicator'), wordStudyModal = document.getElementById('wordStudyModal'), closeModalButton = document.getElementById('closeModalButton'), selectedWordHeader = document.getElementById('selectedWordHeader'), dictionaryMeaning = document.getElementById('dictionaryMeaning'), occurrencesDiv = document.getElementById('occurrences'), quickSearchInput = document.getElementById('quickSearchInput'), searchButton = document.getElementById('searchButton'), scrollToTopBtn = document.getElementById('scrollToTopBtn');
+const bookSelect = document.getElementById('bookSelect'), chapterSelect = document.getElementById('chapterSelect'), languageSelect = document.getElementById('languageSelect'), goButton = document.getElementById('goButton'), prevChapterButton = document.getElementById('prevChapterButton'), nextChapterButton = document.getElementById('nextChapterButton'), playEnglishButton = document.getElementById('playEnglishButton'), playIndianLangButton = document.getElementById('playIndianLangButton'), pauseResumeButton = document.getElementById('pauseResumeButton'), stopAudioButton = document.getElementById('stopAudioButton'), playbackRateSlider = document.getElementById('playbackRateSlider'), playbackRateValue = document.getElementById('playbackRateValue'), bibleTextDiv = document.getElementById('bibleTextDiv'), loadingIndicator = document.getElementById('loadingIndicator'), wordStudyModal = document.getElementById('wordStudyModal'), closeModalButton = document.getElementById('closeModalButton'), selectedWordHeader = document.getElementById('selectedWordHeader'), dictionaryMeaning = document.getElementById('dictionaryMeaning'), occurrencesDiv = document.getElementById('occurrences'), quickSearchInput = document.getElementById('quickSearchInput'), searchButton = document.getElementById('searchButton');
+// Removed scrollToTopBtn from here as it's no longer needed for this workaround
 
 async function initializeApp() {
     setupEventListeners();
@@ -72,14 +73,11 @@ function setupEventListeners() {
     quickSearchInput.addEventListener('keypress', e => { if (e.key === 'Enter') handleSearch(quickSearchInput.value); });
     resetChapterAudioButtons();
 
-    // Scroll-to-top button listeners
-    bibleTextDiv.addEventListener('scroll', toggleScrollToTopButton);
-    scrollToTopBtn.addEventListener('click', () => {
-        bibleTextDiv.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-        });
+    // MODIFICATION: Repurpose 'goButton' to go to the first verse of the current chapter
+    goButton.addEventListener('click', () => {
+        displayChapter(1); // Explicitly scroll to verse 1
     });
+    // Removed scroll-to-top button listeners since we are not using a dedicated button
 }
 
 async function fetchAndProcessBibleData(filePath, langKey) {
@@ -190,7 +188,7 @@ function displayChapter(scrollToVerseNum = null) {
             setTimeout(() => targetElement.classList.remove('highlighted-verse'), 3000);
         }
     }
-    toggleScrollToTopButton(); // Check button visibility after displaying chapter
+    // Removed toggleScrollToTopButton() call as the button is no longer used
 }
 
 function navigateToNextChapter() {
@@ -561,25 +559,19 @@ function handleSearch(query) {
     }
 }
 
-// New function to toggle scroll-to-top button visibility
-function toggleScrollToTopButton() {
-    const firstVerse = document.getElementById('verse-1');
-    if (!firstVerse) {
-        scrollToTopBtn.classList.remove('show');
-        return;
-    }
-
-    // Check if the first verse is outside the current view
-    const rect = firstVerse.getBoundingClientRect();
-    const bibleTextDivRect = bibleTextDiv.getBoundingClientRect();
-
-    // The button should show if the top of the first verse is above the visible area of bibleTextDiv
-    // AND if the user has scrolled down significantly (e.g., more than 50px)
-    const isFirstVerseOutOfViewTop = rect.top < bibleTextDivRect.top;
-
-    if (bibleTextDiv.scrollTop > 50 && isFirstVerseOutOfViewTop) {
-        scrollToTopBtn.classList.add('show');
-    } else {
-        scrollToTopBtn.classList.remove('show');
-    }
-}
+// The toggleScrollToTopButton function is no longer needed as per the new requirement
+// function toggleScrollToTopButton() {
+//     const firstVerse = document.getElementById('verse-1');
+//     if (!firstVerse) {
+//         scrollToTopBtn.classList.remove('show');
+//         return;
+//     }
+//     const rect = firstVerse.getBoundingClientRect();
+//     const bibleTextDivRect = bibleTextDiv.getBoundingClientRect();
+//     const isFirstVerseOutOfViewTop = rect.top < bibleTextDivRect.top;
+//     if (bibleTextDiv.scrollTop > 50 && isFirstVerseOutOfViewTop) {
+//         scrollToTopBtn.classList.add('show');
+//     } else {
+//         scrollToTopBtn.classList.remove('show');
+//     }
+// }

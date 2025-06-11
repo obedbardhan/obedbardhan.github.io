@@ -5,143 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>India Bible Project</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f0f0f0; }
-        header {
-            background-color: #333;
-            color: white;
-            padding: 10px 20px;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-        .controls {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            align-items: center;
-        }
-        .controls label, .controls select, .controls button, .controls input {
-            margin-bottom: 5px; /* For wrapping */
-            padding: 8px;
-            border-radius: 4px;
-            border: 1px solid #ccc;
-        }
-        .controls select { background-color: white; }
-        .controls button {
-            background-color: #0fe3eb;
-            color: rgb(20, 20, 1);
-            cursor: pointer;
-            border: none;
-        }
-        .controls button:hover { background-color: #05e8f0; }
-        .controls button:disabled {
-            background-color: #999;
-            cursor: not-allowed;
-        }
-        .controls input[type="text"] { width: 150px; }
-        #quickSearchInput { min-width: 180px; }
-        .playback-speed-control { display: flex; align-items: center; gap: 5px;}
-
-        main { padding: 20px; }
-        .verse-container {
-            background-color: white;
-            padding: 15px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            max-height: calc(100vh - 150px); /* Adjust based on header height */
-            overflow-y: auto;
-            position: relative; /* Crucial for positioning the button within */
-        }
-        .verse-block {
-            margin-bottom: 15px;
-            padding: 10px;
-            border-left: 4px solid #007bff;
-            background-color: #f9f9f9;
-            border-radius: 4px;
-        }
-        .verse-block.highlighted-verse {
-            background-color: #fff3cd; /* Yellowish highlight */
-            border-left-color: #ffc107;
-        }
-        .verse-number {
-            font-weight: bold;
-            color: #ff1e00;
-            margin-right: 8px;
-            display: inline-block;
-        }
-        .english-verse {
-            color: #333;
-            margin-bottom: 5px;
-            display: block;
-        }
-        .indian-lang-verse {
-            color: #2a28a7;
-            font-style: italic;
-            display: block;
-        }
-        .english-verse .word-clickable {
-            cursor: pointer;
-        }
-        .english-verse .word-clickable:hover {
-            color: #0056b3;
-            background-color: #e9ecef;
-        }
-        .chapter-title {
-            color: #333;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-        }
-        .modal {
-            display: none; position: fixed; z-index: 1001;
-            left: 0; top: 0; width: 100%; height: 100%;
-            overflow: auto; background-color: rgba(0,0,0,0.4);
-        }
-        .modal-content {
-            background-color: #fefefe; margin: 10% auto; padding: 20px;
-            border: 1px solid #888; width: 80%; max-width: 700px;
-            border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            position: relative;
-        }
-        .modal .close-button {
-            color: #aaa; float: right; font-size: 28px;
-            font-weight: bold; cursor: pointer;
-        }
-        #loadingIndicator {
-            font-size: 1.2em;
-            color: #555;
-            text-align: center;
-            padding: 20px;
-        }
-
-        /* Added for scroll-to-top button */
-        #scrollToTopBtn {
-            display: none; /* Hidden by default, JavaScript will make it block */
-            position: absolute; /* Position relative to .verse-container */
-            bottom: 20px; /* Adjust as needed */
-            right: 20px; /* Adjust as needed */
-            z-index: 99; /* Make sure it's above other content */
-            border: none;
-            outline: none;
-            background-color: #007bff;
-            color: white;
-            cursor: pointer;
-            padding: 10px 15px;
-            border-radius: 50%; /* Circular button */
-            font-size: 18px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            transition: opacity 0.3s ease-in-out;
-            opacity: 0; /* Start hidden for smooth transition */
-        }
-
-        #scrollToTopBtn.show {
-            opacity: 1;
-            display: block; /* Make it visible when 'show' class is added */
-        }
-    </style>
-</head>
+    </head>
 <body>
     <header>
         <div class="controls">
@@ -181,7 +45,8 @@
     <main>
         <div id="bibleTextDiv" class="verse-container">
             <p id="loadingIndicator">Loading Bible data, please wait...</p>
-            <button id="scrollToTopBtn" title="Go to top">⬆</button> </div>
+            <button id="scrollToTopBtn" title="Go to top">⬆</button>
+        </div>
 
         <div id="wordStudyModal" class="modal">
             <div class="modal-content">
