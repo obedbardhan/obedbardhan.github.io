@@ -52,6 +52,7 @@
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
             max-height: calc(100vh - 150px); /* Adjust based on header height */
             overflow-y: auto;
+            position: relative; /* Crucial for positioning the button within */
         }
         .verse-block {
             margin-bottom: 15px;
@@ -114,6 +115,31 @@
             text-align: center;
             padding: 20px;
         }
+
+        /* Added for scroll-to-top button */
+        #scrollToTopBtn {
+            display: none; /* Hidden by default, JavaScript will make it block */
+            position: absolute; /* Position relative to .verse-container */
+            bottom: 20px; /* Adjust as needed */
+            right: 20px; /* Adjust as needed */
+            z-index: 99; /* Make sure it's above other content */
+            border: none;
+            outline: none;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            padding: 10px 15px;
+            border-radius: 50%; /* Circular button */
+            font-size: 18px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: opacity 0.3s ease-in-out;
+            opacity: 0; /* Start hidden for smooth transition */
+        }
+
+        #scrollToTopBtn.show {
+            opacity: 1;
+            display: block; /* Make it visible when 'show' class is added */
+        }
     </style>
 </head>
 <body>
@@ -155,7 +181,7 @@
     <main>
         <div id="bibleTextDiv" class="verse-container">
             <p id="loadingIndicator">Loading Bible data, please wait...</p>
-        </div>
+            <button id="scrollToTopBtn" title="Go to top">⬆</button> </div>
 
         <div id="wordStudyModal" class="modal">
             <div class="modal-content">

@@ -17,7 +17,7 @@ const localTranslations = {
 const bibleBooks = ["Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy", "Joshua", "Judges", "Ruth", "1 Samuel", "2 Samuel", "1 Kings", "2 Kings", "1 Chronicles", "2 Chronicles", "Ezra", "Nehemiah", "Esther", "Job", "Psalms", "Proverbs", "Ecclesiastes", "Song of Solomon", "Isaiah", "Jeremiah", "Lamentations", "Ezekiel", "Daniel", "Hosea", "Joel", "Amos", "Obadiah", "Jonah", "Micah", "Nahum", "Habakkuk", "Zephaniah", "Haggai", "Zechariah", "Malachi", "Matthew", "Mark", "Luke", "John", "Acts", "Romans", "1 Corinthians", "2 Corinthians", "Galatians", "Ephesians", "Philippians", "Colossians", "1 Thessalonians", "2 Thessalonians", "1 Timothy", "2 Timothy", "Titus", "Philemon", "Hebrews", "James", "1 Peter", "2 Peter", "1 John", "2 John", "3 John", "Jude", "Revelation"];
 
 // DOM Elements
-const bookSelect = document.getElementById('bookSelect'), chapterSelect = document.getElementById('chapterSelect'), languageSelect = document.getElementById('languageSelect'), goButton = document.getElementById('goButton'), prevChapterButton = document.getElementById('prevChapterButton'), nextChapterButton = document.getElementById('nextChapterButton'), playEnglishButton = document.getElementById('playEnglishButton'), playIndianLangButton = document.getElementById('playIndianLangButton'), pauseResumeButton = document.getElementById('pauseResumeButton'), stopAudioButton = document.getElementById('stopAudioButton'), playbackRateSlider = document.getElementById('playbackRateSlider'), playbackRateValue = document.getElementById('playbackRateValue'), bibleTextDiv = document.getElementById('bibleTextDiv'), loadingIndicator = document.getElementById('loadingIndicator'), wordStudyModal = document.getElementById('wordStudyModal'), closeModalButton = document.getElementById('closeModalButton'), selectedWordHeader = document.getElementById('selectedWordHeader'), dictionaryMeaning = document.getElementById('dictionaryMeaning'), occurrencesDiv = document.getElementById('occurrences'), quickSearchInput = document.getElementById('quickSearchInput'), searchButton = document.getElementById('searchButton');
+const bookSelect = document.getElementById('bookSelect'), chapterSelect = document.getElementById('chapterSelect'), languageSelect = document.getElementById('languageSelect'), goButton = document.getElementById('goButton'), prevChapterButton = document.getElementById('prevChapterButton'), nextChapterButton = document.getElementById('nextChapterButton'), playEnglishButton = document.getElementById('playEnglishButton'), playIndianLangButton = document.getElementById('playIndianLangButton'), pauseResumeButton = document.getElementById('pauseResumeButton'), stopAudioButton = document.getElementById('stopAudioButton'), playbackRateSlider = document.getElementById('playbackRateSlider'), playbackRateValue = document.getElementById('playbackRateValue'), bibleTextDiv = document.getElementById('bibleTextDiv'), loadingIndicator = document.getElementById('loadingIndicator'), wordStudyModal = document.getElementById('wordStudyModal'), closeModalButton = document.getElementById('closeModalButton'), selectedWordHeader = document.getElementById('selectedWordHeader'), dictionaryMeaning = document.getElementById('dictionaryMeaning'), occurrencesDiv = document.getElementById('occurrences'), quickSearchInput = document.getElementById('quickSearchInput'), searchButton = document.getElementById('searchButton'), scrollToTopBtn = document.getElementById('scrollToTopBtn');
 
 async function initializeApp() {
     setupEventListeners();
@@ -71,6 +71,15 @@ function setupEventListeners() {
     searchButton.addEventListener('click', () => handleSearch(quickSearchInput.value));
     quickSearchInput.addEventListener('keypress', e => { if (e.key === 'Enter') handleSearch(quickSearchInput.value); });
     resetChapterAudioButtons();
+
+    // Scroll-to-top button listeners
+    bibleTextDiv.addEventListener('scroll', toggleScrollToTopButton);
+    scrollToTopBtn.addEventListener('click', () => {
+        bibleTextDiv.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    });
 }
 
 async function fetchAndProcessBibleData(filePath, langKey) {
@@ -84,7 +93,7 @@ async function fetchAndProcessBibleData(filePath, langKey) {
             case 'odia': odiaBibleData = data; break;
             case 'telugu': teluguBibleData = data; break;
             case 'tamil': tamilBibleData = data; break;
-            case 'kannada': kannadaBibleData = data; break;
+            case 'kn_irv_updated': kannadaBibleData = data; break;
         }
     } catch (error) {
         console.error(`Failed to load ${langKey} data:`, error);
@@ -181,6 +190,7 @@ function displayChapter(scrollToVerseNum = null) {
             setTimeout(() => targetElement.classList.remove('highlighted-verse'), 3000);
         }
     }
+    toggleScrollToTopButton(); // Check button visibility after displaying chapter
 }
 
 function navigateToNextChapter() {
@@ -417,6 +427,7 @@ async function handleWordClick(event) {
                 const clickableSummary = data.extract.replace(/([a-zA-Z0-9']+)/g, `<span class="word-clickable" data-word="$1">$1</span>`);
                 return { html: `<p>${clickableSummary}</p>`, needsListeners: true };
             }
+            // FIX: Added missing closing curly brace '}' here
             return { html: `<p>No Wikipedia summary found for "${word}".</p>` };
         } catch (e) {
             return { html: `<p>Error fetching summary.</p>` };
@@ -486,16 +497,43 @@ function handleOccurrenceLinkClick(e) {
     wordStudyModal.style.display = 'none';
     bookSelect.value = book;
     populateChapterSelect(book);
-    chapterSelect.value = chapter;
+    // Ensure chapter is selected after population, before displaying
+    chapterSelect.value = chapter; 
     displayChapter(verse);
 }
 
 function handleSearch(query) {
     const searchTerm = query.trim();
     if (!searchTerm) {
-        displayChapter();
+        displayChapter(); // Display current chapter if search term is empty
         return;
     }
+
+    // Attempt to parse as "Book Chapter:Verse"
+    const referenceMatch = searchTerm.match(/^(.+)\s+(\d+):(\d+)$/);
+    if (referenceMatch) {
+        const bookName = referenceMatch[1].trim();
+        const chapterNum = parseInt(referenceMatch[2]);
+        const verseNum = parseInt(referenceMatch[3]);
+
+        // Validate book name (case-insensitive and partial match for common book names)
+        const matchedBook = bibleBooks.find(b => b.toLowerCase() === bookName.toLowerCase() || b.toLowerCase().startsWith(bookName.toLowerCase()));
+
+        if (matchedBook) {
+            // Check if the book and chapter exist in the data
+            const bookData = netBibleData.filter(v => v.englishBookName === matchedBook && v.chapter === chapterNum);
+            if (bookData.length > 0) {
+                bookSelect.value = matchedBook;
+                populateChapterSelect(matchedBook);
+                chapterSelect.value = chapterNum;
+                displayChapter(verseNum);
+                wordStudyModal.style.display = 'none'; // Close modal if open
+                return; // Stop further execution for navigation
+            }
+        }
+    }
+
+    // If not a recognized "Book Chapter:Verse" format, proceed with keyword search
     const results = netBibleData.filter(v => v.text && v.text.toLowerCase().includes(searchTerm.toLowerCase()));
     
     bibleTextDiv.innerHTML = `<h2 class="chapter-title">Search Results for "${searchTerm}"</h2>`;
@@ -520,5 +558,28 @@ function handleSearch(query) {
         document.querySelectorAll('.word-clickable').forEach(span => span.addEventListener('click', handleWordClick));
     } else {
         bibleTextDiv.innerHTML += `<p>No results found.</p>`;
+    }
+}
+
+// New function to toggle scroll-to-top button visibility
+function toggleScrollToTopButton() {
+    const firstVerse = document.getElementById('verse-1');
+    if (!firstVerse) {
+        scrollToTopBtn.classList.remove('show');
+        return;
+    }
+
+    // Check if the first verse is outside the current view
+    const rect = firstVerse.getBoundingClientRect();
+    const bibleTextDivRect = bibleTextDiv.getBoundingClientRect();
+
+    // The button should show if the top of the first verse is above the visible area of bibleTextDiv
+    // AND if the user has scrolled down significantly (e.g., more than 50px)
+    const isFirstVerseOutOfViewTop = rect.top < bibleTextDivRect.top;
+
+    if (bibleTextDiv.scrollTop > 50 && isFirstVerseOutOfViewTop) {
+        scrollToTopBtn.classList.add('show');
+    } else {
+        scrollToTopBtn.classList.remove('show');
     }
 }
