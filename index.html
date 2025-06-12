@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>India Bible Project</title>
     <link rel="stylesheet" href="style.css">
-    </head>
+    <script src="sanscript.js"></script>
+</head>
 <body>
     <header>
         <div class="controls">
@@ -45,7 +46,6 @@
     <main>
         <div id="bibleTextDiv" class="verse-container">
             <p id="loadingIndicator">Loading Bible data, please wait...</p>
-            <button id="scrollToTopBtn" title="Go to top">⬆</button>
         </div>
 
         <div id="wordStudyModal" class="modal">
@@ -54,6 +54,13 @@
                 <h3 id="selectedWordHeader">Word Details:</h3>
                 <div id="dictionaryMeaning"></div>
                 <div id="occurrences"></div>
+            </div>
+        </div>
+
+        <div id="verseAudioModal" class="modal">
+            <div class="modal-content">
+                <span class="close-button" id="closeAudioModalButton">&times;</span>
+                <div id="verseAudioContent"></div>
             </div>
         </div>
     </main>

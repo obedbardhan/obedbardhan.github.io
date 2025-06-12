@@ -1,4 +1,7 @@
+// The application will now start after the basic HTML document is loaded.
+// This is cleaner and possible because sanscript.js is now loaded locally.
 document.addEventListener('DOMContentLoaded', initializeApp);
+
 
 // Data arrays and App State
 let netBibleData = [], hindiBibleData = [], odiaBibleData = [], teluguBibleData = [], tamilBibleData = [], kannadaBibleData = [], currentIndianLanguageData = [];
@@ -11,14 +14,26 @@ const localTranslations = {
     'or': { // Odia
         'entice': 'ପ୍ରଲୋଭିତ କରିବା'
     }
-    // Other languages and words can be added here
 };
 
 const bibleBooks = ["Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy", "Joshua", "Judges", "Ruth", "1 Samuel", "2 Samuel", "1 Kings", "2 Kings", "1 Chronicles", "2 Chronicles", "Ezra", "Nehemiah", "Esther", "Job", "Psalms", "Proverbs", "Ecclesiastes", "Song of Solomon", "Isaiah", "Jeremiah", "Lamentations", "Ezekiel", "Daniel", "Hosea", "Joel", "Amos", "Obadiah", "Jonah", "Micah", "Nahum", "Habakkuk", "Zephaniah", "Haggai", "Zechariah", "Malachi", "Matthew", "Mark", "Luke", "John", "Acts", "Romans", "1 Corinthians", "2 Corinthians", "Galatians", "Ephesians", "Philippians", "Colossians", "1 Thessalonians", "2 Thessalonians", "1 Timothy", "2 Timothy", "Titus", "Philemon", "Hebrews", "James", "1 Peter", "2 Peter", "1 John", "2 John", "3 John", "Jude", "Revelation"];
 
 // DOM Elements
 const bookSelect = document.getElementById('bookSelect'), chapterSelect = document.getElementById('chapterSelect'), languageSelect = document.getElementById('languageSelect'), goButton = document.getElementById('goButton'), prevChapterButton = document.getElementById('prevChapterButton'), nextChapterButton = document.getElementById('nextChapterButton'), playEnglishButton = document.getElementById('playEnglishButton'), playIndianLangButton = document.getElementById('playIndianLangButton'), pauseResumeButton = document.getElementById('pauseResumeButton'), stopAudioButton = document.getElementById('stopAudioButton'), playbackRateSlider = document.getElementById('playbackRateSlider'), playbackRateValue = document.getElementById('playbackRateValue'), bibleTextDiv = document.getElementById('bibleTextDiv'), loadingIndicator = document.getElementById('loadingIndicator'), wordStudyModal = document.getElementById('wordStudyModal'), closeModalButton = document.getElementById('closeModalButton'), selectedWordHeader = document.getElementById('selectedWordHeader'), dictionaryMeaning = document.getElementById('dictionaryMeaning'), occurrencesDiv = document.getElementById('occurrences'), quickSearchInput = document.getElementById('quickSearchInput'), searchButton = document.getElementById('searchButton');
-// Removed scrollToTopBtn from here as it's no longer needed for this workaround
+
+const verseAudioModal = document.getElementById('verseAudioModal'),
+      closeAudioModalButton = document.getElementById('closeAudioModalButton'),
+      verseAudioContent = document.getElementById('verseAudioContent');
+
+
+// Mapping for Sanscript.js
+const transliterationLangMap = {
+    'irv_hindi': 'devanagari',
+    'odia_all_books': 'oriya',
+    'te_irv_updated': 'telugu',
+    'ta_oitce_updated': 'tamil',
+    'kn_irv_updated': 'kannada'
+};
 
 async function initializeApp() {
     setupEventListeners();
@@ -39,12 +54,11 @@ async function initializeApp() {
         ]);
         populateChapterSelect(bookSelect.value);
         setCurrentIndianLanguageData();
-        displayChapter();
+        displayChapter(); 
     } catch (error) {
         console.error("Initialization error:", error);
     } finally {
         loadingIndicator.style.display = 'none';
-        // Initialize playback rate display
         playbackRateSlider.value = currentPlaybackRate;
         playbackRateValue.textContent = `${currentPlaybackRate.toFixed(1)}x`;
     }
@@ -73,11 +87,12 @@ function setupEventListeners() {
     quickSearchInput.addEventListener('keypress', e => { if (e.key === 'Enter') handleSearch(quickSearchInput.value); });
     resetChapterAudioButtons();
 
-    // MODIFICATION: Repurpose 'goButton' to go to the first verse of the current chapter
-    goButton.addEventListener('click', () => {
-        displayChapter(1); // Explicitly scroll to verse 1
+    goButton.addEventListener('click', () => { displayChapter(1); });
+
+    closeAudioModalButton.addEventListener('click', () => {
+        verseAudioModal.style.display = 'none';
+        stopCurrentAudio();
     });
-    // Removed scroll-to-top button listeners since we are not using a dedicated button
 }
 
 async function fetchAndProcessBibleData(filePath, langKey) {
@@ -91,7 +106,7 @@ async function fetchAndProcessBibleData(filePath, langKey) {
             case 'odia': odiaBibleData = data; break;
             case 'telugu': teluguBibleData = data; break;
             case 'tamil': tamilBibleData = data; break;
-            case 'kn_irv_updated': kannadaBibleData = data; break;
+            case 'kannada': kannadaBibleData = data; break;
         }
     } catch (error) {
         console.error(`Failed to load ${langKey} data:`, error);
@@ -124,7 +139,7 @@ function populateChapterSelect(bookName) {
     }
 }
 
-function displayChapter(scrollToVerseNum = null) {
+async function displayChapter(scrollToVerseNum = null) {
     stopCurrentAudio();
     updateNavButtonsState();
     const selectedBook = bookSelect.value;
@@ -161,6 +176,7 @@ function displayChapter(scrollToVerseNum = null) {
                 const cleanEngText = engVerse.text.replace(/"/g, '&quot;');
                 verseBlock.innerHTML += `<p class="english-verse">${engVerse.text.replace(/([a-zA-Z0-9']+)/g, `<span class="word-clickable" data-word="$1">$1</span>`)} <button class="play-verse-audio-btn" data-lang="en-US" data-text="${cleanEngText}">🔊</button></p>`;
             }
+
             if (indVerse?.text) {
                 let langInfo = {};
                 switch(languageSelect.value) {
@@ -178,7 +194,14 @@ function displayChapter(scrollToVerseNum = null) {
         }
     }
     document.querySelectorAll('.word-clickable').forEach(span => span.addEventListener('click', handleWordClick));
-    document.querySelectorAll('.play-verse-audio-btn').forEach(btn => btn.addEventListener('click', e => speakText(e.target.dataset.text, e.target.dataset.lang, 'verse')));
+
+    document.querySelectorAll('.english-verse .play-verse-audio-btn').forEach(btn => {
+        btn.addEventListener('click', e => speakText(e.target.dataset.text, e.target.dataset.lang, 'verse'));
+    });
+
+    document.querySelectorAll('.indian-lang-verse .play-verse-audio-btn').forEach(btn => {
+        btn.addEventListener('click', handleVerseAudioClick);
+    });
     
     if (scrollToVerseNum) {
         const targetElement = document.getElementById(`verse-${scrollToVerseNum}`);
@@ -188,8 +211,43 @@ function displayChapter(scrollToVerseNum = null) {
             setTimeout(() => targetElement.classList.remove('highlighted-verse'), 3000);
         }
     }
-    // Removed toggleScrollToTopButton() call as the button is no longer used
 }
+
+function handleVerseAudioClick(event) {
+    const button = event.target;
+    const text = button.dataset.text;
+    const lang = button.dataset.lang;
+    const script = transliterationLangMap[languageSelect.value];
+
+    if (!text || !lang) {
+        console.error("Verse audio button is missing text or lang data.");
+        return;
+    }
+
+    speakText(text, lang, 'verse');
+
+    let transliteratedText = "Transliteration not available for this language.";
+    // Check if the Sanscript library is loaded and a script for the language is configured
+    if (script && typeof window.Sanscript !== 'undefined') {
+        try {
+            // Use Sanscript to transliterate from the native script to Roman (itrans)
+            transliteratedText = window.Sanscript.t(text, script, 'itrans');
+        } catch (e) {
+            console.error("Sanscript transliteration error:", e);
+            transliteratedText = "An error occurred during transliteration.";
+        }
+    }
+
+    verseAudioContent.innerHTML = `
+        <h4>Verse</h4>
+        <p><strong>Original:</strong> ${text}</p>
+        <hr>
+        <p><strong>Roman Script:</strong> ${transliteratedText}</p>
+    `;
+
+    verseAudioModal.style.display = 'block';
+}
+
 
 function navigateToNextChapter() {
     const currentBookIndex = bibleBooks.indexOf(bookSelect.value);
@@ -264,21 +322,19 @@ function speakText(text, lang = 'en-US', source = 'verse') {
 
     utterance.onstart = () => {
         currentSpeech = { utterance, isPlaying: true, isPaused: false, source };
-        if (source === 'english_chapter') {
-            playEnglishButton.textContent = 'Stop English Chapter';
-            playIndianLangButton.textContent = `Play ${languageSelect.options[languageSelect.selectedIndex]?.text.split('(')[0].trim()} Chapter`;
-        } else if (source === 'indian_chapter') {
-            playIndianLangButton.textContent = `Stop ${languageSelect.options[languageSelect.selectedIndex]?.text.split('(')[0].trim()} Chapter`;
-            playEnglishButton.textContent = 'Play English Chapter';
-        } else if (source === 'verse') {
+        if (source === 'english_chapter' || source === 'indian_chapter') {
+           // Chapter buttons are handled separately
+        } else {
             resetChapterAudioButtons();
         }
-        pauseResumeButton.textContent = 'Pause';
-        pauseResumeButton.style.display = 'inline-block';
-        stopAudioButton.style.display = 'inline-block';
     };
     
-    utterance.onend = () => stopCurrentAudio();
+    utterance.onend = () => {
+        if (currentSpeech.source === 'verse') {
+            stopCurrentAudio();
+        }
+    };
+
     utterance.onerror = (event) => {
         console.error('SpeechSynthesis Utterance Error:', event.error);
         stopCurrentAudio();
@@ -313,9 +369,14 @@ function handlePlayEnglishChapter() {
     if (currentSpeech.isPlaying && currentSpeech.source === 'english_chapter') {
         stopCurrentAudio();
     } else {
+        verseAudioModal.style.display = 'none';
         const verses = netBibleData.filter(v => v.englishBookName === bookSelect.value && v.chapter === parseInt(chapterSelect.value)).sort((a,b) => a.verse - b.verse).map(v => v.text);
         if (verses.length > 0) {
             speakText(verses.join(" "), 'en-US', 'english_chapter');
+            playEnglishButton.textContent = 'Stop English Chapter';
+            playIndianLangButton.textContent = `Play ${languageSelect.options[languageSelect.selectedIndex]?.text.split('(')[0].trim()} Chapter`;
+            pauseResumeButton.style.display = 'inline-block';
+            stopAudioButton.style.display = 'inline-block';
         } else {
             console.warn("No English verses found for this chapter.");
         }
@@ -326,6 +387,7 @@ function handlePlayIndianLangChapter() {
     if (currentSpeech.isPlaying && currentSpeech.source === 'indian_chapter') {
         stopCurrentAudio();
     } else {
+        verseAudioModal.style.display = 'none';
         const verses = currentIndianLanguageData.filter(v => v.englishBookName === bookSelect.value && v.chapter === parseInt(chapterSelect.value)).sort((a,b) => a.verse - b.verse).map(v => v.text);
         let langCode = 'en-US';
         if (languageSelect.value === 'irv_hindi') langCode = 'hi-IN';
@@ -336,6 +398,10 @@ function handlePlayIndianLangChapter() {
 
         if (verses.length > 0) {
             speakText(verses.join(" "), langCode, 'indian_chapter');
+            playIndianLangButton.textContent = `Stop ${languageSelect.options[languageSelect.selectedIndex]?.text.split('(')[0].trim()} Chapter`;
+            playEnglishButton.textContent = 'Play English Chapter';
+            pauseResumeButton.style.display = 'inline-block';
+            stopAudioButton.style.display = 'inline-block';
         } else {
             console.warn("No Indian language verses found for this chapter or language data not loaded.");
         }
@@ -354,17 +420,10 @@ function getCurrentIndianLangInfo() {
     }
 }
 
-/**
- * [REFACTORED FUNCTION] Handles all aspects of the word study modal.
- * This function was significantly refactored to fix a recursive bug. It now fetches all data
- * first, then updates the UI in a single, synchronized step.
- * @param {Event} event The click event that triggered the study.
- */
 async function handleWordClick(event) {
     const word = event.target.dataset.word.replace(/[^a-zA-Z]/g, '').toLowerCase();
     if (!word) return;
 
-    // 1. Set up the modal with "Loading..." placeholders
     selectedWordHeader.textContent = `Word Details: "${word}"`;
     dictionaryMeaning.innerHTML = `
         <div id="englishMeaningContainer">
@@ -394,7 +453,6 @@ async function handleWordClick(event) {
         document.getElementById('indianLangMeaningContainer').style.display = 'none';
     }
 
-    // 2. Define all data-fetching tasks. They now return HTML content instead of updating the DOM directly.
     const fetchEnglishDef = async () => {
         try {
             const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
@@ -410,7 +468,7 @@ async function handleWordClick(event) {
                 });
                 return html;
             }
-            return `<p>No dictionary definition found for "${word}".</p>`;
+            return `<p>No dictionary definition found for "${word}".p>`;
         } catch (e) {
             return `<p>Error fetching definition.</p>`;
         }
@@ -425,7 +483,6 @@ async function handleWordClick(event) {
                 const clickableSummary = data.extract.replace(/([a-zA-Z0-9']+)/g, `<span class="word-clickable" data-word="$1">$1</span>`);
                 return { html: `<p>${clickableSummary}</p>`, needsListeners: true };
             }
-            // FIX: Added missing closing curly brace '}' here
             return { html: `<p>No Wikipedia summary found for "${word}".</p>` };
         } catch (e) {
             return { html: `<p>Error fetching summary.</p>` };
@@ -442,7 +499,7 @@ async function handleWordClick(event) {
             const data = await response.json();
             return data.responseData ? `<p>${data.responseData.translatedText}</p>` : `<p>Could not find a translation for "${word}".</p>`;
         } catch (e) {
-            return `<p>Error fetching translation.</p>`;
+            return `<p>Error fetching translation. </p>`;
         }
     };
 
@@ -463,7 +520,6 @@ async function handleWordClick(event) {
         return `<p>No other occurrences found.</p>`;
     };
     
-    // 3. Run all tasks and wait for them to complete.
     const [engDefHtml, wikiResult, indianMeaningHtml, occurrencesHtml] = await Promise.all([
         fetchEnglishDef(),
         fetchWikipediaSummary(),
@@ -471,7 +527,6 @@ async function handleWordClick(event) {
         Promise.resolve(findOccurrences())
     ]);
 
-    // 4. Update the DOM with all the results at once.
     document.getElementById('englishMeaningContent').innerHTML = engDefHtml;
     document.getElementById('indianLangMeaningContent').innerHTML = indianMeaningHtml;
     
@@ -480,7 +535,6 @@ async function handleWordClick(event) {
     
     occurrencesDiv.innerHTML = occurrencesHtml;
 
-    // 5. Attach all necessary event listeners to the new content.
     if (wikiResult.needsListeners) {
         wikipediaSummaryContent.querySelectorAll('.word-clickable').forEach(span => span.addEventListener('click', handleWordClick));
     }
@@ -495,7 +549,6 @@ function handleOccurrenceLinkClick(e) {
     wordStudyModal.style.display = 'none';
     bookSelect.value = book;
     populateChapterSelect(book);
-    // Ensure chapter is selected after population, before displaying
     chapterSelect.value = chapter; 
     displayChapter(verse);
 }
@@ -503,35 +556,31 @@ function handleOccurrenceLinkClick(e) {
 function handleSearch(query) {
     const searchTerm = query.trim();
     if (!searchTerm) {
-        displayChapter(); // Display current chapter if search term is empty
+        displayChapter();
         return;
     }
 
-    // Attempt to parse as "Book Chapter:Verse"
     const referenceMatch = searchTerm.match(/^(.+)\s+(\d+):(\d+)$/);
     if (referenceMatch) {
         const bookName = referenceMatch[1].trim();
         const chapterNum = parseInt(referenceMatch[2]);
         const verseNum = parseInt(referenceMatch[3]);
 
-        // Validate book name (case-insensitive and partial match for common book names)
         const matchedBook = bibleBooks.find(b => b.toLowerCase() === bookName.toLowerCase() || b.toLowerCase().startsWith(bookName.toLowerCase()));
 
         if (matchedBook) {
-            // Check if the book and chapter exist in the data
             const bookData = netBibleData.filter(v => v.englishBookName === matchedBook && v.chapter === chapterNum);
             if (bookData.length > 0) {
                 bookSelect.value = matchedBook;
                 populateChapterSelect(matchedBook);
                 chapterSelect.value = chapterNum;
                 displayChapter(verseNum);
-                wordStudyModal.style.display = 'none'; // Close modal if open
-                return; // Stop further execution for navigation
+                wordStudyModal.style.display = 'none';
+                return;
             }
         }
     }
 
-    // If not a recognized "Book Chapter:Verse" format, proceed with keyword search
     const results = netBibleData.filter(v => v.text && v.text.toLowerCase().includes(searchTerm.toLowerCase()));
     
     bibleTextDiv.innerHTML = `<h2 class="chapter-title">Search Results for "${searchTerm}"</h2>`;
@@ -558,20 +607,3 @@ function handleSearch(query) {
         bibleTextDiv.innerHTML += `<p>No results found.</p>`;
     }
 }
-
-// The toggleScrollToTopButton function is no longer needed as per the new requirement
-// function toggleScrollToTopButton() {
-//     const firstVerse = document.getElementById('verse-1');
-//     if (!firstVerse) {
-//         scrollToTopBtn.classList.remove('show');
-//         return;
-//     }
-//     const rect = firstVerse.getBoundingClientRect();
-//     const bibleTextDivRect = bibleTextDiv.getBoundingClientRect();
-//     const isFirstVerseOutOfViewTop = rect.top < bibleTextDivRect.top;
-//     if (bibleTextDiv.scrollTop > 50 && isFirstVerseOutOfViewTop) {
-//         scrollToTopBtn.classList.add('show');
-//     } else {
-//         scrollToTopBtn.classList.remove('show');
-//     }
-// }

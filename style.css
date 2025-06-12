@@ -1,3 +1,12 @@
+/* Add this new style to your existing style.css */
+.roman-transliteration {
+    color: #555; /* A slightly subdued color */
+    font-size: 0.9em;
+    margin-top: 2px;
+    font-style: normal; /* Ensure it's not italic if parent is */
+}
+
+
 /* General Body and Layout */
 body {
     font-family: Arial, sans-serif;
@@ -22,7 +31,7 @@ header {
     flex-wrap: wrap;
     gap: 10px;
     align-items: center;
-    justify-content: center; /* Centering the controls */
+    justify-content: center;
 }
 
 .controls label, .controls select, .controls button, .controls input {
@@ -80,11 +89,9 @@ main {
     padding: 15px;
     border-radius: 5px;
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    max-height: calc(100vh - 150px); /* Adjust based on header height */
-    overflow-y: auto; /* CRITICAL: Makes the container scrollable */
-    position: relative; /* CRITICAL: Establishes positioning context for #scrollToTopBtn */
-    /* temporary background to visualize scrollable area */
-    /* background-color: #e6ffe6; */
+    max-height: calc(100vh - 150px);
+    overflow-y: auto;
+    position: relative;
 }
 
 /* Verse Styling */
@@ -178,40 +185,9 @@ main {
     padding: 20px;
 }
 
-/* Scroll-to-Top Button SPECIFIC STYLES */
-#scrollToTopBtn {
-    /* Initially hidden using opacity and controlled by JS adding 'show' class */
-    display: block; /* Keep as block so transition works */
-    opacity: 0;
-    pointer-events: none; /* Disables clicks when hidden */
-    
-    position: absolute; /* Positioned relative to .verse-container */
-    bottom: 20px;
-    right: 20px;
-    z-index: 99; /* Ensure it's above other content */
-
-    border: none;
-    outline: none;
-    background-color: #007bff;
-    color: white;
-    cursor: pointer;
-    padding: 10px 15px;
-    border-radius: 50%; /* Circular button */
-    font-size: 18px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
-    transform: translateY(10px); /* Slightly off-screen when hidden */
-}
-
-#scrollToTopBtn.show {
-    opacity: 1;
-    pointer-events: auto; /* Enables clicks when visible */
-    transform: translateY(0); /* Slides into view */
-}
-
 /* Audio button for individual verses */
 .play-verse-audio-btn {
-    background-color: #28a745 !important; /* Green */
+    background-color: #28a745 !important;
     color: white !important;
     border: none !important;
     border-radius: 4px !important;
