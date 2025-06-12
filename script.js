@@ -1,5 +1,4 @@
 // The application will now start after the basic HTML document is loaded.
-// This is cleaner and possible because sanscript.js is now loaded locally.
 document.addEventListener('DOMContentLoaded', initializeApp);
 
 
@@ -21,10 +20,7 @@ const bibleBooks = ["Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy", 
 // DOM Elements
 const bookSelect = document.getElementById('bookSelect'), chapterSelect = document.getElementById('chapterSelect'), languageSelect = document.getElementById('languageSelect'), goButton = document.getElementById('goButton'), prevChapterButton = document.getElementById('prevChapterButton'), nextChapterButton = document.getElementById('nextChapterButton'), playEnglishButton = document.getElementById('playEnglishButton'), playIndianLangButton = document.getElementById('playIndianLangButton'), pauseResumeButton = document.getElementById('pauseResumeButton'), stopAudioButton = document.getElementById('stopAudioButton'), playbackRateSlider = document.getElementById('playbackRateSlider'), playbackRateValue = document.getElementById('playbackRateValue'), bibleTextDiv = document.getElementById('bibleTextDiv'), loadingIndicator = document.getElementById('loadingIndicator'), wordStudyModal = document.getElementById('wordStudyModal'), closeModalButton = document.getElementById('closeModalButton'), selectedWordHeader = document.getElementById('selectedWordHeader'), dictionaryMeaning = document.getElementById('dictionaryMeaning'), occurrencesDiv = document.getElementById('occurrences'), quickSearchInput = document.getElementById('quickSearchInput'), searchButton = document.getElementById('searchButton');
 
-const verseAudioModal = document.getElementById('verseAudioModal'),
-      closeAudioModalButton = document.getElementById('closeAudioModalButton'),
-      verseAudioContent = document.getElementById('verseAudioContent');
-
+// *** REMOVED: verseAudioModal and its related elements are no longer needed ***
 
 // Mapping for Sanscript.js
 const transliterationLangMap = {
@@ -89,10 +85,7 @@ function setupEventListeners() {
 
     goButton.addEventListener('click', () => { displayChapter(1); });
 
-    closeAudioModalButton.addEventListener('click', () => {
-        verseAudioModal.style.display = 'none';
-        stopCurrentAudio();
-    });
+    // *** REMOVED: Event listener for the audio modal close button ***
 }
 
 async function fetchAndProcessBibleData(filePath, langKey) {
@@ -161,6 +154,9 @@ async function displayChapter(scrollToVerseNum = null) {
         bibleTextDiv.innerHTML += `<p>No verses found for this chapter in the selected languages.</p>`;
         return;
     }
+    
+    // Get the script for the currently selected language
+    const currentTransliterationSourceScript = transliterationLangMap[languageSelect.value];
 
     for (let i = 1; i <= maxVerseNum; i++) {
         const engVerse = englishVerses.find(v => v.verse === i);
@@ -189,18 +185,27 @@ async function displayChapter(scrollToVerseNum = null) {
                 }
                 const cleanIndText = indVerse.text.replace(/"/g, '&quot;');
                 verseBlock.innerHTML += `<p class="indian-lang-verse">(${langInfo.name}): ${indVerse.text} <button class="play-verse-audio-btn" data-lang="${langInfo.code}" data-text="${cleanIndText}">🔊</button></p>`;
+            
+                // *** MODIFIED: Transliteration is now added inline ***
+                if (currentTransliterationSourceScript && typeof window.Sanscript !== 'undefined') {
+                    try {
+                        const transliteratedText = window.Sanscript.t(indVerse.text, currentTransliterationSourceScript, 'itrans');
+                        if (transliteratedText) {
+                            verseBlock.innerHTML += `<p class="roman-transliteration">(Roman): ${transliteratedText}</p>`;
+                        }
+                    } catch (e) {
+                        console.error("Sanscript transliteration error:", e);
+                    }
+                }
             }
             bibleTextDiv.appendChild(verseBlock);
         }
     }
     document.querySelectorAll('.word-clickable').forEach(span => span.addEventListener('click', handleWordClick));
 
-    document.querySelectorAll('.english-verse .play-verse-audio-btn').forEach(btn => {
+    // *** MODIFIED: Reverted to a single, simple event listener for all audio buttons ***
+    document.querySelectorAll('.play-verse-audio-btn').forEach(btn => {
         btn.addEventListener('click', e => speakText(e.target.dataset.text, e.target.dataset.lang, 'verse'));
-    });
-
-    document.querySelectorAll('.indian-lang-verse .play-verse-audio-btn').forEach(btn => {
-        btn.addEventListener('click', handleVerseAudioClick);
     });
     
     if (scrollToVerseNum) {
@@ -213,40 +218,7 @@ async function displayChapter(scrollToVerseNum = null) {
     }
 }
 
-function handleVerseAudioClick(event) {
-    const button = event.target;
-    const text = button.dataset.text;
-    const lang = button.dataset.lang;
-    const script = transliterationLangMap[languageSelect.value];
-
-    if (!text || !lang) {
-        console.error("Verse audio button is missing text or lang data.");
-        return;
-    }
-
-    speakText(text, lang, 'verse');
-
-    let transliteratedText = "Transliteration not available for this language.";
-    // Check if the Sanscript library is loaded and a script for the language is configured
-    if (script && typeof window.Sanscript !== 'undefined') {
-        try {
-            // Use Sanscript to transliterate from the native script to Roman (itrans)
-            transliteratedText = window.Sanscript.t(text, script, 'itrans');
-        } catch (e) {
-            console.error("Sanscript transliteration error:", e);
-            transliteratedText = "An error occurred during transliteration.";
-        }
-    }
-
-    verseAudioContent.innerHTML = `
-        <h4>Verse</h4>
-        <p><strong>Original:</strong> ${text}</p>
-        <hr>
-        <p><strong>Roman Script:</strong> ${transliteratedText}</p>
-    `;
-
-    verseAudioModal.style.display = 'block';
-}
+// *** REMOVED: The handleVerseAudioClick function is no longer needed ***
 
 
 function navigateToNextChapter() {
@@ -369,7 +341,6 @@ function handlePlayEnglishChapter() {
     if (currentSpeech.isPlaying && currentSpeech.source === 'english_chapter') {
         stopCurrentAudio();
     } else {
-        verseAudioModal.style.display = 'none';
         const verses = netBibleData.filter(v => v.englishBookName === bookSelect.value && v.chapter === parseInt(chapterSelect.value)).sort((a,b) => a.verse - b.verse).map(v => v.text);
         if (verses.length > 0) {
             speakText(verses.join(" "), 'en-US', 'english_chapter');
@@ -387,7 +358,6 @@ function handlePlayIndianLangChapter() {
     if (currentSpeech.isPlaying && currentSpeech.source === 'indian_chapter') {
         stopCurrentAudio();
     } else {
-        verseAudioModal.style.display = 'none';
         const verses = currentIndianLanguageData.filter(v => v.englishBookName === bookSelect.value && v.chapter === parseInt(chapterSelect.value)).sort((a,b) => a.verse - b.verse).map(v => v.text);
         let langCode = 'en-US';
         if (languageSelect.value === 'irv_hindi') langCode = 'hi-IN';

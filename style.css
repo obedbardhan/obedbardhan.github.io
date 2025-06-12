@@ -1,203 +1,212 @@
-/* Add this new style to your existing style.css */
-.roman-transliteration {
-    color: #555; /* A slightly subdued color */
-    font-size: 0.9em;
-    margin-top: 2px;
-    font-style: normal; /* Ensure it's not italic if parent is */
-}
-
-
 /* General Body and Layout */
 body {
-    font-family: Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f0f0f0;
-    color: #333;
+    background-color: #edf2f7; /* Light gray background */
+    color: #2d3748; /* Dark gray text */
+    transition: background-color 0.3s ease;
 }
 
 header {
-    background-color: #333;
-    color: white;
-    padding: 10px 20px;
+    background-color: #2d3748; /* Dark slate header */
+    color: #e2e8f0; /* Light gray header text */
+    padding: 1rem 1.5rem;
     position: sticky;
     top: 0;
     z-index: 1000;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .controls {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
+    display: flex; /* Changed from grid to flex */
+    flex-wrap: wrap; /* Allows items to wrap to the next line */
+    gap: 0.75rem;
     align-items: center;
-    justify-content: center;
 }
 
+/* Styling for all input elements in the header */
 .controls label, .controls select, .controls button, .controls input {
-    margin-bottom: 5px;
-    padding: 8px;
-    border-radius: 4px;
-    border: 1px solid #ccc;
-    font-size: 1em;
+    font-size: 0.9rem;
+    border-radius: 0.375rem; /* Slightly rounded corners */
+    border: 1px solid #4a5568; /* Darker border */
+    height: 40px;
+    box-sizing: border-box;
 }
 
-.controls select {
-    background-color: white;
+.controls label {
+    border: none;
+    text-align: right;
+    padding-right: 0.5rem;
+    font-weight: 500;
+}
+
+.controls select, .controls input[type="text"] {
+    background-color: #ffffff;
+    color: #2d3748;
+    padding: 0 0.75rem;
+}
+
+.controls input[type="text"]::placeholder {
+    color: #a0aec0;
 }
 
 .controls button {
-    background-color: #0fe3eb;
-    color: rgb(20, 20, 1);
+    background-color: #4a5568; /* Default dark button */
+    color: #ffffff;
     cursor: pointer;
-    border: none;
+    font-weight: 600;
     transition: background-color 0.2s ease;
+    padding: 0 1rem; /* Added padding to size button to content */
 }
 
 .controls button:hover {
-    background-color: #05e8f0;
+    background-color: #2d3748;
 }
 
-.controls button:disabled {
-    background-color: #999;
-    cursor: not-allowed;
+/* Specific button styles based on the image */
+#playEnglishButton, #playIndianLangButton, #goButton, #searchButton, #voiceSearchButton {
+    background-color: #38b2ac; /* Teal accent color */
 }
 
-#quickSearchInput {
-    min-width: 180px;
+#playEnglishButton:hover, #playIndianLangButton:hover, #goButton:hover, #searchButton:hover, #voiceSearchButton:hover {
+    background-color: #319795; /* Darker teal on hover */
 }
 
 .playback-speed-control {
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 0.5rem;
+}
+
+#playbackRateSlider {
+    flex-grow: 1;
 }
 
 /* Main Content Area */
 main {
-    padding: 20px;
-    max-width: 900px;
-    margin: 20px auto;
-    background-color: white;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    border-radius: 8px;
+    padding: 1.5rem;
+    max-width: 850px;
+    margin: 2rem auto;
+    background-color: #ffffff;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    border-radius: 0.5rem;
 }
 
 /* Bible Text Display Area */
 .verse-container {
-    background-color: white;
-    padding: 15px;
-    border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    max-height: calc(100vh - 150px);
-    overflow-y: auto;
-    position: relative;
-}
-
-/* Verse Styling */
-.verse-block {
-    margin-bottom: 15px;
-    padding: 10px;
-    border-left: 4px solid #007bff;
-    background-color: #f9f9f9;
-    border-radius: 4px;
-}
-
-.verse-block.highlighted-verse {
-    background-color: #fff3cd;
-    border-left-color: #ffc107;
-}
-
-.verse-number {
-    font-weight: bold;
-    color: #ff1e00;
-    margin-right: 8px;
-    display: inline-block;
-}
-
-.english-verse {
-    color: #333;
-    margin-bottom: 5px;
-    display: block;
-}
-
-.indian-lang-verse {
-    color: #2a28a7;
-    font-style: italic;
-    display: block;
-}
-
-/* Word Clickable Spans */
-.english-verse .word-clickable {
-    cursor: pointer;
-}
-.english-verse .word-clickable:hover {
-    color: #0056b3;
-    background-color: #e9ecef;
+    background-color: transparent;
+    padding: 0;
+    box-shadow: none;
+    max-height: none;
+    overflow-y: visible;
 }
 
 /* Chapter Title */
 .chapter-title {
-    color: #333;
-    border-bottom: 2px solid #eee;
-    padding-bottom: 10px;
-    margin-bottom: 20px;
+    color: #1a202c;
+    font-size: 2.25rem;
+    font-weight: 700;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
 }
 
-/* Modal for Word Study */
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1001;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0,0,0,0.4);
+/* Verse Styling */
+.verse-block {
+    margin-bottom: 1.25rem;
+    padding: 1rem 1rem 1rem 1.25rem;
+    border-left: 4px solid #4fd1c5; /* Accent color border */
+    background-color: #f7fafc; /* Light gray verse background */
+    border-radius: 0.25rem;
+    overflow: hidden; /* To contain the floating number */
 }
 
-.modal-content {
-    background-color: #fefefe;
-    margin: 10% auto;
-    padding: 20px;
-    border: 1px solid #888;
-    width: 80%;
-    max-width: 700px;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    position: relative;
-}
-
-.modal .close-button {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
+.verse-number {
     font-weight: bold;
-    cursor: pointer;
+    color: #dd6b20; /* Red-orange color for verse number */
+    margin-right: 0.75rem;
+    float: left;
+    font-size: 1.1rem;
+    line-height: 1.6;
 }
 
-/* Loading Indicator */
-#loadingIndicator {
-    font-size: 1.2em;
-    color: #555;
-    text-align: center;
-    padding: 20px;
+.english-verse, .indian-lang-verse, .roman-transliteration {
+    display: block;
+    margin-left: 2.25rem; /* Indent text to align with verse number */
+    line-height: 1.6;
+    color: #4a5568;
+}
+
+.indian-lang-verse {
+    color: #2b6cb0; /* Dark blue for Indian languages */
+    font-style: normal; /* Removed italics for a cleaner look */
+    font-weight: 500;
+}
+
+.roman-transliteration {
+    color: #718096; /* Subdued gray for transliteration */
+    font-size: 0.9em;
+    margin-top: 4px;
+}
+
+/* Clickable word spans */
+.word-clickable {
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.word-clickable:hover {
+    color: #3182ce;
+    background-color: #ebf8ff;
 }
 
 /* Audio button for individual verses */
 .play-verse-audio-btn {
-    background-color: #28a745 !important;
+    background-color: #38b2ac !important;
     color: white !important;
     border: none !important;
-    border-radius: 4px !important;
-    padding: 3px 8px !important;
-    font-size: 0.8em !important;
+    border-radius: 0.25rem !important;
+    padding: 2px 6px !important;
+    font-size: 0.9em !important;
     cursor: pointer !important;
-    margin-left: 5px !important;
+    margin-left: 8px !important;
     vertical-align: middle !important;
+    height: auto !important;
+    transition: background-color 0.2s ease !important;
 }
 
 .play-verse-audio-btn:hover {
-    background-color: #218838 !important;
+    background-color: #319795 !important;
+}
+
+/* Modal for Word Study (A bit of styling to match the new theme) */
+.modal-content {
+    background-color: #fefefe;
+    margin: 10% auto;
+    padding: 25px;
+    border: 1px solid #e2e8f0;
+    width: 90%;
+    max-width: 700px;
+    border-radius: 0.5rem;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.modal .close-button {
+    color: #a0aec0;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+.modal .close-button:hover {
+    color: #2d3748;
+}
+
+#loadingIndicator {
+    font-size: 1.2em;
+    color: #718096;
+    text-align: center;
+    padding: 40px;
 }
