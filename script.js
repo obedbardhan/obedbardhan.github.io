@@ -426,36 +426,52 @@ async function handleWordClick(event) {
     const fetchEnglishDef = async () => {
         try {
             const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
-            const data = await response.json();
-            if (response.ok && data.length > 0 && !data.title) {
-                let html = '';
-                data[0].meanings.slice(0, 2).forEach(meaning => {
-                    html += `<h3>${meaning.partOfSpeech}</h3>`;
-                    meaning.definitions.slice(0, 2).forEach(def => {
-                        html += `<p><strong>Definition:</strong> ${def.definition}</p>`;
-                        if (def.example) html += `<p><em>Usage: ${def.example}</em></p>`;
-                    });
-                });
-                return html;
+            if (!response.ok) {
+                 return `<p>No dictionary definition found for "${word}" (API error ${response.status}).</p>`;
             }
-            return `<p>No dictionary definition found for "${word}".p>`;
+            const data = await response.json();
+            if (data.title) {
+                return `<p>No dictionary definition found for "${word}".</p>`;
+            }
+            if (Array.isArray(data) && data.length > 0) {
+                let html = '';
+                if (data[0].meanings && Array.isArray(data[0].meanings)) {
+                    data[0].meanings.slice(0, 2).forEach(meaning => {
+                        if (meaning && meaning.partOfSpeech && meaning.definitions && Array.isArray(meaning.definitions)) {
+                            html += `<h3>${meaning.partOfSpeech}</h3>`;
+                            meaning.definitions.slice(0, 2).forEach(def => {
+                                if (def && def.definition) {
+                                    html += `<p><strong>Definition:</strong> ${def.definition}</p>`;
+                                    if (def.example) html += `<p><em>Usage: ${def.example}</em></p>`;
+                                }
+                            });
+                        }
+                    });
+                }
+                if (html) return html;
+            }
+            return `<p>No dictionary definition found for "${word}".</p>`;
         } catch (e) {
-            return `<p>Error fetching definition.</p>`;
+            console.error("Error fetching English definition:", e);
+            return `<p>Error fetching definition. The API may be unavailable.</p>`;
         }
     };
 
     const fetchWikipediaSummary = async () => {
         try {
             const response = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(word)}`);
-            if (!response.ok) return { html: `<p>No Wikipedia summary found for "${word}".</p>` };
+            if (!response.ok) {
+                return { html: `<p>No Wikipedia summary found for "${word}".</p>` };
+            }
             const data = await response.json();
-            if (data.type === 'standard' && data.extract) {
+            if (data && data.type === 'standard' && data.extract) {
                 const clickableSummary = data.extract.replace(/([a-zA-Z0-9']+)/g, `<span class="word-clickable" data-word="$1">$1</span>`);
                 return { html: `<p>${clickableSummary}</p>`, needsListeners: true };
             }
             return { html: `<p>No Wikipedia summary found for "${word}".</p>` };
         } catch (e) {
-            return { html: `<p>Error fetching summary.</p>` };
+            console.error("Error fetching Wikipedia summary:", e);
+            return { html: `<p>Error fetching summary. The API may be unavailable.</p>` };
         }
     };
 
@@ -465,11 +481,19 @@ async function handleWordClick(event) {
         if (localTranslation) return `<p>${localTranslation}</p>`;
         try {
             const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(word)}&langpair=en|${langCode}`);
-            if (!response.ok) throw new Error(`API responded with status ${response.status}`);
+            if (!response.ok) {
+                 return `<p>Could not find a translation for "${word}" (API error ${response.status}).</p>`;
+            }
             const data = await response.json();
-            return data.responseData ? `<p>${data.responseData.translatedText}</p>` : `<p>Could not find a translation for "${word}".</p>`;
+            if (data && data.responseData && data.responseData.translatedText) {
+                if (data.responseData.translatedText.toLowerCase() !== word.toLowerCase()) {
+                    return `<p>${data.responseData.translatedText}</p>`;
+                }
+            }
+            return `<p>Could not find a translation for "${word}".</p>`;
         } catch (e) {
-            return `<p>Error fetching translation. </p>`;
+            console.error("Error fetching Indian language translation:", e);
+            return `<p>Error fetching translation. The API may be unavailable.</p>`;
         }
     };
 
