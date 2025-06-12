@@ -18,9 +18,7 @@ const localTranslations = {
 const bibleBooks = ["Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy", "Joshua", "Judges", "Ruth", "1 Samuel", "2 Samuel", "1 Kings", "2 Kings", "1 Chronicles", "2 Chronicles", "Ezra", "Nehemiah", "Esther", "Job", "Psalms", "Proverbs", "Ecclesiastes", "Song of Solomon", "Isaiah", "Jeremiah", "Lamentations", "Ezekiel", "Daniel", "Hosea", "Joel", "Amos", "Obadiah", "Jonah", "Micah", "Nahum", "Habakkuk", "Zephaniah", "Haggai", "Zechariah", "Malachi", "Matthew", "Mark", "Luke", "John", "Acts", "Romans", "1 Corinthians", "2 Corinthians", "Galatians", "Ephesians", "Philippians", "Colossians", "1 Thessalonians", "2 Thessalonians", "1 Timothy", "2 Timothy", "Titus", "Philemon", "Hebrews", "James", "1 Peter", "2 Peter", "1 John", "2 John", "3 John", "Jude", "Revelation"];
 
 // DOM Elements
-const bookSelect = document.getElementById('bookSelect'), chapterSelect = document.getElementById('chapterSelect'), languageSelect = document.getElementById('languageSelect'), goButton = document.getElementById('goButton'), prevChapterButton = document.getElementById('prevChapterButton'), nextChapterButton = document.getElementById('nextChapterButton'), playEnglishButton = document.getElementById('playEnglishButton'), playIndianLangButton = document.getElementById('playIndianLangButton'), pauseResumeButton = document.getElementById('pauseResumeButton'), stopAudioButton = document.getElementById('stopAudioButton'), playbackRateSlider = document.getElementById('playbackRateSlider'), playbackRateValue = document.getElementById('playbackRateValue'), bibleTextDiv = document.getElementById('bibleTextDiv'), loadingIndicator = document.getElementById('loadingIndicator'), wordStudyModal = document.getElementById('wordStudyModal'), closeModalButton = document.getElementById('closeModalButton'), selectedWordHeader = document.getElementById('selectedWordHeader'), dictionaryMeaning = document.getElementById('dictionaryMeaning'), occurrencesDiv = document.getElementById('occurrences'), quickSearchInput = document.getElementById('quickSearchInput'), searchButton = document.getElementById('searchButton');
-
-// *** REMOVED: verseAudioModal and its related elements are no longer needed ***
+const bookSelect = document.getElementById('bookSelect'), chapterSelect = document.getElementById('chapterSelect'), languageSelect = document.getElementById('languageSelect'), goButton = document.getElementById('goButton'), prevChapterButton = document.getElementById('prevChapterButton'), nextChapterButton = document.getElementById('nextChapterButton'), playEnglishButton = document.getElementById('playEnglishButton'), playIndianLangButton = document.getElementById('playIndianLangButton'), pauseResumeButton = document.getElementById('pauseResumeButton'), stopAudioButton = document.getElementById('stopAudioButton'), playbackRateSlider = document.getElementById('playbackRateSlider'), playbackRateValue = document.getElementById('playbackRateValue'), bibleTextDiv = document.getElementById('bibleTextDiv'), loadingIndicator = document.getElementById('loadingIndicator'), wordStudyModal = document.getElementById('wordStudyModal'), closeModalButton = document.getElementById('closeModalButton'), selectedWordHeader = document.getElementById('selectedWordHeader'), dictionaryMeaning = document.getElementById('dictionaryMeaning'), occurrencesDiv = document.getElementById('occurrences'), quickSearchInput = document.getElementById('quickSearchInput'), searchButton = document.getElementById('searchButton'), toggleControlsButton = document.getElementById('toggleControlsButton'), secondaryControls = document.querySelector('.secondary-controls');
 
 // Mapping for Sanscript.js
 const transliterationLangMap = {
@@ -33,6 +31,7 @@ const transliterationLangMap = {
 
 async function initializeApp() {
     setupEventListeners();
+    setInitialControlsState();
     populateBookSelect();
     if ('speechSynthesis' in window) {
         speechSynthesis.onvoiceschanged = () => availableVoices = speechSynthesis.getVoices();
@@ -83,9 +82,33 @@ function setupEventListeners() {
     quickSearchInput.addEventListener('keypress', e => { if (e.key === 'Enter') handleSearch(quickSearchInput.value); });
     resetChapterAudioButtons();
 
-    goButton.addEventListener('click', () => { displayChapter(1); });
+    goButton.addEventListener('click', () => { 
+        displayChapter(1); 
+        // On mobile, hide controls after clicking "Go"
+        if (window.innerWidth <= 768) {
+            secondaryControls.classList.add('hidden');
+            toggleControlsButton.textContent = '+';
+        }
+    });
 
-    // *** REMOVED: Event listener for the audio modal close button ***
+    toggleControlsButton.addEventListener('click', () => {
+        secondaryControls.classList.toggle('hidden');
+        if (secondaryControls.classList.contains('hidden')) {
+            toggleControlsButton.textContent = '+';
+        } else {
+            toggleControlsButton.textContent = '-';
+        }
+    });
+}
+
+function setInitialControlsState() {
+    if (window.innerWidth <= 768) {
+        secondaryControls.classList.add('hidden');
+        toggleControlsButton.textContent = '+';
+    } else {
+        secondaryControls.classList.remove('hidden');
+        toggleControlsButton.textContent = '-';
+    }
 }
 
 async function fetchAndProcessBibleData(filePath, langKey) {
@@ -155,7 +178,6 @@ async function displayChapter(scrollToVerseNum = null) {
         return;
     }
     
-    // Get the script for the currently selected language
     const currentTransliterationSourceScript = transliterationLangMap[languageSelect.value];
 
     for (let i = 1; i <= maxVerseNum; i++) {
@@ -186,7 +208,6 @@ async function displayChapter(scrollToVerseNum = null) {
                 const cleanIndText = indVerse.text.replace(/"/g, '&quot;');
                 verseBlock.innerHTML += `<p class="indian-lang-verse">(${langInfo.name}): ${indVerse.text} <button class="play-verse-audio-btn" data-lang="${langInfo.code}" data-text="${cleanIndText}">🔊</button></p>`;
             
-                // *** MODIFIED: Transliteration is now added inline ***
                 if (currentTransliterationSourceScript && typeof window.Sanscript !== 'undefined') {
                     try {
                         const transliteratedText = window.Sanscript.t(indVerse.text, currentTransliterationSourceScript, 'itrans');
@@ -203,7 +224,6 @@ async function displayChapter(scrollToVerseNum = null) {
     }
     document.querySelectorAll('.word-clickable').forEach(span => span.addEventListener('click', handleWordClick));
 
-    // *** MODIFIED: Reverted to a single, simple event listener for all audio buttons ***
     document.querySelectorAll('.play-verse-audio-btn').forEach(btn => {
         btn.addEventListener('click', e => speakText(e.target.dataset.text, e.target.dataset.lang, 'verse'));
     });
@@ -217,9 +237,6 @@ async function displayChapter(scrollToVerseNum = null) {
         }
     }
 }
-
-// *** REMOVED: The handleVerseAudioClick function is no longer needed ***
-
 
 function navigateToNextChapter() {
     const currentBookIndex = bibleBooks.indexOf(bookSelect.value);
@@ -294,9 +311,7 @@ function speakText(text, lang = 'en-US', source = 'verse') {
 
     utterance.onstart = () => {
         currentSpeech = { utterance, isPlaying: true, isPaused: false, source };
-        if (source === 'english_chapter' || source === 'indian_chapter') {
-           // Chapter buttons are handled separately
-        } else {
+        if (source !== 'english_chapter' && source !== 'indian_chapter') {
             resetChapterAudioButtons();
         }
     };
@@ -393,6 +408,25 @@ function getCurrentIndianLangInfo() {
 async function handleWordClick(event) {
     const word = event.target.dataset.word.replace(/[^a-zA-Z]/g, '').toLowerCase();
     if (!word) return;
+
+    const modalContent = wordStudyModal.querySelector('.modal-content');
+    let top = event.clientY + 15;
+    let left = event.clientX + 15;
+
+    const modalMaxWidth = 700;
+    const modalMaxHeight = window.innerHeight * 0.8; 
+
+    if (left + modalMaxWidth > window.innerWidth) {
+        left = event.clientX - modalMaxWidth - 15;
+    }
+    if (top + modalMaxHeight > window.innerHeight) {
+        top = window.innerHeight - modalMaxHeight - 20;
+    }
+    if (top < 10) top = 10;
+    if (left < 10) left = 10;
+
+    modalContent.style.top = `${top}px`;
+    modalContent.style.left = `${left}px`;
 
     selectedWordHeader.textContent = `Word Details: "${word}"`;
     dictionaryMeaning.innerHTML = `

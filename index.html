@@ -10,36 +10,43 @@
 <body>
     <header>
         <div class="controls">
-            <button id="prevChapterButton" title="Previous Chapter">&lt;&lt;</button>
-            <!-- <label for="bookSelect">Book:</label> -->
-            <select id="bookSelect"></select>
-            <!-- <label for="chapterSelect">Chapter:</label> -->
-            <select id="chapterSelect"></select>
-            <button id="nextChapterButton" title="Next Chapter">&gt;&gt;</button>
-
-            <label for="languageSelect">Indian Language:</label>
-            <select id="languageSelect">
-                <option value="irv_hindi">Hindi (IRV)</option>
-                <option value="odia_all_books">Odia</option>
-                <option value="te_irv_updated">Telugu (IRV)</option>
-                <option value="ta_oitce_updated">Tamil (OITCE)</option>
-                <option value="kn_irv_updated">Kannada (IRV)</option>
-            </select>
-
-            <button id="goButton">Go</button>
-            <button id="playEnglishButton">Play English Chapter</button>
-            <button id="playIndianLangButton">Play Indian Language Chapter</button>
-            
-            <button id="pauseResumeButton" style="display: none;">Pause</button>
-            <button id="stopAudioButton" style="display: none;">Stop Audio</button>
-            <div class="playback-speed-control">
-                <label for="playbackRateSlider">Speed:</label>
-                <input type="range" id="playbackRateSlider" min="0.5" max="2" step="0.1" value="1">
-                <span id="playbackRateValue">1.0x</span>
+            <!-- Primary, always-visible controls -->
+            <div class="primary-controls">
+                <button id="prevChapterButton" title="Previous Chapter">&lt;&lt;</button>
+                <select id="bookSelect"></select>
+                <select id="chapterSelect"></select>
+                <button id="nextChapterButton" title="Next Chapter">&gt;&gt;</button>
+                <button id="goButton">Go</button>
             </div>
-            <input type="text" id="quickSearchInput" placeholder="e.g., John 3:16 or 'love'">
-            <button id="searchButton">Search</button>
-            <button id="voiceSearchButton" title="Voice Search">🎤</button>
+
+            <!-- Toggle button for secondary controls -->
+            <button id="toggleControlsButton" title="Show/Hide More Options">-</button>
+
+            <!-- Collapsible secondary controls -->
+            <div class="secondary-controls">
+                <label for="languageSelect">Indian Language:</label>
+                <select id="languageSelect">
+                    <option value="irv_hindi">Hindi (IRV)</option>
+                    <option value="odia_all_books">Odia</option>
+                    <option value="te_irv_updated">Telugu (IRV)</option>
+                    <option value="ta_oitce_updated">Tamil (OITCE)</option>
+                    <option value="kn_irv_updated">Kannada (IRV)</option>
+                </select>
+
+                <button id="playEnglishButton">Play English Chapter</button>
+                <button id="playIndianLangButton">Play Indian Language Chapter</button>
+                
+                <button id="pauseResumeButton" style="display: none;">Pause</button>
+                <button id="stopAudioButton" style="display: none;">Stop Audio</button>
+                <div class="playback-speed-control">
+                    <label for="playbackRateSlider">Speed:</label>
+                    <input type="range" id="playbackRateSlider" min="0.5" max="2" step="0.1" value="1">
+                    <span id="playbackRateValue">1.0x</span>
+                </div>
+                <input type="text" id="quickSearchInput" placeholder="e.g., John 3:16 or 'love'">
+                <button id="searchButton">Search</button>
+                <button id="voiceSearchButton" title="Voice Search">🎤</button>
+            </div>
         </div>
     </header>
 
@@ -56,13 +63,6 @@
                 <div id="occurrences"></div>
             </div>
         </div>
-
-        <!-- <div id="verseAudioModal" class="modal">
-            <div class="modal-content">
-                <span class="close-button" id="closeAudioModalButton">&times;</span>
-                <div id="verseAudioContent"></div>
-            </div>
-        </div> -->
     </main>
 
     <script src="script.js"></script>
