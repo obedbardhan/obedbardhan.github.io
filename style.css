@@ -79,14 +79,14 @@ header {
 
 /* Toggle button style */
 #toggleControlsButton {
-    background-color: #667eea; /* Indigo */
+    background-color: #09adb95b; /* Indigo */
     font-size: 1.5rem;
     font-weight: bold;
     padding: 0 0.75rem;
     min-width: 40px;
 }
 #toggleControlsButton:hover {
-    background-color: #5a67d8;
+    background-color: #5abfd8;
 }
 
 /* Specific button styles based on the image */
