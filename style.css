@@ -102,10 +102,56 @@ header {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    flex-grow: 1; /* Allows it to take available space */
 }
 
 #playbackRateSlider {
     flex-grow: 1;
+}
+
+/* Collapsible secondary controls */
+.secondary-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem; /* Gap between control groups */
+    align-items: center;
+    overflow: hidden;
+    max-height: 200px; /* Sufficient height to show content */
+    opacity: 1;
+    pointer-events: auto;
+    transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+    width: 100%; /* Ensure it takes full width when visible below primary controls */
+    margin-top: 0.75rem; /* Add some margin when visible */
+}
+
+.secondary-controls.hidden {
+    max-height: 0;
+    opacity: 0;
+    pointer-events: none;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    overflow: hidden;
+}
+
+/* New: Styling for control groups within secondary-controls */
+.control-group {
+    display: flex;
+    gap: 0.75rem; /* Gap between items within a group */
+    align-items: center;
+    flex-wrap: wrap; /* Allow wrapping within the group */
+    flex-grow: 1; /* Allow groups to take available space */
+}
+
+.control-group .full-width-on-mobile {
+    flex-grow: 1;
+    width: 100%; /* Ensure these take full width on mobile */
+}
+
+.control-group #quickSearchInput {
+    flex-grow: 1; /* Allow search input to take available space */
+    min-width: 150px; /* Prevent it from becoming too small */
 }
 
 /* Main Content Area */
@@ -249,17 +295,76 @@ main {
 
 /* Responsive design for controls */
 @media (max-width: 768px) {
-    .secondary-controls.hidden {
-        display: none;
-    }
-    .secondary-controls {
-        flex-basis: 100%; /* Take full width when wrapping */
-    }
     .primary-controls {
-       flex-basis: 100%;
-       order: -1; /* Ensure primary controls are shown first */
+        /* Use Grid for precise mobile layout */
+        display: grid;
+        grid-template-columns: auto 1fr 1fr auto auto auto; /* Prev, Book, Chapter, Next, Language, Go, Toggle */
+        gap: 0.5rem; /* Smaller gap for mobile */
+        align-items: center;
+        width: 100%;
+        margin-bottom: 0.5rem; /* Add some space below the primary controls */
     }
-     #toggleControlsButton {
-        order: -1;
+
+    #prevChapterButton {
+        grid-column: 1 / 2;
+    }
+    #bookSelect {
+        grid-column: 2 / 3;
+    }
+    #chapterSelect {
+        grid-column: 3 / 4;
+    }
+    #nextChapterButton {
+        grid-column: 4 / 5;
+    }
+    #languageSelect {
+        grid-column: 1 / 5; /* Span across multiple columns below the first row */
+        width: 100%; /* Ensure it takes full width within its grid area */
+    }
+    #goButton {
+        grid-column: 5 / 6;
+    }
+    #toggleControlsButton {
+        grid-column: 6 / 7;
+    }
+
+    /* General styling for selects/buttons in primary controls on mobile */
+    .primary-controls select,
+    .primary-controls button {
+        min-width: unset; /* Allow items to shrink */
+        width: auto; /* Let content define width or grid takes over */
+        padding: 0.4rem 0.6rem; /* Slightly smaller padding */
+        font-size: 0.85rem; /* Slightly smaller font */
+    }
+
+    /* Secondary controls should always span full width below primary controls */
+    .secondary-controls {
+        width: 100%;
+        flex-direction: column; /* Stack secondary controls vertically */
+        align-items: stretch; /* Stretch items to fill width */
+        gap: 0.5rem; /* Smaller gap for stacked items */
+        margin-top: 0.5rem; /* Adjust margin for mobile */
+    }
+
+    /* Ensure control groups in secondary controls stack or align as needed */
+    .secondary-controls .control-group {
+        flex-direction: row; /* Keep elements in a row within their group by default */
+        flex-wrap: wrap; /* Allow wrapping if items are too wide */
+        width: 100%; /* Make each group take full width */
+    }
+
+    /* Ensure individual items within control groups adjust */
+    .secondary-controls .control-group button,
+    .secondary-controls .control-group input[type="text"],
+    .secondary-controls .control-group .playback-speed-control {
+        flex-grow: 1; /* Allow elements to grow and share space */
+        min-width: unset; /* Reset min-width to allow shrinking */
+        width: auto; /* Auto width based on content or flex-grow */
+    }
+
+    /* Specific adjustment for search input on mobile */
+    #quickSearchInput {
+        flex-grow: 1;
+        width: auto; /* This will be overridden by flex-grow but good to keep */
     }
 }

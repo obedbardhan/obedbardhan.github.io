@@ -10,7 +10,6 @@
 <body>
     <header>
         <div class="controls">
-            <!-- Primary, always-visible controls -->
             <div class="primary-controls">
                 <button id="prevChapterButton" title="Previous Chapter">&lt;&lt;</button>
                 <select id="bookSelect"></select>
@@ -26,21 +25,31 @@
                 <button id="goButton">Go</button>
                 <button id="toggleControlsButton" title="Show/Hide More Options">-</button>
             </div>
+
             <div class="secondary-controls">
-                
-                <button id="playEnglishButton">Play English Chapter</button>
-                <button id="playIndianLangButton">Play Indian Language Chapter</button>
-                
-                <button id="pauseResumeButton" style="display: none;">Pause</button>
-                <button id="stopAudioButton" style="display: none;">Stop Audio</button>
-                <div class="playback-speed-control">
-                    <label for="playbackRateSlider">Speed:</label>
-                    <input type="range" id="playbackRateSlider" min="0.5" max="2" step="0.1" value="1">
-                    <span id="playbackRateValue">1.0x</span>
+                <div class="control-group">
+                    <button id="playEnglishButton">Play English Chapter</button>
+                    <button id="playIndianLangButton">Play Indian Language Chapter</button>
                 </div>
-                <input type="text" id="quickSearchInput" placeholder="e.g., John 3:16 or 'love'">
-                <button id="searchButton">Search</button>
-                <button id="voiceSearchButton" title="Voice Search">🎤</button>
+                
+                <div class="control-group">
+                    <button id="pauseResumeButton" style="display: none;">Pause</button>
+                    <button id="stopAudioButton" style="display: none;">Stop Audio</button>
+                </div>
+
+                <div class="control-group full-width-on-mobile">
+                    <div class="playback-speed-control">
+                        <label for="playbackRateSlider">Speed:</label>
+                        <input type="range" id="playbackRateSlider" min="0.5" max="2" step="0.1" value="1">
+                        <span id="playbackRateValue">1.0x</span>
+                    </div>
+                    <button id="voiceSearchButton" title="Voice Search">🎤</button>
+                </div>
+
+                <div class="control-group full-width-on-mobile">
+                    <input type="text" id="quickSearchInput" placeholder="e.g., John 3:16 or 'love'">
+                    <button id="searchButton">Search</button>
+                </div>
             </div>
         </div>
     </header>
