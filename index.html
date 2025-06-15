@@ -5,7 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>India Bible Project</title>
     <link rel="stylesheet" href="style.css">
+    
     <script src="sanscript.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pinyin/dist/pinyin.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hebrew-transliteration/dist/hebrew-transliteration.umd.min.js"></script>  
 </head>
 <body>
     <header>
@@ -16,11 +19,18 @@
                 <select id="chapterSelect"></select>
                 <button id="nextChapterButton" title="Next Chapter">&gt;&gt;</button>
                 <select id="languageSelect">
-                    <option value="irv_hindi">Hindi (IRV)</option>
+                    <option value="irv_hindi">Hindi</option>
                     <option value="odia_all_books">Odia</option>
-                    <option value="te_irv_updated">Telugu (IRV)</option>
-                    <option value="ta_oitce_updated">Tamil (OITCE)</option>
-                    <option value="kn_irv_updated">Kannada (IRV)</option>
+                    <option value="te_irv_updated">Telugu</option>
+                    <option value="ta_oitce_updated">Tamil</option>
+                    <option value="kn_irv_updated">Kannada</option>
+                    <option value="pa_irv_updated">Gurmukhi</option>
+                    <option value="mr_irv_updated">Marathi</option>
+                    <option value="hebrew_modern_updated">Hebrew</option>
+                    <option value="chinese_union_simp_updated">Chinese</option>
+                    <option value="french_epee_updated">French</option>
+                    <option value="german_luther_updated">German</option>
+                    <option value="esp_rv1909_updated">Spanish</option>
                 </select>
                 <button id="goButton">Go</button>
                 <button id="toggleControlsButton" title="Show/Hide More Options">-</button>

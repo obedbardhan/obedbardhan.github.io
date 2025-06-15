@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', initializeApp);
 
 
 // Data arrays and App State
-let netBibleData = [], hindiBibleData = [], odiaBibleData = [], teluguBibleData = [], tamilBibleData = [], kannadaBibleData = [], currentIndianLanguageData = [];
+let netBibleData = [], hindiBibleData = [], odiaBibleData = [], teluguBibleData = [], tamilBibleData = [], kannadaBibleData = [], frenchBibleData = [], germanBibleData = [], chineseBibleData = [], hebrewBibleData = [], spanishBibleData = [], marathiBibleData =[], punjabiBibleData = [], currentIndianLanguageData = [];
 let availableVoices = [];
 let currentSpeech = { utterance: null, isPlaying: false, isPaused: false, source: null };
 let currentPlaybackRate = parseFloat(localStorage.getItem('playbackRate')) || 1.0;
@@ -17,6 +17,21 @@ const localTranslations = {
 
 const bibleBooks = ["Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy", "Joshua", "Judges", "Ruth", "1 Samuel", "2 Samuel", "1 Kings", "2 Kings", "1 Chronicles", "2 Chronicles", "Ezra", "Nehemiah", "Esther", "Job", "Psalms", "Proverbs", "Ecclesiastes", "Song of Solomon", "Isaiah", "Jeremiah", "Lamentations", "Ezekiel", "Daniel", "Hosea", "Joel", "Amos", "Obadiah", "Jonah", "Micah", "Nahum", "Habakkuk", "Zephaniah", "Haggai", "Zechariah", "Malachi", "Matthew", "Mark", "Luke", "John", "Acts", "Romans", "1 Corinthians", "2 Corinthians", "Galatians", "Ephesians", "Philippians", "Colossians", "1 Thessalonians", "2 Thessalonians", "1 Timothy", "2 Timothy", "Titus", "Philemon", "Hebrews", "James", "1 Peter", "2 Peter", "1 John", "2 John", "3 John", "Jude", "Revelation"];
 
+// List of common English words to exclude from occurrence search
+const stopWords = [
+    'a', 'about', 'above', 'after', 'again', 'against', 'all', 'am', 'an', 'and', 'any', 'are', 'as', 'at',
+    'be', 'because', 'been', 'before', 'being', 'below', 'between', 'both', 'but', 'by', 'can', 'did',
+    'do', 'does', 'doing', 'down', 'during', 'each', 'few', 'for', 'from', 'further', 'had', 'has', 'have',
+    'having', 'he', 'her', 'here', 'hers', 'herself', 'him', 'himself', 'his', 'how', 'i', 'if', 'in',
+    'into', 'is', 'it', 'its', 'itself', 'just', 'me', 'more', 'most', 'my', 'myself', 'no', 'nor', 'not',
+    'now', 'of', 'off', 'on', 'once', 'only', 'or', 'other', 'our', 'ours', 'ourselves', 'out', 'over', 'own',
+    'same', 'she', 'should', 'so', 'some', 'such', 'than', 'that', 'the', 'their', 'theirs', 'them',
+    'themselves', 'then', 'there', 'these', 'they', 'this', 'those', 'through', 'to', 'too', 'under',
+    'until', 'up', 'very', 'was', 'we', 'were', 'what', 'when', 'where', 'which', 'while', 'who', 'whom',
+    'why', 'will', 'with', 'would', 'you', 'your', 'yours', 'yourself', 'yourselves'
+];
+
+
 // DOM Elements
 const bookSelect = document.getElementById('bookSelect'), chapterSelect = document.getElementById('chapterSelect'), languageSelect = document.getElementById('languageSelect'), goButton = document.getElementById('goButton'), prevChapterButton = document.getElementById('prevChapterButton'), nextChapterButton = document.getElementById('nextChapterButton'), playEnglishButton = document.getElementById('playEnglishButton'), playIndianLangButton = document.getElementById('playIndianLangButton'), pauseResumeButton = document.getElementById('pauseResumeButton'), stopAudioButton = document.getElementById('stopAudioButton'), playbackRateSlider = document.getElementById('playbackRateSlider'), playbackRateValue = document.getElementById('playbackRateValue'), bibleTextDiv = document.getElementById('bibleTextDiv'), loadingIndicator = document.getElementById('loadingIndicator'), wordStudyModal = document.getElementById('wordStudyModal'), closeModalButton = document.getElementById('closeModalButton'), selectedWordHeader = document.getElementById('selectedWordHeader'), dictionaryMeaning = document.getElementById('dictionaryMeaning'), occurrencesDiv = document.getElementById('occurrences'), quickSearchInput = document.getElementById('quickSearchInput'), searchButton = document.getElementById('searchButton'), toggleControlsButton = document.getElementById('toggleControlsButton'), secondaryControls = document.querySelector('.secondary-controls');
 
@@ -26,7 +41,10 @@ const transliterationLangMap = {
     'odia_all_books': 'oriya',
     'te_irv_updated': 'telugu',
     'ta_oitce_updated': 'tamil',
-    'kn_irv_updated': 'kannada'
+    'kn_irv_updated': 'kannada',
+    'pa_irv_updated': 'gurmukhi',
+    'mr_irv_updated': 'devanagari',
+    'hebrew_modern_updated': 'roman'
 };
 
 async function initializeApp() {
@@ -45,11 +63,18 @@ async function initializeApp() {
             fetchAndProcessBibleData('odia_all_books.json', 'odia'),
             fetchAndProcessBibleData('te_irv_updated.json', 'telugu'),
             fetchAndProcessBibleData('ta_oitce_updated.json', 'tamil'),
-            fetchAndProcessBibleData('kn_irv_updated.json', 'kannada')
+            fetchAndProcessBibleData('kn_irv_updated.json', 'kannada'),
+            fetchAndProcessBibleData('pa_irv_updated.json', 'gurmukhi'),
+            fetchAndProcessBibleData('mr_irv_updated.json', 'marathi'),
+            fetchAndProcessBibleData('hebrew_modern_updated.json', 'hebrew'),
+            fetchAndProcessBibleData('chinese_union_simp_updated.json', 'chinese'),
+            fetchAndProcessBibleData('french_epee_updated.json', 'french'),
+            fetchAndProcessBibleData('german_luther_updated.json', 'german'),
+            fetchAndProcessBibleData('esp_rv1909_updated.json', 'spanish')
         ]);
         populateChapterSelect(bookSelect.value);
         setCurrentIndianLanguageData();
-        displayChapter(); 
+        displayChapter();
     } catch (error) {
         console.error("Initialization error:", error);
     } finally {
@@ -58,6 +83,7 @@ async function initializeApp() {
         playbackRateValue.textContent = `${currentPlaybackRate.toFixed(1)}x`;
     }
 }
+
 
 function setupEventListeners() {
     bookSelect.addEventListener('change', () => { populateChapterSelect(bookSelect.value); displayChapter(); });
@@ -82,8 +108,8 @@ function setupEventListeners() {
     quickSearchInput.addEventListener('keypress', e => { if (e.key === 'Enter') handleSearch(quickSearchInput.value); });
     resetChapterAudioButtons();
 
-    goButton.addEventListener('click', () => { 
-        displayChapter(1); 
+    goButton.addEventListener('click', () => {
+        displayChapter(1);
         // On mobile, hide controls after clicking "Go"
         if (window.innerWidth <= 768) {
             secondaryControls.classList.add('hidden');
@@ -116,26 +142,40 @@ async function fetchAndProcessBibleData(filePath, langKey) {
         const response = await fetch(filePath);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
-        switch(langKey) {
+        switch (langKey) {
             case 'english': netBibleData = data; break;
             case 'hindi': hindiBibleData = data; break;
             case 'odia': odiaBibleData = data; break;
             case 'telugu': teluguBibleData = data; break;
             case 'tamil': tamilBibleData = data; break;
             case 'kannada': kannadaBibleData = data; break;
-        }
+            case 'french': frenchBibleData = data; break;
+            case 'german': germanBibleData = data; break;
+            case 'chinese': chineseBibleData = data; break;
+            case 'hebrew': hebrewBibleData = data; break;
+            case 'marathi': marathiBibleData = data; break;
+            case 'gurmukhi': punjabiBibleData = data; break;
+            case 'spanish': spanishBibleData = data; break;
+        }   
     } catch (error) {
         console.error(`Failed to load ${langKey} data:`, error);
     }
 }
 
 function setCurrentIndianLanguageData() {
-    switch(languageSelect.value) {
+    switch (languageSelect.value) {
         case 'irv_hindi': currentIndianLanguageData = hindiBibleData; break;
         case 'odia_all_books': currentIndianLanguageData = odiaBibleData; break;
         case 'te_irv_updated': currentIndianLanguageData = teluguBibleData; break;
         case 'ta_oitce_updated': currentIndianLanguageData = tamilBibleData; break;
         case 'kn_irv_updated': currentIndianLanguageData = kannadaBibleData; break;
+        case 'pa_irv_updated': currentIndianLanguageData = punjabiBibleData; break;
+        case 'mr_irv_updated': currentIndianLanguageData = marathiBibleData; break;
+        case 'french_epee_updated': currentIndianLanguageData = frenchBibleData; break;
+        case 'german_luther_updated': currentIndianLanguageData = germanBibleData; break;
+        case 'chinese_union_simp_updated': currentIndianLanguageData = chineseBibleData; break;
+        case 'hebrew_modern_updated': currentIndianLanguageData = hebrewBibleData; break;
+        case 'esp_rv1909_updated': currentIndianLanguageData = spanishBibleData; break;
         default: currentIndianLanguageData = [];
     }
 }
@@ -147,7 +187,7 @@ function populateBookSelect() {
 function populateChapterSelect(bookName) {
     chapterSelect.innerHTML = '';
     const bookData = netBibleData.filter(v => v.englishBookName === bookName);
-    const chapters = [...new Set(bookData.map(v => v.chapter))].sort((a,b) => a - b);
+    const chapters = [...new Set(bookData.map(v => v.chapter))].sort((a, b) => a - b);
     if (chapters.length > 0) {
         chapters.forEach(chap => chapterSelect.add(new Option(chap, chap)));
     } else {
@@ -167,9 +207,9 @@ async function displayChapter(scrollToVerseNum = null) {
 
     const englishVerses = netBibleData.filter(v => v.englishBookName === selectedBook && v.chapter === selectedChapter).sort((a, b) => a.verse - b.verse);
     const indianLanguageVerses = currentIndianLanguageData.filter(v => v.englishBookName === selectedBook && v.chapter === selectedChapter).sort((a, b) => a.verse - b.verse);
-    
+
     bibleTextDiv.innerHTML = `<h2 class="chapter-title">${selectedBook} ${selectedChapter}</h2>`;
-    
+
     const allVerses = [...englishVerses.map(v => v.verse), ...indianLanguageVerses.map(v => v.verse)];
     const maxVerseNum = allVerses.length > 0 ? Math.max(...allVerses) : 0;
 
@@ -177,19 +217,21 @@ async function displayChapter(scrollToVerseNum = null) {
         bibleTextDiv.innerHTML += `<p>No verses found for this chapter in the selected languages.</p>`;
         return;
     }
-    
-    const currentTransliterationSourceScript = transliterationLangMap[languageSelect.value];
+
+    // ... inside async function displayChapter ... after the maxVerseNum calculation ...
+
+    // const currentTransliterationSourceScript = transliterationLangMap[languageSelect.value];
 
     for (let i = 1; i <= maxVerseNum; i++) {
         const engVerse = englishVerses.find(v => v.verse === i);
         const indVerse = indianLanguageVerses.find(v => v.verse === i);
-        
+
         if (engVerse || indVerse) {
             const verseBlock = document.createElement('div');
             verseBlock.className = 'verse-block';
             verseBlock.id = `verse-${i}`;
             verseBlock.innerHTML = `<p class="verse-number">${i}</p>`;
-            
+
             if (engVerse?.text) {
                 const cleanEngText = engVerse.text.replace(/"/g, '&quot;');
                 verseBlock.innerHTML += `<p class="english-verse">${engVerse.text.replace(/([a-zA-Z0-9']+)/g, `<span class="word-clickable" data-word="$1">$1</span>`)} <button class="play-verse-audio-btn" data-lang="en-US" data-text="${cleanEngText}">🔊</button></p>`;
@@ -197,27 +239,58 @@ async function displayChapter(scrollToVerseNum = null) {
 
             if (indVerse?.text) {
                 let langInfo = {};
-                switch(languageSelect.value) {
-                    case 'irv_hindi': langInfo = {name: 'हिन्दी', code: 'hi-IN'}; break;
-                    case 'odia_all_books': langInfo = {name: 'ଓଡିଆ', code: 'or-IN'}; break;
-                    case 'te_irv_updated': langInfo = {name: 'తెలుగు', code: 'te-IN'}; break;
-                    case 'ta_oitce_updated': langInfo = {name: 'தமிழ்', code: 'ta-IN'}; break;
-                    case 'kn_irv_updated': langInfo = {name: 'ಕನ್ನಡ', code: 'kn-IN'}; break;
-                    default: langInfo = {name: 'Indian Language', code: 'en-US'};
+                switch (languageSelect.value) {
+                    case 'irv_hindi': langInfo = { name: 'हिन्दी', code: 'hi-IN' }; break;
+                    case 'odia_all_books': langInfo = { name: 'ଓଡିଆ', code: 'or-IN' }; break;
+                    case 'te_irv_updated': langInfo = { name: 'తెలుగు', code: 'te-IN' }; break;
+                    case 'ta_oitce_updated': langInfo = { name: 'தமிழ்', code: 'ta-IN' }; break;
+                    case 'kn_irv_updated': langInfo = { name: 'ಕನ್ನಡ', code: 'kn-IN' }; break;
+                    case 'pa_irv_updated': langInfo = { name: 'ਗੁਰਮੁਖੀ', code: 'pa-IN' }; break;
+                    case 'mr_irv_updated': langInfo = { name: 'मराठी', code: 'mr-IN' }; break;
+                    case 'french_epee_updated': langInfo = { name: 'français', code: 'fr-FR' }; break;
+                    case 'german_luther_updated': langInfo = { name: 'deutsch', code: 'de-DE' }; break;
+                    case 'chinese_union_simp_updated': langInfo = { name: '普通话', code: 'zh-CN' }; break;
+                    case 'hebrew_modern_updated': langInfo = { name: 'עִברִית', code: 'he-IL' }; break;
+                    case 'esp_rv1909_updated': langInfo = { name: 'español', code: 'es-MX' }; break;
+                    default: langInfo = { name: 'Indian Language', code: 'en-US' };
                 }
                 const cleanIndText = indVerse.text.replace(/"/g, '&quot;');
                 verseBlock.innerHTML += `<p class="indian-lang-verse">(${langInfo.name}): ${indVerse.text} <button class="play-verse-audio-btn" data-lang="${langInfo.code}" data-text="${cleanIndText}">🔊</button></p>`;
-            
-                if (currentTransliterationSourceScript && typeof window.Sanscript !== 'undefined') {
-                    try {
-                        const transliteratedText = window.Sanscript.t(indVerse.text, currentTransliterationSourceScript, 'itrans');
-                        if (transliteratedText) {
-                            verseBlock.innerHTML += `<p class="roman-transliteration">(Roman): ${transliteratedText}</p>`;
-                        }
-                    } catch (e) {
-                        console.error("Sanscript transliteration error:", e);
+
+                // --- Replace your entire transliteration block in displayChapter with this ---
+                try {
+                    const langValue = languageSelect.value;
+                    const sourceScript = transliterationLangMap[langValue];
+                    let transliteratedText = '';
+
+                    // Check which library and function to use
+                    if (langValue === 'hebrew_modern_updated' && typeof window.transliterate === 'function') {
+                        // --- HEBREW ---
+                        // Use the dedicated hebrew-transliteration library
+                        transliteratedText = transliterate(indVerse.text, { isSimple: true });
+
+                    } else if (langValue === 'chinese_union_simp_updated' && typeof window.pinyin === 'object' && typeof window.pinyin.default === 'function') {
+                        // --- CHINESE ---
+                        // The library creates an object; the function is the 'default' property.
+                        const pinyinFunction = pinyin.default;
+                        transliteratedText = pinyinFunction(indVerse.text, { 
+                            style: pinyin.STYLE_NORMAL 
+                        }).map(word => word[0]).join('');
+
+                    } else if (sourceScript && typeof window.Sanscript !== 'undefined') {
+                        // --- INDIC LANGUAGES ---
+                        // Use Sanscript.js for all other mapped languages
+                        transliteratedText = window.Sanscript.t(indVerse.text, sourceScript, 'hk');
                     }
+
+                    // Display the result if any transliteration was generated
+                    if (transliteratedText) {
+                        verseBlock.innerHTML += `<p class="roman-transliteration">(Transliteration): ${transliteratedText}</p>`;
+                    }
+                } catch (e) {
+                    console.error("Transliteration error:", e);
                 }
+                // --- End of the block to replace ---
             }
             bibleTextDiv.appendChild(verseBlock);
         }
@@ -227,7 +300,7 @@ async function displayChapter(scrollToVerseNum = null) {
     document.querySelectorAll('.play-verse-audio-btn').forEach(btn => {
         btn.addEventListener('click', e => speakText(e.target.dataset.text, e.target.dataset.lang, 'verse'));
     });
-    
+
     if (scrollToVerseNum) {
         const targetElement = document.getElementById(`verse-${scrollToVerseNum}`);
         if (targetElement) {
@@ -237,7 +310,6 @@ async function displayChapter(scrollToVerseNum = null) {
         }
     }
 }
-
 function navigateToNextChapter() {
     const currentBookIndex = bibleBooks.indexOf(bookSelect.value);
     const currentChapterIndex = chapterSelect.selectedIndex;
@@ -279,7 +351,7 @@ function updateNavButtonsState() {
     const isLastChapterOfBook = chapterSelect.selectedIndex >= chapterSelect.options.length - 1;
     const isFirstBook = bibleBooks.indexOf(bookSelect.value) === 0;
     const isLastBook = bibleBooks.indexOf(bookSelect.value) === bibleBooks.length - 1;
-    
+
     prevChapterButton.disabled = isFirstBook && isFirstChapterOfBook;
     nextChapterButton.disabled = isLastBook && isLastChapterOfBook;
 }
@@ -293,7 +365,7 @@ function resetChapterAudioButtons() {
 }
 
 function speakText(text, lang = 'en-US', source = 'verse') {
-    stopCurrentAudio(); 
+    stopCurrentAudio();
 
     if (!('speechSynthesis' in window) || !text) {
         console.warn("Speech synthesis not supported or no text to speak.");
@@ -315,7 +387,7 @@ function speakText(text, lang = 'en-US', source = 'verse') {
             resetChapterAudioButtons();
         }
     };
-    
+
     utterance.onend = () => {
         if (currentSpeech.source === 'verse') {
             stopCurrentAudio();
@@ -326,7 +398,7 @@ function speakText(text, lang = 'en-US', source = 'verse') {
         console.error('SpeechSynthesis Utterance Error:', event.error);
         stopCurrentAudio();
     };
-    
+
     speechSynthesis.speak(utterance);
 }
 
@@ -356,7 +428,7 @@ function handlePlayEnglishChapter() {
     if (currentSpeech.isPlaying && currentSpeech.source === 'english_chapter') {
         stopCurrentAudio();
     } else {
-        const verses = netBibleData.filter(v => v.englishBookName === bookSelect.value && v.chapter === parseInt(chapterSelect.value)).sort((a,b) => a.verse - b.verse).map(v => v.text);
+        const verses = netBibleData.filter(v => v.englishBookName === bookSelect.value && v.chapter === parseInt(chapterSelect.value)).sort((a, b) => a.verse - b.verse).map(v => v.text);
         if (verses.length > 0) {
             speakText(verses.join(" "), 'en-US', 'english_chapter');
             playEnglishButton.textContent = 'Stop English Chapter';
@@ -373,13 +445,20 @@ function handlePlayIndianLangChapter() {
     if (currentSpeech.isPlaying && currentSpeech.source === 'indian_chapter') {
         stopCurrentAudio();
     } else {
-        const verses = currentIndianLanguageData.filter(v => v.englishBookName === bookSelect.value && v.chapter === parseInt(chapterSelect.value)).sort((a,b) => a.verse - b.verse).map(v => v.text);
+        const verses = currentIndianLanguageData.filter(v => v.englishBookName === bookSelect.value && v.chapter === parseInt(chapterSelect.value)).sort((a, b) => a.verse - b.verse).map(v => v.text);
         let langCode = 'en-US';
         if (languageSelect.value === 'irv_hindi') langCode = 'hi-IN';
         else if (languageSelect.value === 'odia_all_books') langCode = 'or-IN';
         else if (languageSelect.value === 'te_irv_updated') langCode = 'te-IN';
         else if (languageSelect.value === 'ta_oitce_updated') langCode = 'ta-IN';
         else if (languageSelect.value === 'kn_irv_updated') langCode = 'kn-IN';
+        else if (languageSelect.value === 'pa_irv_updated') langCode = 'pa-IN';
+        else if (languageSelect.value === 'mr_irv_updated') langCode = 'mr-IN';
+        else if (languageSelect.value === 'french_epee_updated') langCode = 'fr-FR';
+        else if (languageSelect.value === 'german_luther_updated') langCode = 'de-DE';
+        else if (languageSelect.value === 'chinese_union_simp_updated') langCode = 'zh-CN';
+        else if (languageSelect.value === 'hebrew_modern_updated') langCode = 'he-IL';
+        else if (languageSelect.value === 'esp_rv1909_updated') langCode = 'es-MX';
 
         if (verses.length > 0) {
             speakText(verses.join(" "), langCode, 'indian_chapter');
@@ -395,12 +474,19 @@ function handlePlayIndianLangChapter() {
 
 function getCurrentIndianLangInfo() {
     const langValue = languageSelect.value;
-    switch(langValue) {
+    switch (langValue) {
         case 'irv_hindi': return { code: 'hi', name: 'Hindi' };
         case 'odia_all_books': return { code: 'or', name: 'Odia' };
         case 'te_irv_updated': return { code: 'te', name: 'Telugu' };
         case 'ta_oitce_updated': return { code: 'ta', name: 'Tamil' };
         case 'kn_irv_updated': return { code: 'kn', name: 'Kannada' };
+        case 'pa_irv_updated': return { code: 'pa', name: 'Gurmukhi' };
+        case 'mr_irv_updated': return { code: 'mr', name: 'Marathi' };
+        case 'french_epee_updated': return { code: 'fr', name: 'French' };
+        case 'german_luther_updated': return { code: 'de', name: 'Deutsch' };
+        case 'chinese_union_simp_updated': return { code: 'zh', name: 'Chinese' };
+        case 'hebrew_modern_updated': return { code: 'he', name: 'Hebrew' };
+        case 'esp_rv1909_updated': return { code: 'es', name: 'Spanish' };
         default: return { code: null, name: 'Indian Language' };
     }
 }
@@ -414,7 +500,7 @@ async function handleWordClick(event) {
     let left = event.clientX + 15;
 
     const modalMaxWidth = 700;
-    const modalMaxHeight = window.innerHeight * 0.8; 
+    const modalMaxHeight = window.innerHeight * 0.8;
 
     if (left + modalMaxWidth > window.innerWidth) {
         left = event.clientX - modalMaxWidth - 15;
@@ -461,7 +547,7 @@ async function handleWordClick(event) {
         try {
             const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
             if (!response.ok) {
-                 return `<p>No dictionary definition found for "${word}" (API error ${response.status}).</p>`;
+                return `<p>No dictionary definition found for "${word}" (API error ${response.status}).</p>`;
             }
             const data = await response.json();
             if (data.title) {
@@ -516,7 +602,7 @@ async function handleWordClick(event) {
         try {
             const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(word)}&langpair=en|${langCode}`);
             if (!response.ok) {
-                 return `<p>Could not find a translation for "${word}" (API error ${response.status}).</p>`;
+                return `<p>Could not find a translation for "${word}" (API error ${response.status}).</p>`;
             }
             const data = await response.json();
             if (data && data.responseData && data.responseData.translatedText) {
@@ -548,12 +634,23 @@ async function handleWordClick(event) {
         return `<p>No other occurrences found.</p>`;
     };
     
+    // MODIFICATION START: Check if the word is a stop word
+    let occurrencesPromise;
+    if (stopWords.includes(word)) {
+        // If it's a common word, don't search for occurrences. Just show a message.
+        occurrencesPromise = Promise.resolve('<p>Occurrences are not searched for common English words.</p>');
+    } else {
+        // Otherwise, perform the search as usual.
+        occurrencesPromise = Promise.resolve(findOccurrences());
+    }
+
     const [engDefHtml, wikiResult, indianMeaningHtml, occurrencesHtml] = await Promise.all([
         fetchEnglishDef(),
         fetchWikipediaSummary(),
         fetchIndianLangMeaning(),
-        Promise.resolve(findOccurrences())
+        occurrencesPromise // Use the conditional promise here
     ]);
+    // MODIFICATION END
 
     document.getElementById('englishMeaningContent').innerHTML = engDefHtml;
     document.getElementById('indianLangMeaningContent').innerHTML = indianMeaningHtml;
@@ -577,7 +674,7 @@ function handleOccurrenceLinkClick(e) {
     wordStudyModal.style.display = 'none';
     bookSelect.value = book;
     populateChapterSelect(book);
-    chapterSelect.value = chapter; 
+    chapterSelect.value = chapter;
     displayChapter(verse);
 }
 
@@ -610,9 +707,9 @@ function handleSearch(query) {
     }
 
     const results = netBibleData.filter(v => v.text && v.text.toLowerCase().includes(searchTerm.toLowerCase()));
-    
+
     bibleTextDiv.innerHTML = `<h2 class="chapter-title">Search Results for "${searchTerm}"</h2>`;
-    if(results.length > 0) {
+    if (results.length > 0) {
         let resultsHtml = '';
         results.slice(0, 100).forEach(v => {
             const termForRegex = searchTerm.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
@@ -620,7 +717,7 @@ function handleSearch(query) {
             const parts = v.text.split(highlightRegex);
             const finalHtml = parts.map(part => {
                 if (part.toLowerCase() === searchTerm.toLowerCase()) {
-                     return `<mark><span class="word-clickable" data-word="${part.replace(/'/g, '&apos;')}">${part}</span></mark>`;
+                    return `<mark><span class="word-clickable" data-word="${part.replace(/'/g, '&apos;')}">${part}</span></mark>`;
                 } else {
                     return part.replace(/([a-zA-Z0-9']+)/g, `<span class="word-clickable" data-word="$1">$1</span>`);
                 }
