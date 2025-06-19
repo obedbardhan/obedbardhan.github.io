@@ -8,6 +8,8 @@ let availableVoices = [];
 let currentSpeech = { utterance: null, isPlaying: false, isPaused: false, source: null };
 let currentPlaybackRate = parseFloat(localStorage.getItem('playbackRate')) || 1.0;
 
+// NEW: Variable to track the currently highlighted verse element
+let currentHighlightedVerseElement = null;
 // Local dictionary for overriding incorrect translations from the API
 const localTranslations = {
     'or': { // Odia
@@ -44,7 +46,11 @@ const transliterationLangMap = {
     'kn_irv_updated': 'kannada',
     'pa_irv_updated': 'gurmukhi',
     'mr_irv_updated': 'devanagari',
-    'hebrew_modern_updated': 'roman'
+    'hebrew_modern_updated': 'roman',
+    'chinese_union_simp_updated':'roman',
+    'french_epee_updated':'roman',
+    'german_luther_updated':'roman',
+    'esp_rv1909_updated':'roman'
 };
 
 async function initializeApp() {
@@ -267,8 +273,8 @@ async function displayChapter(scrollToVerseNum = null) {
                     if (langValue === 'hebrew_modern_updated' && typeof window.transliterate === 'function') {
                         // --- HEBREW ---
                         // Use the dedicated hebrew-transliteration library
-                        transliteratedText = transliterate(indVerse.text, { isSimple: true });
-
+                        //transliteratedText = transliterate(indVerse.text, { isSimple: true });
+                        transliteratedText = transliterate(indVerse.text, { style: 'roman' });
                     } else if (langValue === 'chinese_union_simp_updated' && typeof window.pinyin === 'object' && typeof window.pinyin.default === 'function') {
                         // --- CHINESE ---
                         // The library creates an object; the function is the 'default' property.
@@ -424,28 +430,126 @@ function togglePauseResume() {
     }
 }
 
+// NEW: Function to highlight and scroll the current verse, accounting for a fixed header
+function highlightAndScrollVerse(bookName, chapterNum, verseNum) {
+    const verseId = `verse-${verseNum}`;
+    const targetVerseElement = document.getElementById(verseId);
+
+    if (targetVerseElement) {
+        // Remove highlight from the previously highlighted verse
+        if (currentHighlightedVerseElement) {
+            currentHighlightedVerseElement.classList.remove('highlighted-verse');
+        }
+
+        // Add highlight to the current verse
+        targetVerseElement.classList.add('highlighted-verse');
+        currentHighlightedVerseElement = targetVerseElement;
+
+        // --- NEW & IMPROVED SCROLLING LOGIC ---
+
+        // 1. Get the position of the verse relative to the viewport
+        const elementRect = targetVerseElement.getBoundingClientRect();
+        const absoluteElementTop = elementRect.top + window.scrollY;
+
+        // 2. Find the header and get its height
+        const header = document.querySelector('header');
+        const headerHeight = header ? header.offsetHeight : 0;
+
+        // 3. Calculate the ideal scroll position
+        const offsetPosition = absoluteElementTop - headerHeight - 10; // 10 pixels of extra padding
+
+        // 4. Scroll to that position smoothly
+        window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth'
+        });
+    }
+}
+
+// NEW: Function to play a list of verses sequentially with highlighting
+function playChapterSequentially(verses, langCode, source) {
+    stopCurrentAudio();
+    if (!verses || verses.length === 0) {
+        console.warn("No verses provided to play sequentially.");
+        return;
+    }
+
+    let currentVerseIndex = 0;
+    currentSpeech.source = source; // e.g., 'english_chapter'
+    currentSpeech.isPlaying = true;
+    currentSpeech.isPaused = false;
+
+    // Update UI buttons
+    if (source === 'english_chapter') {
+        playEnglishButton.textContent = 'Stop English Chapter';
+        const langName = languageSelect.options[languageSelect.selectedIndex]?.text.split('(')[0].trim() || 'Indian Language';
+        playIndianLangButton.textContent = `Play ${langName} Chapter`;
+    } else {
+        playEnglishButton.textContent = 'Play English Chapter';
+        playIndianLangButton.textContent = `Stop ${languageSelect.options[languageSelect.selectedIndex]?.text.split('(')[0].trim()} Chapter`;
+    }
+    pauseResumeButton.style.display = 'inline-block';
+    stopAudioButton.style.display = 'inline-block';
+
+
+    function playNextVerse() {
+        if (currentVerseIndex >= verses.length) {
+            stopCurrentAudio(); // All verses finished
+            return;
+        }
+
+        const verse = verses[currentVerseIndex];
+        const utterance = new SpeechSynthesisUtterance(verse.text);
+        utterance.lang = langCode;
+        utterance.rate = currentPlaybackRate;
+        utterance.voice = availableVoices.find(v => v.lang === langCode && v.localService) || availableVoices.find(v => v.lang === langCode);
+        currentSpeech.utterance = utterance;
+
+        utterance.onstart = () => {
+            highlightAndScrollVerse(verse.englishBookName, verse.chapter, verse.verse);
+        };
+        
+        utterance.onend = () => {
+            currentVerseIndex++;
+            playNextVerse(); // Play the next verse in the sequence
+        };
+
+        utterance.onerror = (event) => {
+            console.error('SpeechSynthesis Utterance Error:', event.error);
+            stopCurrentAudio(); // Stop on error
+        };
+
+        speechSynthesis.speak(utterance);
+    }
+    
+    playNextVerse(); // Start playing the first verse
+}
+
+// This is the NEW function
 function handlePlayEnglishChapter() {
     if (currentSpeech.isPlaying && currentSpeech.source === 'english_chapter') {
         stopCurrentAudio();
     } else {
-        const verses = netBibleData.filter(v => v.englishBookName === bookSelect.value && v.chapter === parseInt(chapterSelect.value)).sort((a, b) => a.verse - b.verse).map(v => v.text);
-        if (verses.length > 0) {
-            speakText(verses.join(" "), 'en-US', 'english_chapter');
-            playEnglishButton.textContent = 'Stop English Chapter';
-            playIndianLangButton.textContent = `Play ${languageSelect.options[languageSelect.selectedIndex]?.text.split('(')[0].trim()} Chapter`;
-            pauseResumeButton.style.display = 'inline-block';
-            stopAudioButton.style.display = 'inline-block';
+        // Get the full verse objects, not just the text
+        const verseObjects = netBibleData.filter(v => v.englishBookName === bookSelect.value && v.chapter === parseInt(chapterSelect.value)).sort((a,b) => a.verse - b.verse);
+        if (verseObjects.length > 0) {
+            // Call the new sequential player
+            playChapterSequentially(verseObjects, 'en-US', 'english_chapter');
         } else {
             console.warn("No English verses found for this chapter.");
         }
     }
 }
 
+// This is the NEW function
 function handlePlayIndianLangChapter() {
     if (currentSpeech.isPlaying && currentSpeech.source === 'indian_chapter') {
         stopCurrentAudio();
     } else {
-        const verses = currentIndianLanguageData.filter(v => v.englishBookName === bookSelect.value && v.chapter === parseInt(chapterSelect.value)).sort((a, b) => a.verse - b.verse).map(v => v.text);
+        // Get the full verse objects
+        const verseObjects = currentIndianLanguageData.filter(v => v.englishBookName === bookSelect.value && v.chapter === parseInt(chapterSelect.value)).sort((a, b) => a.verse - b.verse);
+        
+        // Determine langCode
         let langCode = 'en-US';
         if (languageSelect.value === 'irv_hindi') langCode = 'hi-IN';
         else if (languageSelect.value === 'odia_all_books') langCode = 'or-IN';
@@ -460,12 +564,9 @@ function handlePlayIndianLangChapter() {
         else if (languageSelect.value === 'hebrew_modern_updated') langCode = 'he-IL';
         else if (languageSelect.value === 'esp_rv1909_updated') langCode = 'es-MX';
 
-        if (verses.length > 0) {
-            speakText(verses.join(" "), langCode, 'indian_chapter');
-            playIndianLangButton.textContent = `Stop ${languageSelect.options[languageSelect.selectedIndex]?.text.split('(')[0].trim()} Chapter`;
-            playEnglishButton.textContent = 'Play English Chapter';
-            pauseResumeButton.style.display = 'inline-block';
-            stopAudioButton.style.display = 'inline-block';
+        if (verseObjects.length > 0) {
+            // Call the new sequential player
+            playChapterSequentially(verseObjects, langCode, 'indian_chapter');
         } else {
             console.warn("No Indian language verses found for this chapter or language data not loaded.");
         }

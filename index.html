@@ -13,28 +13,35 @@
 <body>
     <header>
         <div class="controls">
-            <div class="primary-controls">
+            <div class="control-row primary-line-controls">
                 <button id="prevChapterButton" title="Previous Chapter">&lt;&lt;</button>
                 <select id="bookSelect"></select>
                 <select id="chapterSelect"></select>
                 <button id="nextChapterButton" title="Next Chapter">&gt;&gt;</button>
-                <select id="languageSelect">
-                    <option value="irv_hindi">Hindi</option>
-                    <option value="odia_all_books">Odia</option>
-                    <option value="te_irv_updated">Telugu</option>
-                    <option value="ta_oitce_updated">Tamil</option>
-                    <option value="kn_irv_updated">Kannada</option>
-                    <option value="pa_irv_updated">Gurmukhi</option>
-                    <option value="mr_irv_updated">Marathi</option>
-                    <option value="hebrew_modern_updated">Hebrew</option>
-                    <option value="chinese_union_simp_updated">Chinese</option>
-                    <option value="french_epee_updated">French</option>
-                    <option value="german_luther_updated">German</option>
-                    <option value="esp_rv1909_updated">Spanish</option>
-                </select>
                 <button id="goButton">Go</button>
+            </div>
+
+            <div class="control-row secondary-line-controls">
+                <div class="language-select-group">
+                    <label for="languageSelect">Select Language:</label>
+                    <select id="languageSelect">
+                        <option value="irv_hindi">Hindi</option>
+                        <option value="odia_all_books">Odia</option>
+                        <option value="te_irv_updated">Telugu</option>
+                        <option value="ta_oitce_updated">Tamil</option>
+                        <option value="kn_irv_updated">Kannada</option>
+                        <option value="pa_irv_updated">Gurmukhi</option>
+                        <option value="mr_irv_updated">Marathi</option>
+                        <option value="hebrew_modern_updated">Hebrew</option>
+                        <option value="chinese_union_simp_updated">Chinese</option>
+                        <option value="french_epee_updated">French</option>
+                        <option value="german_luther_updated">German</option>
+                        <option value="esp_rv1909_updated">Spanish</option>
+                    </select>
+                </div>
                 <button id="toggleControlsButton" title="Show/Hide More Options">-</button>
             </div>
+
 
             <div class="secondary-controls">
                 <div class="control-group">

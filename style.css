@@ -21,21 +21,32 @@ header {
 /* Main controls container */
 .controls {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    align-items: center;
+    flex-direction: column; /* Stack the rows vertically */
+    gap: 0.75rem; /* Gap between the main control rows */
+    align-items: center; /* Center the entire block of rows horizontally */
+    width: 100%; /* Ensure it takes full width for proper centering of its children */
 }
 
-/* Groups of controls */
-.primary-controls, .secondary-controls {
+/* Common style for the new control rows (Line 1 and Line 2) */
+.control-row {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    align-items: center;
+    flex-wrap: wrap; /* Allow items to wrap within each row if space is limited */
+    gap: 0.75rem; /* Gap between items within a row */
+    align-items: center; /* Vertically align items in the middle of the row */
+    justify-content: center; /* Center items horizontally within this row */
+    width: 100%; /* Make each row take full width to allow internal centering */
 }
 
-.primary-controls {
-    flex-grow: 1; /* Allows this group to take available space */
+/* The old .primary-controls and .secondary-controls (if any specific styles were applied to them that are now redundant) */
+/* You can remove or adjust the previous .primary-controls { flex-grow: 1; } if it's still present. */
+
+
+/* Style for the language select group (to keep label and select on one line) */
+.language-select-group {
+    display: flex; /* Make it a flex container */
+    align-items: center; /* Vertically align label and select in the middle */
+    gap: 0.5rem; /* Small gap between label and select box */
+    flex-shrink: 0; /* Prevent it from shrinking too much if space is tight */
 }
 
 /* Styling for all input elements in the header */
@@ -366,5 +377,18 @@ main {
     #quickSearchInput {
         flex-grow: 1;
         width: auto; /* This will be overridden by flex-grow but good to keep */
+    }
+
+    /* Add to style.css */
+
+    .highlighted-verse {
+        background-color: #E0F7F9; /* Light yellow background */
+        border-left: 4px solid #f6e05e; /* Yellow border on the left */
+        padding-left: 8px;
+        transition: background-color 0.3s ease;
+    }
+
+    .verse-block {
+        margin-bottom: 0.5em; /* Add some space between verses if not already present */
     }
 }
