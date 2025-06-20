@@ -21,31 +21,39 @@ header {
 /* Main controls container */
 .controls {
     display: flex;
-    flex-direction: column; 
-    gap: 0.75rem;
-    align-items: center;
-    width: 100%;
+    flex-direction: column; /* Stack the rows vertically */
+    gap: 0.75rem; /* Gap between the main control rows */
+    align-items: center; /* Center the entire block of rows horizontally */
+    width: 100%; /* Ensure it takes full width for proper centering of its children */
 }
 
+/* Common style for the new control rows (Line 1 and Line 2) */
 .control-row {
     display: flex;
-    flex-wrap: wrap; 
-    gap: 0.75rem;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
+    flex-wrap: wrap; /* Allow items to wrap within each row if space is limited */
+    gap: 0.75rem; /* Gap between items within a row */
+    align-items: center; /* Vertically align items in the middle of the row */
+    justify-content: center; /* Center items horizontally within this row */
+    width: 100%; /* Make each row take full width to allow internal centering */
 }
 
+/* The old .primary-controls and .secondary-controls (if any specific styles were applied to them that are now redundant) */
+/* You can remove or adjust the previous .primary-controls { flex-grow: 1; } if it's still present. */
+
+
+/* Style for the language select group (to keep label and select on one line) */
 .language-select-group {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+    display: flex; /* Make it a flex container */
+    align-items: center; /* Vertically align label and select in the middle */
+    gap: 0.5rem; /* Small gap between label and select box */
+    flex-shrink: 0; /* Prevent it from shrinking too much if space is tight */
 }
 
+/* Styling for all input elements in the header */
 .controls label, .controls select, .controls button, .controls input {
     font-size: 0.9rem;
-    border-radius: 0.375rem;
-    border: 1px solid #4a5568;
+    border-radius: 0.375rem; /* Slightly rounded corners */
+    border: 1px solid #4a5568; /* Darker border */
     height: 40px;
     box-sizing: border-box;
 }
@@ -68,21 +76,21 @@ header {
 }
 
 .controls button {
-    background-color: #4a5568;
+    background-color: #4a5568; /* Default dark button */
     color: #ffffff;
     cursor: pointer;
     font-weight: 600;
     transition: background-color 0.2s ease;
     padding: 0 1rem;
-    flex-shrink: 0; /* Prevent buttons from shrinking too much */
 }
 
 .controls button:hover {
     background-color: #2d3748;
 }
 
+/* Toggle button style */
 #toggleControlsButton {
-    background-color: #09adb95b;
+    background-color: #09adb95b; /* Indigo */
     font-size: 1.5rem;
     font-weight: bold;
     padding: 0 0.75rem;
@@ -92,37 +100,39 @@ header {
     background-color: #5abfd8;
 }
 
+/* Specific button styles based on the image */
 #playEnglishButton, #playIndianLangButton, #goButton, #searchButton, #voiceSearchButton {
-    background-color: #38b2ac;
+    background-color: #38b2ac; /* Teal accent color */
 }
 
 #playEnglishButton:hover, #playIndianLangButton:hover, #goButton:hover, #searchButton:hover, #voiceSearchButton:hover {
-    background-color: #319795;
+    background-color: #319795; /* Darker teal on hover */
 }
 
 .playback-speed-control {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    flex-grow: 1;
+    flex-grow: 1; /* Allows it to take available space */
 }
 
 #playbackRateSlider {
     flex-grow: 1;
 }
 
+/* Collapsible secondary controls */
 .secondary-controls {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.75rem;
+    gap: 0.75rem; /* Gap between control groups */
     align-items: center;
     overflow: hidden;
-    max-height: 200px;
+    max-height: 200px; /* Sufficient height to show content */
     opacity: 1;
     pointer-events: auto;
     transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
-    width: 100%;
-    margin-top: 0.75rem;
+    width: 100%; /* Ensure it takes full width when visible below primary controls */
+    margin-top: 0.75rem; /* Add some margin when visible */
 }
 
 .secondary-controls.hidden {
@@ -136,19 +146,26 @@ header {
     overflow: hidden;
 }
 
+/* New: Styling for control groups within secondary-controls */
 .control-group {
     display: flex;
-    gap: 0.75rem;
+    gap: 0.75rem; /* Gap between items within a group */
     align-items: center;
-    flex-wrap: wrap;
+    flex-wrap: wrap; /* Allow wrapping within the group */
+    flex-grow: 1; /* Allow groups to take available space */
+}
+
+.control-group .full-width-on-mobile {
     flex-grow: 1;
+    width: 100%; /* Ensure these take full width on mobile */
 }
 
 .control-group #quickSearchInput {
-    flex-grow: 1;
-    min-width: 150px;
+    flex-grow: 1; /* Allow search input to take available space */
+    min-width: 150px; /* Prevent it from becoming too small */
 }
 
+/* Main Content Area */
 main {
     padding: 1.5rem;
     max-width: 850px;
@@ -158,6 +175,7 @@ main {
     border-radius: 0.5rem;
 }
 
+/* Bible Text Display Area */
 .verse-container {
     background-color: transparent;
     padding: 0;
@@ -166,6 +184,7 @@ main {
     overflow-y: visible;
 }
 
+/* Chapter Title */
 .chapter-title {
     color: #1a202c;
     font-size: 2.25rem;
@@ -175,19 +194,19 @@ main {
     margin-bottom: 1.5rem;
 }
 
+/* Verse Styling */
 .verse-block {
     margin-bottom: 1.25rem;
     padding: 1rem 1rem 1rem 1.25rem;
-    border-left: 4px solid #4fd1c5;
-    background-color: #f7fafc;
+    border-left: 4px solid #4fd1c5; /* Accent color border */
+    background-color: #f7fafc; /* Light gray verse background */
     border-radius: 0.25rem;
-    overflow: hidden;
-    transition: background-color 0.3s ease, border-color 0.3s ease;
+    overflow: hidden; /* To contain the floating number */
 }
 
 .verse-number {
     font-weight: bold;
-    color: #dd6b20;
+    color: #dd6b20; /* Red-orange color for verse number */
     margin-right: 0.75rem;
     float: left;
     font-size: 1.1rem;
@@ -196,18 +215,19 @@ main {
 
 .english-verse, .indian-lang-verse, .roman-transliteration {
     display: block;
-    margin-left: 2.25rem;
+    margin-left: 2.25rem; /* Indent text to align with verse number */
     line-height: 1.6;
     color: #4a5568;
 }
 
 .indian-lang-verse {
-    color: #2b6cb0;
+    color: #2b6cb0; /* Dark blue for Indian languages */
+    font-style: normal;
     font-weight: 500;
 }
 
 .roman-transliteration {
-    color: #718096;
+    color: #718096; /* Subdued gray for transliteration */
     font-size: 0.9em;
     margin-top: 4px;
 }
@@ -284,45 +304,91 @@ main {
     padding: 40px;
 }
 
-.highlighted-verse {
-    background-color: #fefcbf; /* A light yellow highlight */
-    border-left-color: #f6e05e; /* A stronger yellow border */
-}
-
-
-/* --- START: RESPONSIVE FIXES --- */
-
+/* Responsive design for controls */
 @media (max-width: 768px) {
-    header {
-        padding: 0.75rem;
-    }
-
-    .control-row {
-        gap: 0.5rem;
-    }
-
-    .primary-line-controls {
-        display: flex;
-        flex-wrap: nowrap; /* Prevent wrapping of this critical line */
+    .primary-controls {
+        /* Use Grid for precise mobile layout */
+        display: grid;
+        grid-template-columns: auto 1fr 1fr auto auto auto; /* Prev, Book, Chapter, Next, Language, Go, Toggle */
+        gap: 0.5rem; /* Smaller gap for mobile */
+        align-items: center;
         width: 100%;
+        margin-bottom: 0.5rem; /* Add some space below the primary controls */
     }
 
-    .primary-line-controls select {
-        flex-grow: 1; /* Allow book and chapter selects to take up space */
-        min-width: 50px; /* But don't let them disappear */
+    #prevChapterButton {
+        grid-column: 1 / 2;
+    }
+    #bookSelect {
+        grid-column: 2 / 3;
+    }
+    #chapterSelect {
+        grid-column: 3 / 4;
+    }
+    #nextChapterButton {
+        grid-column: 4 / 5;
+    }
+    #languageSelect {
+        grid-column: 1 / 5; /* Span across multiple columns below the first row */
+        width: 100%; /* Ensure it takes full width within its grid area */
+    }
+    #goButton {
+        grid-column: 5 / 6;
+    }
+    #toggleControlsButton {
+        grid-column: 6 / 7;
     }
 
+    /* General styling for selects/buttons in primary controls on mobile */
+    .primary-controls select,
+    .primary-controls button {
+        min-width: unset; /* Allow items to shrink */
+        width: auto; /* Let content define width or grid takes over */
+        padding: 0.4rem 0.6rem; /* Slightly smaller padding */
+        font-size: 0.85rem; /* Slightly smaller font */
+    }
+
+    /* Secondary controls should always span full width below primary controls */
+    .secondary-controls {
+        width: 100%;
+        flex-direction: column; /* Stack secondary controls vertically */
+        align-items: stretch; /* Stretch items to fill width */
+        gap: 0.5rem; /* Smaller gap for stacked items */
+        margin-top: 0.5rem; /* Adjust margin for mobile */
+    }
+
+    /* Ensure control groups in secondary controls stack or align as needed */
     .secondary-controls .control-group {
-        flex-wrap: nowrap; /* Prevent play buttons from wrapping */
-        width: 100%;
+        flex-direction: row; /* Keep elements in a row within their group by default */
+        flex-wrap: wrap; /* Allow wrapping if items are too wide */
+        width: 100%; /* Make each group take full width */
     }
 
-    .secondary-controls .control-group button {
-        flex: 1; /* Make buttons in a group share space equally */
+    /* Ensure individual items within control groups adjust */
+    .secondary-controls .control-group button,
+    .secondary-controls .control-group input[type="text"],
+    .secondary-controls .control-group .playback-speed-control {
+        flex-grow: 1; /* Allow elements to grow and share space */
+        min-width: unset; /* Reset min-width to allow shrinking */
+        width: auto; /* Auto width based on content or flex-grow */
     }
 
-    .secondary-controls .control-group.full-width-on-mobile {
-        flex-wrap: wrap; /* Allow wrapping for other groups */
+    /* Specific adjustment for search input on mobile */
+    #quickSearchInput {
+        flex-grow: 1;
+        width: auto; /* This will be overridden by flex-grow but good to keep */
+    }
+
+    /* Add to style.css */
+
+    .highlighted-verse {
+        background-color: #E0F7F9; /* Light yellow background */
+        border-left: 4px solid #f6e05e; /* Yellow border on the left */
+        padding-left: 8px;
+        transition: background-color 0.3s ease;
+    }
+
+    .verse-block {
+        margin-bottom: 0.5em; /* Add some space between verses if not already present */
     }
 }
-/* --- END: RESPONSIVE FIXES --- */
