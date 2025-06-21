@@ -27,7 +27,7 @@ header {
     width: 100%; /* Ensure it takes full width for proper centering of its children */
 }
 
-/* Common style for the new control rows (Line 1 and Line 2) */
+/* Common style for all control rows */
 .control-row {
     display: flex;
     flex-wrap: wrap; /* Allow items to wrap within each row if space is limited */
@@ -37,9 +37,21 @@ header {
     width: 100%; /* Make each row take full width to allow internal centering */
 }
 
-/* The old .primary-controls and .secondary-controls (if any specific styles were applied to them that are now redundant) */
-/* You can remove or adjust the previous .primary-controls { flex-grow: 1; } if it's still present. */
+/* Specific styling for the primary line on larger screens */
+.primary-line-controls {
+    /* On desktop, keep them in a row, centered */
+    justify-content: center;
+}
 
+.secondary-line-controls {
+    justify-content: center;
+}
+
+.tertiary-line-controls,
+.quaternary-line-controls,
+.quinternary-line-controls {
+    justify-content: center; /* Center buttons within these lines on desktop */
+}
 
 /* Style for the language select group (to keep label and select on one line) */
 .language-select-group {
@@ -56,6 +68,8 @@ header {
     border: 1px solid #4a5568; /* Darker border */
     height: 40px;
     box-sizing: border-box;
+    flex-grow: 1; /* Allow elements to grow and fill space by default */
+    min-width: 0; /* Allow elements to shrink below their content size if needed */
 }
 
 .controls label {
@@ -63,6 +77,7 @@ header {
     text-align: right;
     padding-right: 0.5rem;
     font-weight: 500;
+    flex-grow: 0; /* Labels shouldn't grow */
 }
 
 .controls select, .controls input[type="text"] {
@@ -82,6 +97,7 @@ header {
     font-weight: 600;
     transition: background-color 0.2s ease;
     padding: 0 1rem;
+    white-space: nowrap; /* Prevent button text from wrapping */
 }
 
 .controls button:hover {
@@ -95,6 +111,7 @@ header {
     font-weight: bold;
     padding: 0 0.75rem;
     min-width: 40px;
+    flex-grow: 0; /* Prevent toggle button from growing too much */
 }
 #toggleControlsButton:hover {
     background-color: #5abfd8;
@@ -120,14 +137,14 @@ header {
     flex-grow: 1;
 }
 
-/* Collapsible secondary controls */
+/* Collapsible secondary controls container */
 .secondary-controls {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem; /* Gap between control groups */
+    flex-direction: column; /* Stack the control rows vertically within this group */
+    gap: 0.75rem; /* Gap between the control rows (tertiary, quaternary, quinternary) */
     align-items: center;
     overflow: hidden;
-    max-height: 200px; /* Sufficient height to show content */
+    max-height: 200px; /* Sufficient height to show content when visible */
     opacity: 1;
     pointer-events: auto;
     transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
@@ -146,24 +163,10 @@ header {
     overflow: hidden;
 }
 
-/* New: Styling for control groups within secondary-controls */
-.control-group {
-    display: flex;
-    gap: 0.75rem; /* Gap between items within a group */
-    align-items: center;
-    flex-wrap: wrap; /* Allow wrapping within the group */
-    flex-grow: 1; /* Allow groups to take available space */
-}
+/* Individual control groups within secondary-controls */
+/* No specific control-group class needed now that control-row is used for each line */
+/* The old .control-group and .full-width-on-mobile are deprecated by the new .control-row structure */
 
-.control-group .full-width-on-mobile {
-    flex-grow: 1;
-    width: 100%; /* Ensure these take full width on mobile */
-}
-
-.control-group #quickSearchInput {
-    flex-grow: 1; /* Allow search input to take available space */
-    min-width: 150px; /* Prevent it from becoming too small */
-}
 
 /* Main Content Area */
 main {
@@ -306,80 +309,90 @@ main {
 
 /* Responsive design for controls */
 @media (max-width: 768px) {
-    .primary-controls {
-        /* Use Grid for precise mobile layout */
+    /* Ensure the main controls container aligns items to start on mobile */
+    .controls {
+        align-items: stretch; /* Stretch control rows to fill width */
+    }
+
+    /* Line 1: Previous, Book, Chapter, Next */
+    .primary-line-controls {
         display: grid;
-        grid-template-columns: auto 1fr 1fr auto auto auto; /* Prev, Book, Chapter, Next, Language, Go, Toggle */
-        gap: 0.5rem; /* Smaller gap for mobile */
-        align-items: center;
+        grid-template-columns: auto 1fr 1fr auto; /* Prev (auto), Book (1fr), Chapter (1fr), Next (auto) */
+        gap: 0.5rem;
         width: 100%;
-        margin-bottom: 0.5rem; /* Add some space below the primary controls */
+        justify-content: stretch; /* Stretch items in the grid */
     }
 
-    #prevChapterButton {
-        grid-column: 1 / 2;
-    }
-    #bookSelect {
-        grid-column: 2 / 3;
-    }
+    /* Make book and chapter selects take available space */
+    #bookSelect,
     #chapterSelect {
-        grid-column: 3 / 4;
-    }
-    #nextChapterButton {
-        grid-column: 4 / 5;
-    }
-    #languageSelect {
-        grid-column: 1 / 5; /* Span across multiple columns below the first row */
-        width: 100%; /* Ensure it takes full width within its grid area */
-    }
-    #goButton {
-        grid-column: 5 / 6;
-    }
-    #toggleControlsButton {
-        grid-column: 6 / 7;
+        flex-grow: 1; /* These are within a grid now, but still good to have */
+        width: auto; /* Allow grid to control width */
     }
 
-    /* General styling for selects/buttons in primary controls on mobile */
-    .primary-controls select,
-    .primary-controls button {
-        min-width: unset; /* Allow items to shrink */
-        width: auto; /* Let content define width or grid takes over */
-        padding: 0.4rem 0.6rem; /* Slightly smaller padding */
-        font-size: 0.85rem; /* Slightly smaller font */
-    }
-
-    /* Secondary controls should always span full width below primary controls */
-    .secondary-controls {
+    /* Line 2: Language label, Language select, Go, Toggle */
+    .secondary-line-controls {
+        display: grid;
+        grid-template-columns: auto 1fr auto auto; /* Label (auto), Select (1fr), Go (auto), Toggle (auto) */
+        gap: 0.5rem;
         width: 100%;
-        flex-direction: column; /* Stack secondary controls vertically */
-        align-items: stretch; /* Stretch items to fill width */
-        gap: 0.5rem; /* Smaller gap for stacked items */
-        margin-top: 0.5rem; /* Adjust margin for mobile */
+        justify-content: stretch;
     }
 
-    /* Ensure control groups in secondary controls stack or align as needed */
-    .secondary-controls .control-group {
-        flex-direction: row; /* Keep elements in a row within their group by default */
-        flex-wrap: wrap; /* Allow wrapping if items are too wide */
-        width: 100%; /* Make each group take full width */
+    .language-select-group {
+        grid-column: 1 / 3; /* Make language label and select span two columns */
+        justify-content: flex-start; /* Align contents to the start */
+        flex-grow: 1; /* Allow it to grow */
     }
 
-    /* Ensure individual items within control groups adjust */
-    .secondary-controls .control-group button,
-    .secondary-controls .control-group input[type="text"],
-    .secondary-controls .control-group .playback-speed-control {
-        flex-grow: 1; /* Allow elements to grow and share space */
-        min-width: unset; /* Reset min-width to allow shrinking */
-        width: auto; /* Auto width based on content or flex-grow */
+    #languageSelect {
+        flex-grow: 1; /* Ensure the select fills available space */
+        min-width: 0; /* Allow it to shrink */
     }
 
-    /* Specific adjustment for search input on mobile */
-    #quickSearchInput {
+    #goButton {
+        grid-column: 3 / 4; /* Place Go button */
+        flex-grow: 0; /* Don't want it to grow excessively */
+    }
+
+    #toggleControlsButton {
+        grid-column: 4 / 5; /* Place Toggle button */
+        flex-grow: 0; /* Don't want it to grow excessively */
+    }
+
+    /* Collapsible Secondary Controls - now containing Lines 3, 4, 5 */
+    .secondary-controls {
+        flex-direction: column; /* Stack the internal control-rows */
+        gap: 0.5rem; /* Smaller gap between the stacked lines */
+        align-items: stretch; /* Stretch all lines to full width */
+    }
+
+    /* Lines 3, 4, 5 should ensure their internal buttons/inputs stretch */
+    .tertiary-line-controls,
+    .quaternary-line-controls,
+    .quinternary-line-controls {
+        flex-direction: row; /* Keep elements in a row within their specific line */
+        flex-wrap: wrap; /* Allow wrapping if needed */
+        gap: 0.5rem; /* Gap between items within the line */
+        width: 100%; /* Each line takes full width */
+        justify-content: stretch; /* Ensure internal items stretch */
+    }
+
+    /* Make buttons and inputs within these lines fill available space */
+    .tertiary-line-controls button,
+    .quaternary-line-controls button,
+    .quaternary-line-controls .playback-speed-control, /* This is a flex container itself */
+    .quinternary-line-controls input,
+    .quinternary-line-controls button {
         flex-grow: 1;
-        width: auto; /* This will be overridden by flex-grow but good to keep */
+        min-width: 0; /* Allow shrinking */
+        width: auto; /* Reset explicit width */
     }
 
-    /* Add to style.css */
+    /* Specific adjustments for playback rate slider within its flex container */
+    .playback-speed-control #playbackRateSlider {
+        flex-grow: 1;
+    }
 
     .highlighted-verse {
         background-color: #E0F7F9; /* Light yellow background */
