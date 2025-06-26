@@ -63,6 +63,7 @@ async function initializeApp() {
     }
     try {
         loadingIndicator.style.display = 'block';
+        // Load all language data, but only display English initially
         await Promise.allSettled([
             fetchAndProcessBibleData('all_web_bible_updated.json', 'english'),
             fetchAndProcessBibleData('irv_hindi.json', 'hindi'),
@@ -79,8 +80,9 @@ async function initializeApp() {
             fetchAndProcessBibleData('esp_rv1909_updated.json', 'spanish')
         ]);
         populateChapterSelect(bookSelect.value);
-        setCurrentIndianLanguageData();
-        displayChapter();
+        // Do NOT call setCurrentIndianLanguageData() here.
+        // It will be called when user selects a language from dropdown.
+        displayChapter(); // Display only English initially
     } catch (error) {
         console.error("Initialization error:", error);
     } finally {
@@ -94,7 +96,11 @@ async function initializeApp() {
 function setupEventListeners() {
     bookSelect.addEventListener('change', () => { populateChapterSelect(bookSelect.value); displayChapter(); });
     chapterSelect.addEventListener('change', displayChapter);
-    languageSelect.addEventListener('change', () => { setCurrentIndianLanguageData(); displayChapter(); });
+    languageSelect.addEventListener('change', () => { 
+        setCurrentIndianLanguageData(); // Update currentIndianLanguageData based on selection
+        displayChapter(); // Re-render chapter to show/hide secondary language content
+        updateIndianLangPlaybackButtonVisibility(); // Update button visibility
+    });
     prevChapterButton.addEventListener('click', navigateToPreviousChapter);
     nextChapterButton.addEventListener('click', navigateToNextChapter);
     playEnglishButton.addEventListener('click', handlePlayEnglishChapter);
@@ -143,6 +149,15 @@ function setInitialControlsState() {
     }
 }
 
+// NEW: Function to update the visibility of the Indian language playback button
+function updateIndianLangPlaybackButtonVisibility() {
+    if (languageSelect.value === 'none') {
+        playIndianLangButton.style.display = 'none';
+    } else {
+        playIndianLangButton.style.display = 'inline-block';
+    }
+}
+
 async function fetchAndProcessBibleData(filePath, langKey) {
     try {
         const response = await fetch(filePath);
@@ -169,20 +184,25 @@ async function fetchAndProcessBibleData(filePath, langKey) {
 }
 
 function setCurrentIndianLanguageData() {
-    switch (languageSelect.value) {
-        case 'irv_hindi': currentIndianLanguageData = hindiBibleData; break;
-        case 'odia_all_books': currentIndianLanguageData = odiaBibleData; break;
-        case 'te_irv_updated': currentIndianLanguageData = teluguBibleData; break;
-        case 'ta_oitce_updated': currentIndianLanguageData = tamilBibleData; break;
-        case 'kn_irv_updated': currentIndianLanguageData = kannadaBibleData; break;
-        case 'pa_irv_updated': currentIndianLanguageData = punjabiBibleData; break;
-        case 'mr_irv_updated': currentIndianLanguageData = marathiBibleData; break;
-        case 'french_epee_updated': currentIndianLanguageData = frenchBibleData; break;
-        case 'german_luther_updated': currentIndianLanguageData = germanBibleData; break;
-        case 'chinese_union_simp_updated': currentIndianLanguageData = chineseBibleData; break;
-        case 'hebrew_modern_updated': currentIndianLanguageData = hebrewBibleData; break;
-        case 'esp_rv1909_updated': currentIndianLanguageData = spanishBibleData; break;
-        default: currentIndianLanguageData = [];
+    const selectedLang = languageSelect.value;
+    if (selectedLang === 'none') {
+        currentIndianLanguageData = []; // No secondary language selected
+    } else {
+        switch (selectedLang) {
+            case 'irv_hindi': currentIndianLanguageData = hindiBibleData; break;
+            case 'odia_all_books': currentIndianLanguageData = odiaBibleData; break;
+            case 'te_irv_updated': currentIndianLanguageData = teluguBibleData; break;
+            case 'ta_oitce_updated': currentIndianLanguageData = tamilBibleData; break;
+            case 'kn_irv_updated': currentIndianLanguageData = kannadaBibleData; break;
+            case 'pa_irv_updated': currentIndianLanguageData = punjabiBibleData; break;
+            case 'mr_irv_updated': currentIndianLanguageData = marathiBibleData; break;
+            case 'french_epee_updated': currentIndianLanguageData = frenchBibleData; break;
+            case 'german_luther_updated': currentIndianLanguageData = germanBibleData; break;
+            case 'chinese_union_simp_updated': currentIndianLanguageData = chineseBibleData; break;
+            case 'hebrew_modern_updated': currentIndianLanguageData = hebrewBibleData; break;
+            case 'esp_rv1909_updated': currentIndianLanguageData = spanishBibleData; break;
+            default: currentIndianLanguageData = [];
+        }
     }
 }
 
@@ -212,7 +232,10 @@ async function displayChapter(scrollToVerseNum = null) {
     }
 
     const englishVerses = netBibleData.filter(v => v.englishBookName === selectedBook && v.chapter === selectedChapter).sort((a, b) => a.verse - b.verse);
-    const indianLanguageVerses = currentIndianLanguageData.filter(v => v.englishBookName === selectedBook && v.chapter === selectedChapter).sort((a, b) => a.verse - b.verse);
+    // Only get Indian language verses if a language is selected
+    const indianLanguageVerses = (languageSelect.value !== 'none' && currentIndianLanguageData.length > 0) 
+        ? currentIndianLanguageData.filter(v => v.englishBookName === selectedBook && v.chapter === selectedChapter).sort((a, b) => a.verse - b.verse)
+        : [];
 
     bibleTextDiv.innerHTML = `<h2 class="chapter-title">${selectedBook} ${selectedChapter}</h2>`;
 
@@ -223,10 +246,6 @@ async function displayChapter(scrollToVerseNum = null) {
         bibleTextDiv.innerHTML += `<p>No verses found for this chapter in the selected languages.</p>`;
         return;
     }
-
-    // ... inside async function displayChapter ... after the maxVerseNum calculation ...
-
-    // const currentTransliterationSourceScript = transliterationLangMap[languageSelect.value];
 
     for (let i = 1; i <= maxVerseNum; i++) {
         const engVerse = englishVerses.find(v => v.verse === i);
@@ -243,7 +262,8 @@ async function displayChapter(scrollToVerseNum = null) {
                 verseBlock.innerHTML += `<p class="english-verse">${engVerse.text.replace(/([a-zA-Z0-9']+)/g, `<span class="word-clickable" data-word="$1">$1</span>`)} <button class="play-verse-audio-btn" data-lang="en-US" data-text="${cleanEngText}">🔊</button></p>`;
             }
 
-            if (indVerse?.text) {
+            // Only render Indian language content if a secondary language is selected
+            if (indVerse?.text && languageSelect.value !== 'none') {
                 let langInfo = {};
                 switch (languageSelect.value) {
                     case 'irv_hindi': langInfo = { name: 'हिन्दी', code: 'hi-IN' }; break;
@@ -263,40 +283,29 @@ async function displayChapter(scrollToVerseNum = null) {
                 const cleanIndText = indVerse.text.replace(/"/g, '&quot;');
                 verseBlock.innerHTML += `<p class="indian-lang-verse">(${langInfo.name}): ${indVerse.text} <button class="play-verse-audio-btn" data-lang="${langInfo.code}" data-text="${cleanIndText}">🔊</button></p>`;
 
-                // --- Replace your entire transliteration block in displayChapter with this ---
                 try {
                     const langValue = languageSelect.value;
                     const sourceScript = transliterationLangMap[langValue];
                     let transliteratedText = '';
 
-                    // Check which library and function to use
                     if (langValue === 'hebrew_modern_updated' && typeof window.transliterate === 'function') {
-                        // --- HEBREW ---
-                        // Use the dedicated hebrew-transliteration library
-                        //transliteratedText = transliterate(indVerse.text, { isSimple: true });
                         transliteratedText = transliterate(indVerse.text, { style: 'roman' });
                     } else if (langValue === 'chinese_union_simp_updated' && typeof window.pinyin === 'object' && typeof window.pinyin.default === 'function') {
-                        // --- CHINESE ---
-                        // The library creates an object; the function is the 'default' property.
                         const pinyinFunction = pinyin.default;
                         transliteratedText = pinyinFunction(indVerse.text, { 
                             style: pinyin.STYLE_NORMAL 
                         }).map(word => word[0]).join('');
 
                     } else if (sourceScript && typeof window.Sanscript !== 'undefined') {
-                        // --- INDIC LANGUAGES ---
-                        // Use Sanscript.js for all other mapped languages
                         transliteratedText = window.Sanscript.t(indVerse.text, sourceScript, 'hk');
                     }
 
-                    // Display the result if any transliteration was generated
                     if (transliteratedText) {
                         verseBlock.innerHTML += `<p class="roman-transliteration">(Transliteration): ${transliteratedText}</p>`;
                     }
                 } catch (e) {
                     console.error("Transliteration error:", e);
                 }
-                // --- End of the block to replace ---
             }
             bibleTextDiv.appendChild(verseBlock);
         }
@@ -315,6 +324,7 @@ async function displayChapter(scrollToVerseNum = null) {
             setTimeout(() => targetElement.classList.remove('highlighted-verse'), 3000);
         }
     }
+    updateIndianLangPlaybackButtonVisibility(); // Ensure button visibility is correct after rendering
 }
 function navigateToNextChapter() {
     const currentBookIndex = bibleBooks.indexOf(bookSelect.value);
@@ -368,6 +378,7 @@ function resetChapterAudioButtons() {
     playIndianLangButton.textContent = `Play ${langName} Chapter`;
     pauseResumeButton.style.display = 'none';
     stopAudioButton.style.display = 'none';
+    updateIndianLangPlaybackButtonVisibility(); // Ensure correct visibility on reset
 }
 
 function speakText(text, lang = 'en-US', source = 'verse') {
@@ -550,7 +561,7 @@ function handlePlayIndianLangChapter() {
         const verseObjects = currentIndianLanguageData.filter(v => v.englishBookName === bookSelect.value && v.chapter === parseInt(chapterSelect.value)).sort((a, b) => a.verse - b.verse);
         
         // Determine langCode
-        let langCode = 'en-US';
+        let langCode = 'en-US'; // Default fallback
         if (languageSelect.value === 'irv_hindi') langCode = 'hi-IN';
         else if (languageSelect.value === 'odia_all_books') langCode = 'or-IN';
         else if (languageSelect.value === 'te_irv_updated') langCode = 'te-IN';
@@ -637,7 +648,8 @@ async function handleWordClick(event) {
 
     const { code: langCode, name: langName } = getCurrentIndianLangInfo();
     const indianLangHeader = document.getElementById('indianLangMeaningHeader');
-    if (langName && langCode) {
+    // Only show Indian language meaning section if a secondary language is selected
+    if (langName && langCode && languageSelect.value !== 'none') {
         indianLangHeader.textContent = `${langName} Meaning`;
         document.getElementById('indianLangMeaningContainer').style.display = 'block';
     } else {
@@ -697,7 +709,8 @@ async function handleWordClick(event) {
     };
 
     const fetchIndianLangMeaning = async () => {
-        if (!langCode) return '';
+        // Only fetch Indian language meaning if a secondary language is selected
+        if (!langCode || languageSelect.value === 'none') return '';
         const localTranslation = localTranslations[langCode]?.[word];
         if (localTranslation) return `<p>${localTranslation}</p>`;
         try {

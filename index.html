@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>India Bible Project</title>
+    <title>My Bible Project</title>
     <link rel="stylesheet" href="style.css">
     
     <script src="sanscript.js"></script>
@@ -22,9 +22,9 @@
 
             <div class="control-row secondary-line-controls">
                 <div class="language-select-group">
-                    <label for="languageSelect">Select Language:</label>
+                    <label for="languageSelect">Second Language:</label>
                     <select id="languageSelect">
-                        <option value="irv_hindi">Hindi</option>
+                        <option value="none">Select Language</option> <option value="irv_hindi">Hindi</option>
                         <option value="odia_all_books">Odia</option>
                         <option value="te_irv_updated">Telugu</option>
                         <option value="ta_oitce_updated">Tamil</option>
@@ -45,8 +45,7 @@
             <div class="secondary-controls">
                 <div class="control-row tertiary-line-controls">
                     <button id="playEnglishButton">Play English Chapter</button>
-                    <button id="playIndianLangButton">Play Indian Language Chapter</button>
-                </div>
+                    <button id="playIndianLangButton" style="display: none;">Play Indian Language Chapter</button> </div>
                 
                 <div class="control-row quaternary-line-controls">
                     <button id="pauseResumeButton" style="display: none;">Pause</button>
