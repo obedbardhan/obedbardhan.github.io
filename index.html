@@ -1,86 +1,274 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Bible Project</title>
+    <title>Easy Bible Study</title>
+    <meta name="description"
+        content="Read the Bible in multiple languages and test your knowledge with Bible quizzes at different difficulty levels.">
+    <!-- Open Graph Meta Tags for Sharing -->
+    <meta property="og:title" content="Easy Bible Study & Quiz">
+    <meta property="og:description"
+        content="Read the Word of God in 13 languages or test your knowledge with interactive Bible quizzes.">
+    <meta property="og:image"
+        content="https://images.unsplash.com/photo-1507400492013-162706c8c05e?q=80&w=1200&auto=format&fit=crop">
+    <meta property="og:url" content="https://obedbardhan.github.io/">
+    <meta property="og:type" content="website">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    
     <script src="sanscript.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/pinyin/dist/pinyin.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/hebrew-transliteration/dist/hebrew-transliteration.umd.min.js"></script>  
+    <script src="https://cdn.jsdelivr.net/npm/hebrew-transliteration/dist/hebrew-transliteration.umd.min.js"></script>
 </head>
+
 <body>
-    <header>
-        <div class="controls">
-            <div class="control-row primary-line-controls">
-                <button id="prevChapterButton" title="Previous Chapter">&lt;&lt;</button>
-                <select id="bookSelect"></select>
-                <select id="chapterSelect"></select>
-                <button id="nextChapterButton" title="Next Chapter">&gt;&gt;</button>
-            </div>
 
-            <div class="control-row secondary-line-controls">
-                <div class="language-select-group">
-                    <label for="languageSelect">Second Language:</label>
-                    <select id="languageSelect">
-                        <option value="none">Select Language</option> <option value="irv_hindi">Hindi</option>
-                        <option value="odia_all_books">Odia</option>
-                        <option value="te_irv_updated">Telugu</option>
-                        <option value="ta_oitce_updated">Tamil</option>
-                        <option value="kn_irv_updated">Kannada</option>
-                        <option value="pa_irv_updated">Gurmukhi</option>
-                        <option value="mr_irv_updated">Marathi</option>
-                        <option value="hebrew_modern_updated">Hebrew</option>
-                        <option value="chinese_union_simp_updated">Chinese</option>
-                        <option value="french_epee_updated">French</option>
-                        <option value="german_luther_updated">German</option>
-                        <option value="esp_rv1909_updated">Spanish</option>
-                    </select>
+    <!-- ===== LANDING PAGE ===== -->
+    <div id="landingPage" class="landing-page">
+        <div class="landing-content">
+            <div class="landing-icon">
+                <div class="cross-icon"></div>
+            </div>
+            <h1 class="landing-title">Easy Bible Study</h1>
+            <p class="landing-subtitle">Read the Word of God in multiple languages or test your knowledge with Bible
+                quizzes</p>
+            <div class="landing-buttons">
+                <button id="openBibleBtn" class="landing-btn bible-btn">
+                    <span class="btn-icon">📖</span>
+                    <span class="btn-label">Bible</span>
+                    <span class="btn-desc">Read in 13 languages</span>
+                </button>
+                <button id="openQuizBtn" class="landing-btn quiz-btn">
+                    <span class="btn-icon quiz-icon">?</span>
+                    <span class="btn-label">Bible Quiz</span>
+                    <span class="btn-desc">Test your knowledge</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== BIBLE SECTION ===== -->
+    <div id="bibleSection" class="app-section" style="display:none;">
+        <header>
+            <div class="controls">
+                <div class="control-row primary-line-controls">
+                    <button id="backToHomeBtn" class="back-btn" title="Back to Home">🏠</button>
+                    <button id="prevChapterButton" title="Previous Chapter">&lt;&lt;</button>
+                    <select id="bookSelect"></select>
+                    <select id="chapterSelect"></select>
+                    <button id="nextChapterButton" title="Next Chapter">&gt;&gt;</button>
                 </div>
-                <button id="goButton">Go</button>
-                <button id="toggleControlsButton" title="Show/Hide More Options">-</button>
-            </div>
 
-            <div class="secondary-controls">
-                <div class="control-row tertiary-line-controls">
-                    <button id="playEnglishButton">Play English Chapter</button>
-                    <button id="playIndianLangButton" style="display: none;">Play Indian Language Chapter</button> </div>
-                
-                <div class="control-row quaternary-line-controls">
-                    <button id="pauseResumeButton" style="display: none;">Pause</button>
-                    <button id="stopAudioButton" style="display: none;">Stop Audio</button>
-                    <div class="playback-speed-control">
-                        <label for="playbackRateSlider">Speed:</label>
-                        <input type="range" id="playbackRateSlider" min="0.5" max="2" step="0.1" value="1">
-                        <span id="playbackRateValue">1.0x</span>
+                <div class="control-row secondary-line-controls">
+                    <div class="language-select-group">
+                        <label for="languageSelect">Second Language:</label>
+                        <select id="languageSelect">
+                            <option value="none">Select Language</option>
+                            <option value="irv_hindi">Hindi</option>
+                            <option value="odia_all_books">Odia</option>
+                            <option value="te_irv_updated">Telugu</option>
+                            <option value="ta_oitce_updated">Tamil</option>
+                            <option value="kn_irv_updated">Kannada</option>
+                            <option value="pa_irv_updated">Gurmukhi</option>
+                            <option value="mr_irv_updated">Marathi</option>
+                            <option value="hebrew_modern_updated">Hebrew</option>
+                            <option value="chinese_union_simp_updated">Chinese</option>
+                            <option value="french_epee_updated">French</option>
+                            <option value="german_luther_updated">German</option>
+                            <option value="esp_rv1909_updated">Spanish</option>
+                        </select>
                     </div>
-                    <button id="voiceSearchButton" title="Voice Search">🎤</button>
+                    <button id="goButton">Go</button>
+                    <button id="toggleControlsButton" title="Show/Hide More Options">-</button>
                 </div>
 
-                <div class="control-row quinternary-line-controls">
-                    <input type="text" id="quickSearchInput" placeholder="e.g., John 3:16 or 'love'">
-                    <button id="searchButton">Search</button>
+                <div class="secondary-controls">
+                    <div class="control-row tertiary-line-controls">
+                        <button id="playEnglishButton">Play English Chapter</button>
+                        <button id="playIndianLangButton" style="display: none;">Play Indian Language Chapter</button>
+                    </div>
+
+                    <div class="control-row quaternary-line-controls">
+                        <button id="pauseResumeButton" style="display: none;">Pause</button>
+                        <button id="stopAudioButton" style="display: none;">Stop Audio</button>
+                        <div class="playback-speed-control">
+                            <label for="playbackRateSlider">Speed:</label>
+                            <input type="range" id="playbackRateSlider" min="0.5" max="2" step="0.1" value="1">
+                            <span id="playbackRateValue">1.0x</span>
+                        </div>
+                        <button id="voiceSearchButton" title="Voice Search">🎤</button>
+                    </div>
+
+                    <div class="control-row quinternary-line-controls">
+                        <input type="text" id="quickSearchInput" placeholder="e.g., John 3:16 or 'love'">
+                        <button id="searchButton">Search</button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <div id="bibleTextDiv" class="verse-container">
+                <p id="loadingIndicator">Loading Bible data, please wait...</p>
+            </div>
+
+            <div id="wordStudyModal" class="modal">
+                <div class="modal-content">
+                    <span class="close-button" id="closeModalButton">&times;</span>
+                    <h3 id="selectedWordHeader">Word Details:</h3>
+                    <div id="dictionaryMeaning"></div>
+                    <div id="occurrences"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ===== QUIZ SECTION ===== -->
+    <div id="quizSection" class="app-section" style="display:none;">
+
+        <!-- Quiz Header -->
+        <header class="quiz-header">
+            <button id="quizBackToHomeBtn" class="back-btn" title="Back to Home">🏠</button>
+            <h2 class="quiz-header-title">Bible Quiz</h2>
+        </header>
+
+        <!-- Quiz Setup Screen -->
+        <div id="quizSetupScreen" class="quiz-screen quiz-setup">
+            <div class="quiz-card setup-card">
+                <div class="setup-icon">🧠</div>
+                <h2>Set Up Your Quiz</h2>
+                <p class="setup-desc">Choose your language, quiz category, and number of questions</p>
+
+                <div class="setup-form">
+                    <div class="setup-group">
+                        <label>Language</label>
+                        <select id="quizLanguageSelect">
+                            <option value="english">English</option>
+                            <option value="hindi">Hindi (हिन्दी)</option>
+                            <option value="odia">Odia (ଓଡିଆ)</option>
+                            <option value="telugu">Telugu (తెలుగు)</option>
+                            <option value="tamil">Tamil (தமிழ்)</option>
+                            <option value="kannada">Kannada (ಕನ್ನಡ)</option>
+                            <option value="gurmukhi">Gurmukhi (ਗੁਰਮੁਖੀ)</option>
+                            <option value="marathi">Marathi (मराठी)</option>
+                            <option value="hebrew">Hebrew (עִברִית)</option>
+                            <option value="chinese">Chinese (中文)</option>
+                            <option value="french">French (Français)</option>
+                            <option value="german">German (Deutsch)</option>
+                            <option value="spanish">Spanish (Español)</option>
+                        </select>
+                    </div>
+
+                    <div class="setup-group">
+                        <label>Quiz Category</label>
+                        <div class="category-selector" id="categorySelector">
+                            <button class="category-btn selected" data-category="characters">
+                                <span class="cat-icon">👤</span>
+                                <span class="cat-name">Bible Characters</span>
+                            </button>
+                            <button class="category-btn" data-category="memory">
+                                <span class="cat-icon">📝</span>
+                                <span class="cat-name">Verse Memory</span>
+                            </button>
+                            <button class="category-btn" data-category="youth">
+                                <span class="cat-icon">⛪</span>
+                                <span class="cat-name">Church Youth</span>
+                            </button>
+                            <button class="category-btn" data-category="kids">
+                                <span class="cat-icon">👶</span>
+                                <span class="cat-name">Kids Mode</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="setup-group">
+                        <label>Number of Questions</label>
+                        <div class="count-selector" id="countSelector">
+                            <button class="count-btn selected" data-count="5">5</button>
+                            <button class="count-btn" data-count="10">10</button>
+                            <button class="count-btn" data-count="15">15</button>
+                            <button class="count-btn" data-count="20">20</button>
+                        </div>
+                    </div>
+
+                    <button id="startQuizBtn" class="start-quiz-btn">Start Quiz →</button>
                 </div>
             </div>
         </div>
-    </header>
 
-    <main>
-        <div id="bibleTextDiv" class="verse-container">
-            <p id="loadingIndicator">Loading Bible data, please wait...</p>
-        </div>
+        <!-- Quiz Play Screen -->
+        <div id="quizPlayScreen" class="quiz-screen" style="display:none;">
+            <div class="quiz-card play-card">
+                <!-- Progress Bar -->
+                <div class="quiz-progress-bar">
+                    <div id="quizProgressFill" class="progress-fill"></div>
+                </div>
+                <div class="quiz-meta">
+                    <span id="quizQuestionCounter" class="question-counter">Question 1 of 10</span>
+                    <span id="quizTimer" class="quiz-timer">⏱ 15</span>
+                    <span id="quizScoreLive" class="score-live">Score: 0</span>
+                </div>
 
-        <div id="wordStudyModal" class="modal">
-            <div class="modal-content">
-                <span class="close-button" id="closeModalButton">&times;</span>
-                <h3 id="selectedWordHeader">Word Details:</h3>
-                <div id="dictionaryMeaning"></div>
-                <div id="occurrences"></div>
+                <!-- Question -->
+                <div id="quizQuestionArea" class="question-area">
+                    <p id="quizQuestionText" class="question-text"></p>
+                    <p id="quizQuestionRef" class="question-ref"></p>
+                </div>
+
+                <!-- Options -->
+                <div id="quizOptionsArea" class="options-area">
+                    <!-- Options will be dynamically inserted -->
+                </div>
+
+                <!-- Next Button -->
+                <button id="quizNextBtn" class="quiz-next-btn" style="display:none;">Next Question →</button>
             </div>
         </div>
-    </main>
+
+        <!-- Quiz Results Screen -->
+        <div id="quizResultsScreen" class="quiz-screen" style="display:none;">
+            <div class="quiz-card results-card">
+                <div id="resultsEmoji" class="results-emoji">🏆</div>
+                <h2 id="resultsTitle" class="results-title">Quiz Complete!</h2>
+                <div class="results-score-ring">
+                    <svg viewBox="0 0 120 120" class="score-ring-svg">
+                        <circle cx="60" cy="60" r="52" class="ring-bg"></circle>
+                        <circle cx="60" cy="60" r="52" id="scoreRingCircle" class="ring-fill"></circle>
+                    </svg>
+                    <div class="score-ring-text">
+                        <span id="resultsPercent" class="score-percent">0%</span>
+                    </div>
+                </div>
+                <p id="resultsDetail" class="results-detail">You answered 0 out of 0 correctly</p>
+                <div class="results-stats">
+                    <div class="stat correct-stat">
+                        <span class="stat-num" id="resultsCorrect">0</span>
+                        <span class="stat-label">Correct</span>
+                    </div>
+                    <div class="stat wrong-stat">
+                        <span class="stat-num" id="resultsWrong">0</span>
+                        <span class="stat-label">Wrong</span>
+                    </div>
+                    <div class="stat skipped-stat">
+                        <span class="stat-num" id="resultsSkipped">0</span>
+                        <span class="stat-label">Skipped</span>
+                    </div>
+                </div>
+                <div class="results-actions">
+                    <button id="retryQuizBtn" class="retry-btn">🔄 Retry Same Level</button>
+                    <button id="newQuizBtn" class="new-quiz-btn">⚙️ New Quiz</button>
+                    <button id="quizToHomeBtn" class="home-btn-result">🏠 Home</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="script.js"></script>
+    <script src="quiz.js"></script>
 </body>
+
 </html>

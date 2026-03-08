@@ -1,16 +1,227 @@
-/* General Body and Layout */
-body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #edf2f7; /* Light gray background */
-    color: #2d3748; /* Dark gray text */
-    transition: background-color 0.3s ease;
+/* =========================================
+   BASE STYLES & DESIGN TOKENS
+   ========================================= */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
 }
 
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #edf2f7;
+    color: #2d3748;
+    transition: background-color 0.3s ease;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* =========================================
+   LANDING PAGE
+   ========================================= */
+.landing-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, #0f3460 100%);
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.landing-page::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at 30% 50%, rgba(78, 205, 196, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 70% 50%, rgba(255, 183, 77, 0.06) 0%, transparent 50%);
+    animation: gentlePulse 8s ease-in-out infinite alternate;
+}
+
+@keyframes gentlePulse {
+    0% {
+        opacity: 0.5;
+        transform: scale(1);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+}
+
+.landing-content {
+    text-align: center;
+    position: relative;
+    z-index: 1;
+    max-width: 600px;
+    width: 100%;
+}
+
+.landing-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    animation: floatIcon 3s ease-in-out infinite;
+}
+
+@keyframes floatIcon {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.cross-icon {
+    position: relative;
+    width: 28px;
+    height: 72px;
+    display: inline-block;
+}
+
+/* Vertical bar of the cross */
+.cross-icon::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0;
+    transform: translateX(-50%);
+    width: 10px;
+    height: 100%;
+    background: #ffffff;
+    border-radius: 3px;
+    border: 2px solid #38b2ac;
+    box-shadow: 0 0 15px rgba(56, 178, 172, 0.6), 0 0 30px rgba(56, 178, 172, 0.3);
+}
+
+/* Horizontal bar of the cross — sits in the upper third */
+.cross-icon::after {
+    content: '';
+    position: absolute;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 44px;
+    height: 10px;
+    background: #ffffff;
+    border-radius: 3px;
+    border: 2px solid #38b2ac;
+    box-shadow: 0 0 15px rgba(56, 178, 172, 0.6), 0 0 30px rgba(56, 178, 172, 0.3);
+}
+
+.quiz-icon {
+    color: #ffffff !important;
+    font-size: 3rem;
+    font-weight: 900;
+    font-family: 'Inter', Arial, sans-serif;
+    text-shadow: 0 0 15px rgba(56, 178, 172, 0.6);
+}
+
+.landing-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0 0 0.75rem;
+    letter-spacing: -0.5px;
+}
+
+.landing-subtitle {
+    font-size: 1.1rem;
+    color: #94a3b8;
+    margin: 0 0 2.5rem;
+    line-height: 1.6;
+}
+
+.landing-buttons {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.landing-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 2rem 2.5rem;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    min-width: 200px;
+    text-align: center;
+}
+
+.landing-btn:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.bible-btn:hover {
+    border-color: #4fd1c5;
+    background: rgba(79, 209, 197, 0.1);
+}
+
+.quiz-btn:hover {
+    border-color: #f6ad55;
+    background: rgba(246, 173, 85, 0.1);
+}
+
+.btn-icon {
+    font-size: 2.5rem;
+}
+
+.btn-label {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.btn-desc {
+    font-size: 0.85rem;
+    color: #94a3b8;
+}
+
+/* =========================================
+   APP SECTIONS
+   ========================================= */
+.app-section {
+    width: 100%;
+}
+
+.back-btn {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    font-size: 1.1rem !important;
+    padding: 0 0.75rem !important;
+    min-width: 42px !important;
+    flex-grow: 0 !important;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.back-btn:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* =========================================
+   BIBLE SECTION — HEADER
+   ========================================= */
 header {
-    background-color: #2d3748; /* Dark slate header */
-    color: #e2e8f0; /* Light gray header text */
+    background-color: #2d3748;
+    color: #e2e8f0;
     padding: 1rem 1.5rem;
     position: sticky;
     top: 0;
@@ -18,28 +229,24 @@ header {
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
-/* Main controls container */
 .controls {
     display: flex;
-    flex-direction: column; /* Stack the rows vertically */
-    gap: 0.75rem; /* Gap between the main control rows */
-    align-items: center; /* Center the entire block of rows horizontally */
-    width: 100%; /* Ensure it takes full width for proper centering of its children */
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: center;
+    width: 100%;
 }
 
-/* Common style for all control rows */
 .control-row {
     display: flex;
-    flex-wrap: wrap; /* Allow items to wrap within each row if space is limited */
-    gap: 0.75rem; /* Gap between items within a row */
-    align-items: center; /* Vertically align items in the middle of the row */
-    justify-content: center; /* Center items horizontally within this row */
-    width: 100%; /* Make each row take full width to allow internal centering */
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
 }
 
-/* Specific styling for the primary line on larger screens */
 .primary-line-controls {
-    /* On desktop, keep them in a row, centered */
     justify-content: center;
 }
 
@@ -50,26 +257,28 @@ header {
 .tertiary-line-controls,
 .quaternary-line-controls,
 .quinternary-line-controls {
-    justify-content: center; /* Center buttons within these lines on desktop */
+    justify-content: center;
 }
 
-/* Style for the language select group (to keep label and select on one line) */
 .language-select-group {
-    display: flex; /* Make it a flex container */
-    align-items: center; /* Vertically align label and select in the middle */
-    gap: 0.5rem; /* Small gap between label and select box */
-    flex-shrink: 0; /* Prevent it from shrinking too much if space is tight */
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
 }
 
-/* Styling for all input elements in the header */
-.controls label, .controls select, .controls button, .controls input {
+.controls label,
+.controls select,
+.controls button,
+.controls input {
+    font-family: 'Inter', sans-serif;
     font-size: 0.9rem;
-    border-radius: 0.375rem; /* Slightly rounded corners */
-    border: 1px solid #4a5568; /* Darker border */
+    border-radius: 0.375rem;
+    border: 1px solid #4a5568;
     height: 40px;
     box-sizing: border-box;
-    flex-grow: 1; /* Allow elements to grow and fill space by default */
-    min-width: 0; /* Allow elements to shrink below their content size if needed */
+    flex-grow: 1;
+    min-width: 0;
 }
 
 .controls label {
@@ -77,10 +286,11 @@ header {
     text-align: right;
     padding-right: 0.5rem;
     font-weight: 500;
-    flex-grow: 0; /* Labels shouldn't grow */
+    flex-grow: 0;
 }
 
-.controls select, .controls input[type="text"] {
+.controls select,
+.controls input[type="text"] {
     background-color: #ffffff;
     color: #2d3748;
     padding: 0 0.75rem;
@@ -91,65 +301,71 @@ header {
 }
 
 .controls button {
-    background-color: #4a5568; /* Default dark button */
+    background-color: #4a5568;
     color: #ffffff;
     cursor: pointer;
     font-weight: 600;
     transition: background-color 0.2s ease;
     padding: 0 1rem;
-    white-space: nowrap; /* Prevent button text from wrapping */
+    white-space: nowrap;
 }
 
 .controls button:hover {
     background-color: #2d3748;
 }
 
-/* Toggle button style */
 #toggleControlsButton {
-    background-color: #09adb95b; /* Indigo */
+    background-color: #09adb95b;
     font-size: 1.5rem;
     font-weight: bold;
     padding: 0 0.75rem;
     min-width: 40px;
-    flex-grow: 0; /* Prevent toggle button from growing too much */
+    flex-grow: 0;
 }
+
 #toggleControlsButton:hover {
     background-color: #5abfd8;
 }
 
-/* Specific button styles based on the image */
-#playEnglishButton, #playIndianLangButton, #goButton, #searchButton, #voiceSearchButton {
-    background-color: #38b2ac; /* Teal accent color */
+#playEnglishButton,
+#playIndianLangButton,
+#goButton,
+#searchButton,
+#voiceSearchButton {
+    background-color: #38b2ac;
 }
 
-#playEnglishButton:hover, #playIndianLangButton:hover, #goButton:hover, #searchButton:hover, #voiceSearchButton:hover {
-    background-color: #319795; /* Darker teal on hover */
+#playEnglishButton:hover,
+#playIndianLangButton:hover,
+#goButton:hover,
+#searchButton:hover,
+#voiceSearchButton:hover {
+    background-color: #319795;
 }
 
 .playback-speed-control {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    flex-grow: 1; /* Allows it to take available space */
+    flex-grow: 1;
 }
 
 #playbackRateSlider {
     flex-grow: 1;
 }
 
-/* Collapsible secondary controls container */
 .secondary-controls {
     display: flex;
-    flex-direction: column; /* Stack the control rows vertically within this group */
-    gap: 0.75rem; /* Gap between the control rows (tertiary, quaternary, quinternary) */
+    flex-direction: column;
+    gap: 0.75rem;
     align-items: center;
     overflow: hidden;
-    max-height: 200px; /* Sufficient height to show content when visible */
+    max-height: 200px;
     opacity: 1;
     pointer-events: auto;
     transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
-    width: 100%; /* Ensure it takes full width when visible below primary controls */
-    margin-top: 0.75rem; /* Add some margin when visible */
+    width: 100%;
+    margin-top: 0.75rem;
 }
 
 .secondary-controls.hidden {
@@ -163,12 +379,9 @@ header {
     overflow: hidden;
 }
 
-/* Individual control groups within secondary-controls */
-/* No specific control-group class needed now that control-row is used for each line */
-/* The old .control-group and .full-width-on-mobile are deprecated by the new .control-row structure */
-
-
-/* Main Content Area */
+/* =========================================
+   BIBLE SECTION — MAIN CONTENT
+   ========================================= */
 main {
     padding: 1.5rem;
     max-width: 850px;
@@ -178,7 +391,6 @@ main {
     border-radius: 0.5rem;
 }
 
-/* Bible Text Display Area */
 .verse-container {
     background-color: transparent;
     padding: 0;
@@ -187,7 +399,6 @@ main {
     overflow-y: visible;
 }
 
-/* Chapter Title */
 .chapter-title {
     color: #1a202c;
     font-size: 2.25rem;
@@ -197,40 +408,41 @@ main {
     margin-bottom: 1.5rem;
 }
 
-/* Verse Styling */
 .verse-block {
     margin-bottom: 1.25rem;
     padding: 1rem 1rem 1rem 1.25rem;
-    border-left: 4px solid #4fd1c5; /* Accent color border */
-    background-color: #f7fafc; /* Light gray verse background */
+    border-left: 4px solid #4fd1c5;
+    background-color: #f7fafc;
     border-radius: 0.25rem;
-    overflow: hidden; /* To contain the floating number */
+    overflow: hidden;
 }
 
 .verse-number {
     font-weight: bold;
-    color: #dd6b20; /* Red-orange color for verse number */
+    color: #dd6b20;
     margin-right: 0.75rem;
     float: left;
     font-size: 1.1rem;
     line-height: 1.6;
 }
 
-.english-verse, .indian-lang-verse, .roman-transliteration {
+.english-verse,
+.indian-lang-verse,
+.roman-transliteration {
     display: block;
-    margin-left: 2.25rem; /* Indent text to align with verse number */
+    margin-left: 2.25rem;
     line-height: 1.6;
     color: #4a5568;
 }
 
 .indian-lang-verse {
-    color: #2b6cb0; /* Dark blue for Indian languages */
+    color: #2b6cb0;
     font-style: normal;
     font-weight: 500;
 }
 
 .roman-transliteration {
-    color: #718096; /* Subdued gray for transliteration */
+    color: #718096;
     font-size: 0.9em;
     margin-top: 4px;
 }
@@ -307,101 +519,824 @@ main {
     padding: 40px;
 }
 
-/* Responsive design for controls */
-@media (max-width: 768px) {
-    /* Ensure the main controls container aligns items to start on mobile */
-    .controls {
-        align-items: stretch; /* Stretch control rows to fill width */
+/* =========================================
+   QUIZ SECTION
+   ========================================= */
+.quiz-header {
+    background: linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%);
+    color: #fff;
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.quiz-header-title {
+    margin: 0;
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+}
+
+.quiz-screen {
+    min-height: calc(100vh - 60px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background: #f0f4f8;
+}
+
+.quiz-card {
+    background: #ffffff;
+    border-radius: 1rem;
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 560px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+    text-align: center;
+    animation: cardFadeIn 0.4s ease-out;
+}
+
+@keyframes cardFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
     }
 
-    /* Line 1: Previous, Book, Chapter, Next */
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.setup-icon {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+}
+
+.setup-card h2 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #1a202c;
+    margin: 0 0 0.5rem;
+}
+
+.setup-desc {
+    color: #718096;
+    margin: 0 0 2rem;
+    font-size: 0.95rem;
+}
+
+.setup-form {
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.setup-group label {
+    display: block;
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.setup-group select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    font-family: 'Inter', sans-serif;
+    color: #2d3748;
+    background: #fff;
+    transition: border-color 0.2s;
+    cursor: pointer;
+}
+
+.setup-group select:focus {
+    outline: none;
+    border-color: #4fd1c5;
+}
+
+.level-selector {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.5rem;
+}
+
+.level-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.75rem 0.5rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 0.5rem;
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Inter', sans-serif;
+}
+
+.level-btn:hover {
+    border-color: #4fd1c5;
+}
+
+.level-btn.selected {
+    border-color: #38b2ac;
+    background: linear-gradient(135deg, #e6fffa, #b2f5ea);
+    color: #234e52;
+}
+
+.level-num {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.level-name {
+    font-size: 0.65rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #718096;
+}
+
+.level-btn.selected .level-name {
+    color: #285e61;
+}
+
+/* Category selector (quiz categories) */
+.category-selector {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+}
+
+.category-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.85rem 0.5rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 0.75rem;
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Inter', sans-serif;
+}
+
+.category-btn:hover {
+    border-color: #4fd1c5;
+    transform: translateY(-1px);
+}
+
+.category-btn.selected {
+    border-color: #38b2ac;
+    background: linear-gradient(135deg, #e6fffa, #b2f5ea);
+    color: #234e52;
+    box-shadow: 0 2px 8px rgba(56, 178, 172, 0.2);
+}
+
+.cat-icon {
+    font-size: 1.5rem;
+}
+
+.cat-name {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #718096;
+}
+
+.category-btn.selected .cat-name {
+    color: #285e61;
+}
+
+/* Question prefix text */
+.q-prefix {
+    font-size: 0.85em;
+    font-weight: 500;
+    color: #4fd1c5;
+    display: block;
+    margin-bottom: 0.3rem;
+}
+
+.count-selector {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+}
+
+.count-btn {
+    padding: 0.75rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 0.5rem;
+    background: #fff;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.2s;
+    color: #4a5568;
+}
+
+.count-btn:hover {
+    border-color: #f6ad55;
+}
+
+.count-btn.selected {
+    border-color: #ed8936;
+    background: linear-gradient(135deg, #fffaf0, #feebc8);
+    color: #7b341e;
+}
+
+.start-quiz-btn {
+    width: 100%;
+    padding: 1rem;
+    border: none;
+    border-radius: 0.75rem;
+    background: linear-gradient(135deg, #38b2ac, #319795);
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 0.5rem;
+}
+
+.start-quiz-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(56, 178, 172, 0.25);
+}
+
+/* --- Quiz Play Screen --- */
+.play-card {
+    padding: 0;
+    overflow: hidden;
+}
+
+.quiz-progress-bar {
+    height: 4px;
+    background: #e2e8f0;
+    width: 100%;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #38b2ac, #4fd1c5);
+    transition: width 0.4s ease;
+    width: 0%;
+}
+
+.quiz-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #edf2f7;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.question-counter {
+    color: #4a5568;
+}
+
+.quiz-timer {
+    color: #e53e3e;
+    font-size: 1rem;
+    font-weight: 700;
+    min-width: 50px;
+    text-align: center;
+}
+
+.quiz-timer.warning {
+    animation: pulse 0.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: scale(1)
+    }
+
+    50% {
+        transform: scale(1.15)
+    }
+}
+
+.score-live {
+    color: #38b2ac;
+}
+
+.question-area {
+    padding: 2rem 1.5rem 1rem;
+}
+
+.question-text {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: #1a202c;
+    line-height: 1.6;
+    margin: 0 0 0.5rem;
+}
+
+.question-ref {
+    font-size: 0.85rem;
+    color: #a0aec0;
+    margin: 0;
+    font-style: italic;
+}
+
+.options-area {
+    padding: 0.5rem 1.5rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+}
+
+.option-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 0.625rem;
+    background: #fff;
+    cursor: pointer;
+    text-align: left;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    color: #2d3748;
+    transition: all 0.2s;
+    width: 100%;
+}
+
+.option-btn:hover:not(.disabled) {
+    border-color: #cbd5e0;
+    background: #f7fafc;
+}
+
+.option-letter {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #edf2f7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+    color: #4a5568;
+}
+
+.option-text {
+    flex: 1;
+    line-height: 1.4;
+}
+
+.option-btn.correct {
+    border-color: #48bb78;
+    background: linear-gradient(135deg, #f0fff4, #c6f6d5);
+    color: #22543d;
+}
+
+.option-btn.correct .option-letter {
+    background: #48bb78;
+    color: #fff;
+}
+
+.option-btn.incorrect {
+    border-color: #fc8181;
+    background: linear-gradient(135deg, #fff5f5, #fed7d7);
+    color: #742a2a;
+}
+
+.option-btn.incorrect .option-letter {
+    background: #fc8181;
+    color: #fff;
+}
+
+.option-btn.disabled {
+    cursor: default;
+    pointer-events: none;
+}
+
+.quiz-next-btn {
+    margin: 0 1.5rem 1.5rem;
+    padding: 0.875rem;
+    border: none;
+    border-radius: 0.625rem;
+    background: linear-gradient(135deg, #4299e1, #3182ce);
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: all 0.3s;
+    width: calc(100% - 3rem);
+}
+
+.quiz-next-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(66, 153, 225, 0.25);
+}
+
+/* --- Quiz Results --- */
+.results-card {
+    padding: 2.5rem;
+}
+
+.results-emoji {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+}
+
+.results-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1a202c;
+    margin: 0 0 1.5rem;
+}
+
+.results-score-ring {
+    position: relative;
+    width: 130px;
+    height: 130px;
+    margin: 0 auto 1rem;
+}
+
+.score-ring-svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+}
+
+.ring-bg {
+    fill: none;
+    stroke: #edf2f7;
+    stroke-width: 8;
+}
+
+.ring-fill {
+    fill: none;
+    stroke: #38b2ac;
+    stroke-width: 8;
+    stroke-linecap: round;
+    stroke-dasharray: 326.73;
+    stroke-dashoffset: 326.73;
+    transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.score-ring-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.score-percent {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #1a202c;
+}
+
+.results-detail {
+    color: #718096;
+    margin: 0 0 1.5rem;
+}
+
+.results-stats {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.stat-num {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #718096;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.correct-stat .stat-num {
+    color: #48bb78;
+}
+
+.wrong-stat .stat-num {
+    color: #fc8181;
+}
+
+.skipped-stat .stat-num {
+    color: #a0aec0;
+}
+
+.results-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: center;
+}
+
+.retry-btn,
+.new-quiz-btn,
+.home-btn-result {
+    padding: 0.75rem 1.25rem;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.retry-btn {
+    background: linear-gradient(135deg, #38b2ac, #319795);
+    color: #fff;
+}
+
+.retry-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(56, 178, 172, 0.3);
+}
+
+.new-quiz-btn {
+    background: linear-gradient(135deg, #4299e1, #3182ce);
+    color: #fff;
+}
+
+.new-quiz-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(66, 153, 225, 0.3);
+}
+
+.home-btn-result {
+    background: #edf2f7;
+    color: #4a5568;
+}
+
+.home-btn-result:hover {
+    background: #e2e8f0;
+}
+
+/* =========================================
+   HIGHLIGHTED VERSE (shared)
+   ========================================= */
+.highlighted-verse {
+    background-color: #E0F7F9;
+    border-left: 4px solid #f6e05e;
+    padding-left: 8px;
+    transition: background-color 0.3s ease;
+}
+
+/* =========================================
+   RESPONSIVE — MOBILE  (max-width: 768px)
+   ========================================= */
+@media (max-width: 768px) {
+    .landing-title {
+        font-size: 1.8rem;
+    }
+
+    .landing-subtitle {
+        font-size: 0.95rem;
+    }
+
+    .landing-btn {
+        min-width: 160px;
+        padding: 1.5rem 1.5rem;
+    }
+
+    .btn-icon {
+        font-size: 2rem;
+    }
+
+    .controls {
+        align-items: stretch;
+    }
+
     .primary-line-controls {
         display: grid;
-        grid-template-columns: auto 1fr 1fr auto; /* Prev (auto), Book (1fr), Chapter (1fr), Next (auto) */
+        grid-template-columns: auto auto 1fr 1fr auto;
+        /* Home, Prev, Book, Chapter, Next */
         gap: 0.5rem;
         width: 100%;
-        justify-content: stretch; /* Stretch items in the grid */
+        justify-content: stretch;
     }
 
-    /* Make book and chapter selects take available space */
     #bookSelect,
     #chapterSelect {
-        flex-grow: 1; /* These are within a grid now, but still good to have */
-        width: auto; /* Allow grid to control width */
+        flex-grow: 1;
+        width: auto;
     }
 
-    /* Line 2: Language label, Language select, Go, Toggle */
     .secondary-line-controls {
         display: grid;
-        grid-template-columns: auto 1fr auto auto; /* Label (auto), Select (1fr), Go (auto), Toggle (auto) */
+        grid-template-columns: auto 1fr auto auto;
         gap: 0.5rem;
         width: 100%;
         justify-content: stretch;
     }
 
     .language-select-group {
-        grid-column: 1 / 3; /* Make language label and select span two columns */
-        justify-content: flex-start; /* Align contents to the start */
-        flex-grow: 1; /* Allow it to grow */
+        grid-column: 1 / 3;
+        justify-content: flex-start;
+        flex-grow: 1;
     }
 
     #languageSelect {
-        flex-grow: 1; /* Ensure the select fills available space */
-        min-width: 0; /* Allow it to shrink */
+        flex-grow: 1;
+        min-width: 0;
     }
 
     #goButton {
-        grid-column: 3 / 4; /* Place Go button */
-        flex-grow: 0; /* Don't want it to grow excessively */
+        grid-column: 3 / 4;
+        flex-grow: 0;
     }
 
     #toggleControlsButton {
-        grid-column: 4 / 5; /* Place Toggle button */
-        flex-grow: 0; /* Don't want it to grow excessively */
+        grid-column: 4 / 5;
+        flex-grow: 0;
     }
 
-    /* Collapsible Secondary Controls - now containing Lines 3, 4, 5 */
     .secondary-controls {
-        flex-direction: column; /* Stack the internal control-rows */
-        gap: 0.5rem; /* Smaller gap between the stacked lines */
-        align-items: stretch; /* Stretch all lines to full width */
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: stretch;
     }
 
-    /* Lines 3, 4, 5 should ensure their internal buttons/inputs stretch */
     .tertiary-line-controls,
     .quaternary-line-controls,
     .quinternary-line-controls {
-        flex-direction: row; /* Keep elements in a row within their specific line */
-        flex-wrap: wrap; /* Allow wrapping if needed */
-        gap: 0.5rem; /* Gap between items within the line */
-        width: 100%; /* Each line takes full width */
-        justify-content: stretch; /* Ensure internal items stretch */
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        width: 100%;
+        justify-content: stretch;
     }
 
-    /* Make buttons and inputs within these lines fill available space */
     .tertiary-line-controls button,
     .quaternary-line-controls button,
-    .quaternary-line-controls .playback-speed-control, /* This is a flex container itself */
+    .quaternary-line-controls .playback-speed-control,
     .quinternary-line-controls input,
     .quinternary-line-controls button {
         flex-grow: 1;
-        min-width: 0; /* Allow shrinking */
-        width: auto; /* Reset explicit width */
+        min-width: 0;
+        width: auto;
     }
 
-    /* Specific adjustments for playback rate slider within its flex container */
     .playback-speed-control #playbackRateSlider {
         flex-grow: 1;
     }
 
-    .highlighted-verse {
-        background-color: #E0F7F9; /* Light yellow background */
-        border-left: 4px solid #f6e05e; /* Yellow border on the left */
-        padding-left: 8px;
-        transition: background-color 0.3s ease;
+    .verse-block {
+        margin-bottom: 0.5em;
+    }
+
+    /* Quiz mobile */
+    .quiz-card {
+        padding: 1.5rem;
+    }
+
+    .level-selector {
+        grid-template-columns: repeat(5, 1fr);
+        gap: 0.35rem;
+    }
+
+    .level-btn {
+        padding: 0.5rem 0.25rem;
+    }
+
+    .level-num {
+        font-size: 0.95rem;
+    }
+
+    .level-name {
+        font-size: 0.55rem;
+    }
+
+    .count-btn {
+        padding: 0.6rem;
+        font-size: 0.9rem;
+    }
+
+    .setup-card h2 {
+        font-size: 1.3rem;
+    }
+}
+
+/* =========================================
+   RESPONSIVE — DESKTOP (min-width: 769px)
+   ========================================= */
+@media (min-width: 769px) {
+    header {
+        padding: 1rem 2rem;
+    }
+
+    .controls {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    .primary-line-controls {
+        gap: 1rem;
+        max-width: 700px;
+    }
+
+    #bookSelect {
+        min-width: 180px;
+        max-width: 220px;
+    }
+
+    #chapterSelect {
+        min-width: 80px;
+        max-width: 100px;
+        flex-grow: 0;
+    }
+
+    .secondary-line-controls {
+        max-width: 700px;
+        gap: 1rem;
+    }
+
+    .secondary-controls {
+        max-width: 700px;
+    }
+
+    .tertiary-line-controls,
+    .quaternary-line-controls,
+    .quinternary-line-controls {
+        max-width: 700px;
+    }
+
+    #prevChapterButton,
+    #nextChapterButton {
+        flex-grow: 0;
+        min-width: 50px;
+        max-width: 60px;
+    }
+
+    main {
+        max-width: 900px;
+        margin: 2.5rem auto;
+        padding: 2.5rem;
+        border-radius: 0.75rem;
     }
 
     .verse-block {
-        margin-bottom: 0.5em; /* Add some space between verses if not already present */
+        padding: 1.25rem 1.5rem 1.25rem 1.5rem;
+        margin-bottom: 1.5rem;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .verse-block:hover {
+        transform: translateX(4px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .chapter-title {
+        font-size: 2.5rem;
+    }
+
+    .modal-content {
+        left: 50% !important;
+        top: 50% !important;
+        transform: translate(-50%, -50%);
+    }
+
+    /* Quiz desktop */
+    .quiz-card {
+        max-width: 600px;
+    }
+
+    .quiz-screen {
+        padding: 3rem;
     }
 }

@@ -1,9 +1,10 @@
-// The application will now start after the basic HTML document is loaded.
-document.addEventListener('DOMContentLoaded', initializeApp);
+// The application will now start when the Bible section is opened from the landing page.
+// Exposed as a global function so quiz.js can call it.
+window.initializeBibleApp = initializeApp;
 
 
 // Data arrays and App State
-let netBibleData = [], hindiBibleData = [], odiaBibleData = [], teluguBibleData = [], tamilBibleData = [], kannadaBibleData = [], frenchBibleData = [], germanBibleData = [], chineseBibleData = [], hebrewBibleData = [], spanishBibleData = [], marathiBibleData =[], punjabiBibleData = [], currentIndianLanguageData = [];
+let netBibleData = [], hindiBibleData = [], odiaBibleData = [], teluguBibleData = [], tamilBibleData = [], kannadaBibleData = [], frenchBibleData = [], germanBibleData = [], chineseBibleData = [], hebrewBibleData = [], spanishBibleData = [], marathiBibleData = [], punjabiBibleData = [], currentIndianLanguageData = [];
 let availableVoices = [];
 let currentSpeech = { utterance: null, isPlaying: false, isPaused: false, source: null };
 let currentPlaybackRate = parseFloat(localStorage.getItem('playbackRate')) || 1.0;
@@ -47,10 +48,10 @@ const transliterationLangMap = {
     'pa_irv_updated': 'gurmukhi',
     'mr_irv_updated': 'devanagari',
     'hebrew_modern_updated': 'roman',
-    'chinese_union_simp_updated':'roman',
-    'french_epee_updated':'roman',
-    'german_luther_updated':'roman',
-    'esp_rv1909_updated':'roman'
+    'chinese_union_simp_updated': 'roman',
+    'french_epee_updated': 'roman',
+    'german_luther_updated': 'roman',
+    'esp_rv1909_updated': 'roman'
 };
 
 async function initializeApp() {
@@ -96,7 +97,7 @@ async function initializeApp() {
 function setupEventListeners() {
     bookSelect.addEventListener('change', () => { populateChapterSelect(bookSelect.value); displayChapter(); });
     chapterSelect.addEventListener('change', displayChapter);
-    languageSelect.addEventListener('change', () => { 
+    languageSelect.addEventListener('change', () => {
         setCurrentIndianLanguageData(); // Update currentIndianLanguageData based on selection
         displayChapter(); // Re-render chapter to show/hide secondary language content
         updateIndianLangPlaybackButtonVisibility(); // Update button visibility
@@ -177,7 +178,7 @@ async function fetchAndProcessBibleData(filePath, langKey) {
             case 'marathi': marathiBibleData = data; break;
             case 'gurmukhi': punjabiBibleData = data; break;
             case 'spanish': spanishBibleData = data; break;
-        }   
+        }
     } catch (error) {
         console.error(`Failed to load ${langKey} data:`, error);
     }
@@ -233,7 +234,7 @@ async function displayChapter(scrollToVerseNum = null) {
 
     const englishVerses = netBibleData.filter(v => v.englishBookName === selectedBook && v.chapter === selectedChapter).sort((a, b) => a.verse - b.verse);
     // Only get Indian language verses if a language is selected
-    const indianLanguageVerses = (languageSelect.value !== 'none' && currentIndianLanguageData.length > 0) 
+    const indianLanguageVerses = (languageSelect.value !== 'none' && currentIndianLanguageData.length > 0)
         ? currentIndianLanguageData.filter(v => v.englishBookName === selectedBook && v.chapter === selectedChapter).sort((a, b) => a.verse - b.verse)
         : [];
 
@@ -292,8 +293,8 @@ async function displayChapter(scrollToVerseNum = null) {
                         transliteratedText = transliterate(indVerse.text, { style: 'roman' });
                     } else if (langValue === 'chinese_union_simp_updated' && typeof window.pinyin === 'object' && typeof window.pinyin.default === 'function') {
                         const pinyinFunction = pinyin.default;
-                        transliteratedText = pinyinFunction(indVerse.text, { 
-                            style: pinyin.STYLE_NORMAL 
+                        transliteratedText = pinyinFunction(indVerse.text, {
+                            style: pinyin.STYLE_NORMAL
                         }).map(word => word[0]).join('');
 
                     } else if (sourceScript && typeof window.Sanscript !== 'undefined') {
@@ -389,10 +390,16 @@ function speakText(text, lang = 'en-US', source = 'verse') {
         return;
     }
 
+    if (!hasVoiceForLanguage(lang)) {
+        const langName = languageSelect.options[languageSelect.selectedIndex]?.text.split('(')[0].trim() || 'this language';
+        alert(`Sorry, your device/browser does not have a Text-to-Speech voice installed for ${langName}.`);
+        return;
+    }
+
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = lang;
     utterance.rate = currentPlaybackRate;
-    utterance.voice = availableVoices.find(v => v.lang === lang && v.localService) || availableVoices.find(v => v.lang === lang);
+    utterance.voice = getBestVoiceForLang(lang);
 
     if (!utterance.voice) {
         console.warn(`No specific voice found for ${lang}. Using default.`);
@@ -425,6 +432,43 @@ function stopCurrentAudio() {
     }
     currentSpeech = { utterance: null, isPlaying: false, isPaused: false, source: null };
     resetChapterAudioButtons();
+}
+
+function getBestVoiceForLang(langCode) {
+    // For English, prioritize clear male voices across different platforms (Chrome, Mac, Windows)
+    if (langCode.startsWith('en')) {
+        const preferredMaleVoices = [
+            'Google UK English Male',
+            'Daniel',
+            'Alex',
+            'Arthur',
+            'Aaron',
+            'Microsoft David - English (United States)',
+            'Microsoft Mark - English (United States)'
+        ];
+
+        for (const voiceName of preferredMaleVoices) {
+            const voice = availableVoices.find(v => v.name === voiceName);
+            if (voice) return voice;
+        }
+    }
+
+    // Default fallback logic: prefer local service for the requested language
+    // But ONLY return a voice if it actually matches the language loosely (e.g., 'hi' for 'hi-IN')
+    // We don't want an English voice trying to read Odia text.
+    const baseLang = langCode.split('-')[0];
+    const exactMatch = availableVoices.find(v => v.lang.startsWith(langCode) && v.localService) ||
+        availableVoices.find(v => v.lang.startsWith(langCode));
+
+    if (exactMatch) return exactMatch;
+
+    const looseMatch = availableVoices.find(v => v.lang.startsWith(baseLang));
+    return looseMatch || null; // Return null if no suitable voice exists
+}
+
+function hasVoiceForLanguage(langCode) {
+    if (availableVoices.length === 0) return true; // Still loading voices from OS, don't block
+    return getBestVoiceForLang(langCode) !== null;
 }
 
 function togglePauseResume() {
@@ -513,13 +557,13 @@ function playChapterSequentially(verses, langCode, source) {
         const utterance = new SpeechSynthesisUtterance(verse.text);
         utterance.lang = langCode;
         utterance.rate = currentPlaybackRate;
-        utterance.voice = availableVoices.find(v => v.lang === langCode && v.localService) || availableVoices.find(v => v.lang === langCode);
+        utterance.voice = getBestVoiceForLang(langCode);
         currentSpeech.utterance = utterance;
 
         utterance.onstart = () => {
             highlightAndScrollVerse(verse.englishBookName, verse.chapter, verse.verse);
         };
-        
+
         utterance.onend = () => {
             currentVerseIndex++;
             playNextVerse(); // Play the next verse in the sequence
@@ -532,7 +576,7 @@ function playChapterSequentially(verses, langCode, source) {
 
         speechSynthesis.speak(utterance);
     }
-    
+
     playNextVerse(); // Start playing the first verse
 }
 
@@ -542,7 +586,7 @@ function handlePlayEnglishChapter() {
         stopCurrentAudio();
     } else {
         // Get the full verse objects, not just the text
-        const verseObjects = netBibleData.filter(v => v.englishBookName === bookSelect.value && v.chapter === parseInt(chapterSelect.value)).sort((a,b) => a.verse - b.verse);
+        const verseObjects = netBibleData.filter(v => v.englishBookName === bookSelect.value && v.chapter === parseInt(chapterSelect.value)).sort((a, b) => a.verse - b.verse);
         if (verseObjects.length > 0) {
             // Call the new sequential player
             playChapterSequentially(verseObjects, 'en-US', 'english_chapter');
@@ -559,7 +603,7 @@ function handlePlayIndianLangChapter() {
     } else {
         // Get the full verse objects
         const verseObjects = currentIndianLanguageData.filter(v => v.englishBookName === bookSelect.value && v.chapter === parseInt(chapterSelect.value)).sort((a, b) => a.verse - b.verse);
-        
+
         // Determine langCode
         let langCode = 'en-US'; // Default fallback
         if (languageSelect.value === 'irv_hindi') langCode = 'hi-IN';
@@ -576,6 +620,13 @@ function handlePlayIndianLangChapter() {
         else if (languageSelect.value === 'esp_rv1909_updated') langCode = 'es-MX';
 
         if (verseObjects.length > 0) {
+            // Check if device supports TTS for this language
+            if (!hasVoiceForLanguage(langCode)) {
+                const langName = languageSelect.options[languageSelect.selectedIndex]?.text.split('(')[0].trim() || 'this language';
+                alert(`Sorry, your device/browser does not have a Text-to-Speech voice installed for ${langName}.`);
+                return;
+            }
+
             // Call the new sequential player
             playChapterSequentially(verseObjects, langCode, 'indian_chapter');
         } else {
@@ -747,7 +798,7 @@ async function handleWordClick(event) {
         }
         return `<p>No other occurrences found.</p>`;
     };
-    
+
     // MODIFICATION START: Check if the word is a stop word
     let occurrencesPromise;
     if (stopWords.includes(word)) {
@@ -768,10 +819,10 @@ async function handleWordClick(event) {
 
     document.getElementById('englishMeaningContent').innerHTML = engDefHtml;
     document.getElementById('indianLangMeaningContent').innerHTML = indianMeaningHtml;
-    
+
     const wikipediaSummaryContent = document.getElementById('wikipediaSummaryContent');
     wikipediaSummaryContent.innerHTML = wikiResult.html;
-    
+
     occurrencesDiv.innerHTML = occurrencesHtml;
 
     if (wikiResult.needsListeners) {
