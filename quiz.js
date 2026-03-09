@@ -20,6 +20,7 @@
         timer: null,
         timeLeft: 15
     };
+    window.quizState = quizState;
 
     // --- Language to JSON file mapping ---
     const languageFiles = {
@@ -318,7 +319,10 @@
                 qPrefix: getQuestionPrefix(bibleData, 'who_in_verse'),
                 options: finalOptions,
                 answer: finalOptions.indexOf(charNameNative),
-                ref: ref
+                ref: ref,
+                book: char.book,
+                ch: char.verseHint.ch,
+                v: char.verseHint.v
             });
         }
 
@@ -351,7 +355,10 @@
                 qPrefix: getQuestionPrefix(bibleData, 'which_book_verse'),
                 options: options,
                 answer: options.indexOf(bookName),
-                ref: ref
+                ref: ref,
+                book: vRef.book,
+                ch: vRef.ch,
+                v: vRef.v
             });
 
             // Question Type 2: Fill-in-the-blank — show verse with missing word
@@ -366,7 +373,10 @@
                         qPrefix: getQuestionPrefix(bibleData, 'fill_blank'),
                         options: fillOptions,
                         answer: fillOptions.indexOf(blankQ.answer),
-                        ref: ref
+                        ref: ref,
+                        book: vRef.book,
+                        ch: vRef.ch,
+                        v: vRef.v
                     });
                 }
             }
@@ -396,7 +406,10 @@
                 qPrefix: getQuestionPrefix(bibleData, 'what_comes_after'),
                 options: options,
                 answer: options.indexOf(nextBook.name),
-                ref: `${currentBook.name} → ${nextBook.name}`
+                ref: `${currentBook.name} → ${nextBook.name}`,
+                book: currentBook.book,
+                ch: 1,
+                v: 1
             });
         }
 
@@ -418,7 +431,10 @@
                 qPrefix: getQuestionPrefix(bibleData, 'how_many_chapters'),
                 options: options,
                 answer: options.indexOf(correctStr),
-                ref: `${bookInfo.name}: ${numChapters}`
+                ref: `${bookInfo.name}: ${numChapters}`,
+                book: bookInfo.book,
+                ch: 1,
+                v: 1
             });
         }
 
@@ -436,7 +452,10 @@
                 qPrefix: getQuestionPrefix(bibleData, 'what_reference'),
                 options: options,
                 answer: options.indexOf(correctRef),
-                ref: correctRef
+                ref: correctRef,
+                book: vRef.book,
+                ch: vRef.ch,
+                v: vRef.v
             });
         }
 
@@ -469,7 +488,10 @@
                 qPrefix: getQuestionPrefix(bibleData, 'creation_day'),
                 options: options,
                 answer: options.indexOf(correctLabel),
-                ref: ref
+                ref: ref,
+                book: day.book,
+                ch: day.ch,
+                v: day.v
             });
         }
 
@@ -497,7 +519,10 @@
                 qPrefix: getQuestionPrefix(bibleData, 'who_in_verse'),
                 options: options,
                 answer: options.indexOf(charName),
-                ref: ref
+                ref: ref,
+                book: sc.book,
+                ch: sc.ch,
+                v: sc.v
             });
         }
 
@@ -966,7 +991,7 @@
 
         // Show reference after answering as a clickable link
         if (q.ref) {
-            $('quizQuestionRef').innerHTML = `<a href="javascript:void(0)" onclick="window.openBibleVerse('${q.ref}')" class="reference-link">📖 ${q.ref}</a>`;
+            $('quizQuestionRef').innerHTML = `<a href="javascript:void(0)" onclick="window.openBibleVerse('${q.ref}', ${q.book}, ${q.ch}, ${q.v})" class="reference-link">📖 ${q.ref}</a>`;
         }
 
         const labels = getLabels();
@@ -1002,7 +1027,7 @@
                     const q = quizState.questions[quizState.currentIndex];
                     // Show reference on timeout as a clickable link
                     if (q.ref) {
-                        $('quizQuestionRef').innerHTML = `<a href="javascript:void(0)" onclick="window.openBibleVerse('${q.ref}')" class="reference-link">📖 ${q.ref}</a>`;
+                        $('quizQuestionRef').innerHTML = `<a href="javascript:void(0)" onclick="window.openBibleVerse('${q.ref}', ${q.book}, ${q.ch}, ${q.v})" class="reference-link">📖 ${q.ref}</a>`;
                     }
 
                     document.querySelectorAll('.option-btn').forEach(btn => {

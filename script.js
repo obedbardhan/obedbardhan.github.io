@@ -106,29 +106,82 @@ if (returnToQuizBtn) {
 }
 
 // NEW: Global function to open a verse from the Quiz section
-window.openBibleVerse = function (reference) {
+window.openBibleVerse = async function (reference, explicitBookNum = null, explicitChapterNum = null, explicitVerseNum = null) {
     if (!reference) return;
 
-    // Parse reference (e.g., "John 3:16", "1 John 2:4", or "ଆଦି ପୁସ୍ତକ 25:26")
-    // This regex looks for everything up to the last space before the chapter:verse
-    const match = reference.match(/^(.+?)\s+(\d+):(\d+)$/);
-    if (!match) return;
+    // Ensure the Bible data is loaded (user might have bypassed landing page)
+    if (!netBibleData || netBibleData.length === 0) {
+        if (typeof window.initializeBibleApp === 'function') {
+            await window.initializeBibleApp();
+        }
+    }
 
-    const bookNameInput = match[1].trim();
-    const chapterNum = parseInt(match[2]);
-    const verseNum = parseInt(match[3]);
+    let bookNameInput;
+    let chapterNum;
+    let verseNum;
+
+    if (explicitBookNum !== null && explicitChapterNum !== null && explicitVerseNum !== null) {
+        // We were given the exact indices, no need to parse the reference string
+        const englishBook = bibleBooks[explicitBookNum - 1]; // 1-indexed to 0-indexed
+        if (englishBook) {
+            bookNameInput = englishBook;
+            chapterNum = explicitChapterNum;
+            verseNum = explicitVerseNum;
+        }
+    }
+
+    if (!bookNameInput) {
+        // Parse reference (e.g., "John 3:16", "1 John 2:4", or "ଆଦି ପୁସ୍ତକ 25:26")
+        // This regex looks for everything up to the last space before the chapter:verse
+        const match = reference.match(/^(.+?)\s+(\d+):(\d+)$/);
+        if (!match) return;
+
+        bookNameInput = match[1].trim();
+        chapterNum = parseInt(match[2]);
+        verseNum = parseInt(match[3]);
+    }
+
+    // Auto-select the secondary language based on the quiz language FIRST
+    if (window.quizState && window.quizState.language) {
+        const langMap = {
+            'hindi': 'irv_hindi',
+            'odia': 'odia_all_books',
+            'telugu': 'te_irv_updated',
+            'tamil': 'ta_oitce_updated',
+            'kannada': 'kn_irv_updated',
+            'gurmukhi': 'pa_irv_updated',
+            'marathi': 'mr_irv_updated',
+            'french': 'french_epee_updated',
+            'german': 'german_luther_updated',
+            'chinese': 'chinese_union_simp_updated',
+            'hebrew': 'hebrew_modern_updated',
+            'spanish': 'esp_rv1909_updated',
+            'english': 'none'
+        };
+
+        const mappedLang = langMap[window.quizState.language];
+        if (mappedLang && languageSelect.value !== mappedLang) {
+            languageSelect.value = mappedLang;
+            setCurrentIndianLanguageData();
+        }
+    }
 
     let matchedBook = null;
 
-    // 1. Try to find the book directly in the English list
-    matchedBook = bibleBooks.find(b => b.toLowerCase() === bookNameInput.toLowerCase());
+    if (explicitBookNum !== null) {
+        // If we have explicit book id, we know exactly what it is.
+        matchedBook = bibleBooks[explicitBookNum - 1];
+    } else {
+        // 1. Try to find the book directly in the English list
+        matchedBook = bibleBooks.find(b => b.toLowerCase() === bookNameInput.toLowerCase());
 
-    // 2. If not found, try to reverse-lookup from the Indian language data
-    if (!matchedBook && currentIndianLanguageData && currentIndianLanguageData.length > 0) {
-        // Find a verse in the current language data where the native `book_name` matches the input
-        const foundData = currentIndianLanguageData.find(v => v.book_name === bookNameInput);
-        if (foundData && foundData.englishBookName) {
-            matchedBook = foundData.englishBookName;
+        // 2. If not found, try to reverse-lookup from the Indian language data
+        if (!matchedBook && currentIndianLanguageData && currentIndianLanguageData.length > 0) {
+            // Find a verse in the current language data where the native `book_name` matches the input
+            const foundData = currentIndianLanguageData.find(v => v.book_name === bookNameInput);
+            if (foundData && foundData.englishBookName) {
+                matchedBook = foundData.englishBookName;
+            }
         }
     }
 
@@ -147,14 +200,15 @@ window.openBibleVerse = function (reference) {
     // Set dropdowns and load data
     bookSelect.value = matchedBook;
     populateChapterSelect(matchedBook);
-    chapterSelect.value = chapterNum;
+    chapterSelect.value = chapterNum.toString(); // Must be a string for <select> value
 
     // Display the chapter and scroll to verse
     displayChapter(verseNum);
 
-    // Show the return button
+    // Show the return button and ensure it's at the top initially
     if (returnToQuizBtn) {
         returnToQuizBtn.style.display = 'block';
+        window.scrollTo(0, 0);
     }
 };
 
@@ -187,7 +241,8 @@ function setupEventListeners() {
     resetChapterAudioButtons();
 
     goButton.addEventListener('click', () => {
-        displayChapter(1);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        displayChapter(); // Don't pass 1, so it stay at the top
         // On mobile, hide controls after clicking "Go"
         if (window.innerWidth <= 768) {
             secondaryControls.classList.add('hidden');
@@ -383,12 +438,18 @@ async function displayChapter(scrollToVerseNum = null) {
     });
 
     if (scrollToVerseNum) {
-        const targetElement = document.getElementById(`verse-${scrollToVerseNum}`);
-        if (targetElement) {
-            targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            targetElement.classList.add('highlighted-verse');
-            setTimeout(() => targetElement.classList.remove('highlighted-verse'), 3000);
-        }
+        // Increased delay to 400ms to ensure DOM rendering and styles are applied for better scrolling
+        setTimeout(() => {
+            const targetElement = document.getElementById(`verse-${scrollToVerseNum}`);
+            if (targetElement) {
+                targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                // Remove previous highlights if any
+                document.querySelectorAll('.highlighted-verse').forEach(el => el.classList.remove('highlighted-verse'));
+                targetElement.classList.add('highlighted-verse');
+                // Keep the highlight longer (5 seconds)
+                setTimeout(() => targetElement.classList.remove('highlighted-verse'), 5000);
+            }
+        }, 400);
     }
     updateIndianLangPlaybackButtonVisibility(); // Ensure button visibility is correct after rendering
 }
