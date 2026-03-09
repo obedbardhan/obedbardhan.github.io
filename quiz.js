@@ -964,8 +964,10 @@
 
         document.querySelectorAll('.option-btn').forEach(btn => btn.classList.add('disabled'));
 
-        // Show reference after answering
-        if (q.ref) $('quizQuestionRef').textContent = q.ref;
+        // Show reference after answering as a clickable link
+        if (q.ref) {
+            $('quizQuestionRef').innerHTML = `<a href="javascript:void(0)" onclick="window.openBibleVerse('${q.ref}')" class="reference-link">📖 ${q.ref}</a>`;
+        }
 
         const labels = getLabels();
         $('quizScoreLive').textContent = `${labels.score}: ${quizState.score}`;
@@ -998,8 +1000,10 @@
                     quizState.skipped++;
 
                     const q = quizState.questions[quizState.currentIndex];
-                    // Show reference on timeout
-                    if (q.ref) $('quizQuestionRef').textContent = q.ref;
+                    // Show reference on timeout as a clickable link
+                    if (q.ref) {
+                        $('quizQuestionRef').innerHTML = `<a href="javascript:void(0)" onclick="window.openBibleVerse('${q.ref}')" class="reference-link">📖 ${q.ref}</a>`;
+                    }
 
                     document.querySelectorAll('.option-btn').forEach(btn => {
                         if (parseInt(btn.dataset.index) === q.answer) {

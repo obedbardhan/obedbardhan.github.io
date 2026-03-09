@@ -93,6 +93,71 @@ async function initializeApp() {
     }
 }
 
+// NEW: Hook up the Return to Quiz button
+const returnToQuizBtn = document.getElementById('returnToQuizBtn');
+if (returnToQuizBtn) {
+    returnToQuizBtn.addEventListener('click', () => {
+        // Hide Bible section, show Quiz section
+        document.getElementById('bibleSection').style.display = 'none';
+        document.getElementById('quizSection').style.display = 'block';
+        returnToQuizBtn.style.display = 'none';
+        stopCurrentAudio();
+    });
+}
+
+// NEW: Global function to open a verse from the Quiz section
+window.openBibleVerse = function (reference) {
+    if (!reference) return;
+
+    // Parse reference (e.g., "John 3:16", "1 John 2:4", or "ଆଦି ପୁସ୍ତକ 25:26")
+    // This regex looks for everything up to the last space before the chapter:verse
+    const match = reference.match(/^(.+?)\s+(\d+):(\d+)$/);
+    if (!match) return;
+
+    const bookNameInput = match[1].trim();
+    const chapterNum = parseInt(match[2]);
+    const verseNum = parseInt(match[3]);
+
+    let matchedBook = null;
+
+    // 1. Try to find the book directly in the English list
+    matchedBook = bibleBooks.find(b => b.toLowerCase() === bookNameInput.toLowerCase());
+
+    // 2. If not found, try to reverse-lookup from the Indian language data
+    if (!matchedBook && currentIndianLanguageData && currentIndianLanguageData.length > 0) {
+        // Find a verse in the current language data where the native `book_name` matches the input
+        const foundData = currentIndianLanguageData.find(v => v.book_name === bookNameInput);
+        if (foundData && foundData.englishBookName) {
+            matchedBook = foundData.englishBookName;
+        }
+    }
+
+    // 3. If STILL not found (perhaps they clicked an Odia link but changed the dropdown to Hindi),
+    // we would ideally search ALL loaded data arrays, but for now we'll fail gracefully.
+    if (!matchedBook) {
+        console.warn("Could not resolve book name to English list:", bookNameInput);
+        return;
+    }
+
+    // Switch UI from Quiz Section to Bible Section
+    document.getElementById('quizSection').style.display = 'none';
+    document.getElementById('landingPage').style.display = 'none';
+    document.getElementById('bibleSection').style.display = 'block';
+
+    // Set dropdowns and load data
+    bookSelect.value = matchedBook;
+    populateChapterSelect(matchedBook);
+    chapterSelect.value = chapterNum;
+
+    // Display the chapter and scroll to verse
+    displayChapter(verseNum);
+
+    // Show the return button
+    if (returnToQuizBtn) {
+        returnToQuizBtn.style.display = 'block';
+    }
+};
+
 
 function setupEventListeners() {
     bookSelect.addEventListener('change', () => { populateChapterSelect(bookSelect.value); displayChapter(); });
@@ -435,15 +500,19 @@ function stopCurrentAudio() {
 }
 
 function getBestVoiceForLang(langCode) {
-    // For English, prioritize clear male voices across different platforms (Chrome, Mac, Windows)
+    // For English, prioritize high-quality, humane "Neural" or online voices
     if (langCode.startsWith('en')) {
+        // Find best humane voices (Edge Natural, Chrome Online Google voices, Safari Premium)
+        const premiumHumanePattern = /(Natural|Online|Neural|Premium|Google US English|Google UK English)/i;
+        const premiumVoice = availableVoices.find(v => v.lang.startsWith('en') && premiumHumanePattern.test(v.name));
+
+        if (premiumVoice) return premiumVoice;
+
+        // Fallback to clear, but standard male voices if no premium neural ones are found
         const preferredMaleVoices = [
-            'Google UK English Male',
+            'Alex', // macOS Premium
             'Daniel',
-            'Alex',
             'Arthur',
-            'Aaron',
-            'Microsoft David - English (United States)',
             'Microsoft Mark - English (United States)'
         ];
 
@@ -453,13 +522,15 @@ function getBestVoiceForLang(langCode) {
         }
     }
 
-    // Default fallback logic: prefer local service for the requested language
-    // But ONLY return a voice if it actually matches the language loosely (e.g., 'hi' for 'hi-IN')
-    // We don't want an English voice trying to read Odia text.
+    // Default fallback logic: prefer humane online voices for the requested language first
     const baseLang = langCode.split('-')[0];
-    const exactMatch = availableVoices.find(v => v.lang.startsWith(langCode) && v.localService) ||
-        availableVoices.find(v => v.lang.startsWith(langCode));
 
+    // 1. Try to find a premium/natural voice for the exact language
+    const premiumMatch = availableVoices.find(v => v.lang.startsWith(langCode) && /(Natural|Online|Neural|Premium)/i.test(v.name));
+    if (premiumMatch) return premiumMatch;
+
+    // 2. Exact match (any voice)
+    const exactMatch = availableVoices.find(v => v.lang.startsWith(langCode));
     if (exactMatch) return exactMatch;
 
     const looseMatch = availableVoices.find(v => v.lang.startsWith(baseLang));
