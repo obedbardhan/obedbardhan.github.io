@@ -283,7 +283,9 @@ async function fetchAndProcessBibleData(filePath, langKey) {
     try {
         const response = await fetch(filePath);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const data = await response.json();
+        const buffer = await response.arrayBuffer();
+        const text = new TextDecoder('utf-8').decode(buffer);
+        const data = JSON.parse(text);
         switch (langKey) {
             case 'english': netBibleData = data; break;
             case 'hindi': hindiBibleData = data; break;

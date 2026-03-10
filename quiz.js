@@ -229,7 +229,9 @@
 
         const resp = await fetch(file);
         if (!resp.ok) throw new Error('Failed to load ' + file);
-        const data = await resp.json();
+        const buffer = await resp.arrayBuffer();
+        const text = new TextDecoder('utf-8').decode(buffer);
+        const data = JSON.parse(text);
 
         const fixes = bookNameFixes[language] || {};
 
@@ -802,14 +804,7 @@
             showSection('landingPage');
         });
 
-        // Category selector
-        document.querySelectorAll('.category-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('selected'));
-                btn.classList.add('selected');
-                quizState.category = btn.dataset.category;
-            });
-        });
+        // Category is now randomly selected (UI removed)
 
         // Count selector
         document.querySelectorAll('.count-btn').forEach(btn => {
@@ -887,7 +882,12 @@
 
             const engData = bibleDataCache['english'];
 
-            // Generate questions based on category
+            // Randomly pick a category for this quiz session
+            const categories = ['characters', 'memory', 'youth', 'kids'];
+            quizState.category = categories[Math.floor(Math.random() * categories.length)];
+            console.log('[Quiz] Randomly selected category:', quizState.category);
+
+            // Generate questions based on randomly selected category
             switch (quizState.category) {
                 case 'characters':
                     quizState.questions = generateCharacterQuestions(bibleData, engData, quizState.questionCount);

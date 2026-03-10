@@ -1,0 +1,12 @@
+{
+    "appId": "io.github.obedbardhan.linguabible",
+    "appName": "LinguaBible",
+    "webDir": "www",
+    "server": {
+        "androidScheme": "https"
+    },
+    "ios": {
+        "contentInset": "automatic",
+        "preferredContentMode": "mobile"
+    }
+}

@@ -4,11 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Easy Bible Study</title>
+    <title>Plurilingual Bible — Quiz & Study</title>
     <meta name="description"
         content="Read the Bible in multiple languages and test your knowledge with Bible quizzes at different difficulty levels.">
     <!-- Open Graph Meta Tags for Sharing -->
-    <meta property="og:title" content="Easy Bible Study & Quiz">
+    <meta property="og:title" content="Plurilingual Bible — Quiz & Study">
     <meta property="og:description"
         content="Read the Word of God in 13 languages or test your knowledge with interactive Bible quizzes.">
     <meta property="og:image"
@@ -16,9 +16,19 @@
     <meta property="og:url" content="https://obedbardhan.github.io/">
     <meta property="og:type" content="website">
 
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#2d3748">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Plurilingual Bible">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;700&family=Noto+Sans+Oriya:wght@400;700&family=Noto+Sans+Telugu:wght@400;700&family=Noto+Sans+Tamil:wght@400;700&family=Noto+Sans+Kannada:wght@400;700&family=Noto+Sans+Gurmukhi:wght@400;700&family=Noto+Sans+Hebrew:wght@400;700&family=Noto+Sans+SC:wght@400;700&family=Noto+Color+Emoji&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <script src="sanscript.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/pinyin/dist/pinyin.js"></script>
@@ -33,7 +43,7 @@
             <div class="landing-icon">
                 <div class="cross-icon"></div>
             </div>
-            <h1 class="landing-title">Easy Bible Study</h1>
+            <h1 class="landing-title">Plurilingual Bible<br><span class="landing-subtitle-line">Quiz & Study</span></h1>
             <p class="landing-subtitle">Read the Word of God in multiple languages or test your knowledge with Bible
                 quizzes</p>
             <div class="landing-buttons">
@@ -112,7 +122,8 @@
         </header>
 
         <main>
-            <button id="returnToQuizBtn" class="action-btn return-btn" style="display: none; margin: 10px auto 20px auto; padding: 12px 24px; background: #007bff; color: white; border-radius: 20px; font-weight: bold; border: none; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">🔙
+            <button id="returnToQuizBtn" class="action-btn return-btn"
+                style="display: none; margin: 10px auto 20px auto; padding: 12px 24px; background: #007bff; color: white; border-radius: 20px; font-weight: bold; border: none; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">🔙
                 Return to Quiz 🏁</button>
 
             <div id="bibleTextDiv" class="verse-container">
@@ -144,7 +155,7 @@
             <div class="quiz-card setup-card">
                 <div class="setup-icon">🧠</div>
                 <h2>Set Up Your Quiz</h2>
-                <p class="setup-desc">Choose your language, quiz category, and number of questions</p>
+                <p class="setup-desc">Choose your language and number of questions</p>
 
                 <div class="setup-form">
                     <div class="setup-group">
@@ -164,28 +175,6 @@
                             <option value="german">German (Deutsch)</option>
                             <option value="spanish">Spanish (Español)</option>
                         </select>
-                    </div>
-
-                    <div class="setup-group">
-                        <label>Quiz Category</label>
-                        <div class="category-selector" id="categorySelector">
-                            <button class="category-btn selected" data-category="characters">
-                                <span class="cat-icon">👤</span>
-                                <span class="cat-name">Bible Characters</span>
-                            </button>
-                            <button class="category-btn" data-category="memory">
-                                <span class="cat-icon">📝</span>
-                                <span class="cat-name">Verse Memory</span>
-                            </button>
-                            <button class="category-btn" data-category="youth">
-                                <span class="cat-icon">⛪</span>
-                                <span class="cat-name">Church Youth</span>
-                            </button>
-                            <button class="category-btn" data-category="kids">
-                                <span class="cat-icon">👶</span>
-                                <span class="cat-name">Kids Mode</span>
-                            </button>
-                        </div>
                     </div>
 
                     <div class="setup-group">
@@ -270,8 +259,21 @@
         </div>
     </div>
 
-    <script src="script.js?v=3"></script>
-    <script src="quiz.js?v=3"></script>
+    <script src="script.js"></script>
+    <script src="quiz.js"></script>
+
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            try {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('[PWA] Service Worker registered:', reg.scope))
+                    .catch(err => console.warn('[PWA] SW registration skipped:', err));
+            } catch (e) {
+                console.warn('[PWA] SW not supported in this environment');
+            }
+        }
+    </script>
 </body>
 
 </html>
