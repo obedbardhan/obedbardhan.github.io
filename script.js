@@ -1,4 +1,15 @@
 // The application will now start when the Bible section is opened from the landing page.
+
+// Global error handling for production stability
+window.onerror = function(message, source, lineno, colno, error) {
+    console.error('[Global Error]:', message, 'at', source, lineno + ':' + colno);
+    return false;
+};
+
+window.onunhandledrejection = function(event) {
+    console.error('[Unhandled Rejection]:', event.reason);
+};
+
 // Exposed as a global function so quiz.js can call it.
 window.initializeBibleApp = initializeApp;
 
@@ -101,6 +112,14 @@ if (returnToQuizBtn) {
         document.getElementById('bibleSection').style.display = 'none';
         document.getElementById('quizSection').style.display = 'block';
         returnToQuizBtn.style.display = 'none';
+        
+        // Hide Bible reader controls when returning
+        const secondaryControls = document.querySelector('.secondary-controls');
+        const toggleControlsButton = document.getElementById('toggleControlsButton');
+        if (secondaryControls && toggleControlsButton) {
+            secondaryControls.classList.add('hidden');
+            toggleControlsButton.textContent = '+';
+        }
         stopCurrentAudio();
     });
 }
@@ -197,6 +216,14 @@ window.openBibleVerse = async function (reference, explicitBookNum = null, expli
     document.getElementById('landingPage').style.display = 'none';
     document.getElementById('bibleSection').style.display = 'block';
 
+    // Force secondary controls to be collapsed when entering the reader
+    const secondaryControls = document.querySelector('.secondary-controls');
+    const toggleControlsButton = document.getElementById('toggleControlsButton');
+    if (secondaryControls && toggleControlsButton) {
+        secondaryControls.classList.add('hidden');
+        toggleControlsButton.textContent = '+';
+    }
+
     // Set dropdowns and load data
     bookSelect.value = matchedBook;
     populateChapterSelect(matchedBook);
@@ -243,11 +270,6 @@ function setupEventListeners() {
     goButton.addEventListener('click', () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
         displayChapter(); // Don't pass 1, so it stay at the top
-        // On mobile, hide controls after clicking "Go"
-        if (window.innerWidth <= 768) {
-            secondaryControls.classList.add('hidden');
-            toggleControlsButton.textContent = '+';
-        }
     });
 
     toggleControlsButton.addEventListener('click', () => {
@@ -261,13 +283,8 @@ function setupEventListeners() {
 }
 
 function setInitialControlsState() {
-    if (window.innerWidth <= 768) {
-        secondaryControls.classList.add('hidden');
-        toggleControlsButton.textContent = '+';
-    } else {
-        secondaryControls.classList.remove('hidden');
-        toggleControlsButton.textContent = '-';
-    }
+    secondaryControls.classList.remove('hidden');
+    toggleControlsButton.textContent = '-';
 }
 
 // NEW: Function to update the visibility of the Indian language playback button
@@ -382,7 +399,8 @@ async function displayChapter(scrollToVerseNum = null) {
 
             if (engVerse?.text) {
                 const cleanEngText = engVerse.text.replace(/"/g, '&quot;');
-                verseBlock.innerHTML += `<p class="english-verse">${engVerse.text.replace(/([a-zA-Z0-9']+)/g, `<span class="word-clickable" data-word="$1">$1</span>`)} <button class="play-verse-audio-btn" data-lang="en-US" data-text="${cleanEngText}">🔊</button></p>`;
+                const speakerIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>';
+                verseBlock.innerHTML += `<p class="english-verse">${engVerse.text.replace(/([a-zA-Z0-9']+)/g, `<span class="word-clickable" data-word="$1">$1</span>`)} <button class="play-verse-audio-btn" data-lang="en-US" data-text="${cleanEngText}">${speakerIcon}</button></p>`;
             }
 
             // Only render Indian language content if a secondary language is selected
@@ -404,7 +422,8 @@ async function displayChapter(scrollToVerseNum = null) {
                     default: langInfo = { name: 'Indian Language', code: 'en-US' };
                 }
                 const cleanIndText = indVerse.text.replace(/"/g, '&quot;');
-                verseBlock.innerHTML += `<p class="indian-lang-verse">(${langInfo.name}): ${indVerse.text} <button class="play-verse-audio-btn" data-lang="${langInfo.code}" data-text="${cleanIndText}">🔊</button></p>`;
+                const speakerIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>';
+                verseBlock.innerHTML += `<p class="indian-lang-verse">(${langInfo.name}): ${indVerse.text} <button class="play-verse-audio-btn" data-lang="${langInfo.code}" data-text="${cleanIndText}">${speakerIcon}</button></p>`;
 
                 try {
                     const langValue = languageSelect.value;

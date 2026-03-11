@@ -11,6 +11,7 @@
     let quizState = {
         language: 'english',
         category: 'characters',
+        book: 'all', // new property for specific book quiz
         questionCount: 5,
         questions: [],
         currentIndex: 0,
@@ -256,6 +257,189 @@
         return result;
     }
 
+    // --- Book Dropdown Populator ---
+    async function populateBooksDropdown(language) {
+        const bookSelect = $('quizBookSelect');
+        if (!bookSelect) return;
+
+        bookSelect.innerHTML = '<option value="all">Loading books...</option>';
+
+        try {
+            const bibleData = await loadBibleData(language);
+            bookSelect.innerHTML = '<option value="all">All Books</option>';
+
+            bibleData.bookList.forEach((bookObj, index) => {
+                const bookNum = bookObj.book; // The key like "GEN"
+                const opt = document.createElement('option');
+                opt.value = bookNum;
+                opt.textContent = `${index + 1}. ${bookObj.name}`;
+                bookSelect.appendChild(opt);
+            });
+        } catch (e) {
+            console.error("Error populating quiz books:", e);
+            bookSelect.innerHTML = '<option value="all">All Books</option>';
+        }
+    }
+
+    // --- Generate Book-wise Fill-in-the-Blank Questions ---
+    function generateBookQuestions(bibleData, engData, count, bookNum) {
+        const questions = [];
+        const labels = getQuestionPrefix(bibleData, 'fill_blank');
+
+        const bookData = bibleData.indexed[bookNum];
+        if (!bookData) return questions;
+
+        let availableVerses = [];
+
+        // Gather all verses that have enough text to blank out
+        for (const [cNum, chapter] of Object.entries(bookData)) {
+            for (const [vNum, vText] of Object.entries(chapter)) {
+                if (vText && vText.length > 20) {
+                    availableVerses.push({
+                        text: vText,
+                        bookName: bibleData.bookNames[bookNum],
+                        cNum: cNum,
+                        vNum: vNum
+                    });
+                }
+            }
+        }
+
+        // Need at least 4 verses to generate good distractors
+        if (availableVerses.length < 4) return questions;
+
+        availableVerses = shuffle(availableVerses);
+
+        const lang = quizState.language;
+        const charDict = nativeCharacterNames[lang] || {};
+        const engNames = Object.keys(charDict);
+
+        // Count occurrences of all words in the book to find rare entity words vs common stop words
+        const wordFreq = {};
+        for (const v of availableVerses) {
+            const cleanNative = v.text.replace(/[\u00b6]/g, '').trim();
+            cleanNative.split(/\s+/).forEach(w => {
+                const cw = w.replace(/[,."“”''!?;:।॥\u0964\u0965]/g, '').toLowerCase();
+                if (cw.length > 0) wordFreq[cw] = (wordFreq[cw] || 0) + 1;
+            });
+        }
+
+        // Generate dynamic stop-words (top 100 most frequent words in the book)
+        // These are statistically guaranteed to be articles, conjunctions, and prepositions across any language.
+        const sortedWords = Object.entries(wordFreq).sort((a, b) => b[1] - a[1]);
+        const dynamicStopWords = new Set(sortedWords.slice(0, 100).map(entry => entry[0]));
+
+        // We want to generate 'count' questions, but we might skip verses so we iterate until we hit the count or run out
+        for (const v of availableVerses) {
+            if (questions.length >= count) break;
+
+            const cleanNative = v.text.replace(/[\u00b6]/g, '').trim();
+            const nativeWordsArray = cleanNative.split(/\s+/);
+
+            // Cross-Reference English Text for Proper Nouns
+            const engVerseText = engData.indexed[bookNum]?.[v.cNum]?.[v.vNum];
+            let targetNativeWord = null;
+            let targetNativeIdx = -1;
+
+            if (engVerseText) {
+                // 1. Try Dictionary Match (High Confidence)
+                for (const name of engNames) {
+                    if (new RegExp(`\\b${name}\\b`, 'i').test(engVerseText)) {
+                        const nativeName = charDict[name];
+                        const idx = nativeWordsArray.findIndex(w => w.includes(nativeName));
+                        if (idx !== -1) {
+                            targetNativeWord = nativeName;
+                            targetNativeIdx = idx;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // 2. Fallback: Frequency Analysis - Find the rarest word in this verse.
+            // Rare words across a book are extremely likely to be specific Places, Proper Nouns, or unique events (like Ark, Noah, Ur, etc)
+            if (!targetNativeWord || targetNativeIdx === -1) {
+                let lowestFreq = Infinity;
+                let bestIdx = -1;
+
+                nativeWordsArray.forEach((w, i) => {
+                    const cw = w.replace(/[,."“”''!?;:।॥\u0964\u0965]/g, '').toLowerCase();
+                    // We only accept words > 2 chars to avoid single letters or tiny punctuation glitches, 
+                    // but we DO accept 3-letter words like "Ur", "Gad", "Er", "Lot", "Nuh" etc.
+                    // Reject any word that falls into the dynamic stop-words list
+                    if (cw.length > 2 && wordFreq[cw] && !dynamicStopWords.has(cw)) {
+                        if (wordFreq[cw] < lowestFreq) {
+                            lowestFreq = wordFreq[cw];
+                            bestIdx = i;
+                        }
+                    }
+                });
+
+                // If even our "rarest" word is highly common (e.g. freq > 10 in a small book), it's probably a stop word, skip this verse.
+                if (bestIdx !== -1 && lowestFreq <= 10) {
+                    targetNativeIdx = bestIdx;
+                    targetNativeWord = nativeWordsArray[bestIdx].replace(/[,."“”''!?;:।॥\u0964\u0965]/g, '');
+                } else {
+                    continue; // Skip verse entirely if no good entity proxy found
+                }
+            }
+
+            // Create question with exactly that array element replaced with '_____'
+            const blankedText = nativeWordsArray.map((w, i) => i === targetNativeIdx ? '_____' : w).join(' ');
+
+            // Generate distractors from other verses in the same book
+            const distractors = new Set();
+            let attempts = 0;
+            while (distractors.size < 3 && attempts < 50) {
+                attempts++;
+                const randVerse = availableVerses[Math.floor(Math.random() * availableVerses.length)];
+                const otherWordsMatch = randVerse.text.replace(/[\u00b6]/g, '').trim().split(/\s+/);
+
+                if (otherWordsMatch.length > 0) {
+                    // Pick a distractor using the same length heuristic to ensure it's also a noun/entity
+                    const validCandidateIndices = [];
+                    otherWordsMatch.forEach((w, i) => {
+                        const cwLower = w.replace(/[,."“”''!?;:।॥\u0964\u0965]/g, '').toLowerCase();
+                        // Reject stop words as distractors
+                        if (cwLower.length >= 3 && !dynamicStopWords.has(cwLower)) validCandidateIndices.push(i);
+                    });
+
+                    if (validCandidateIndices.length > 0) {
+                        const candIdx = validCandidateIndices[Math.floor(Math.random() * validCandidateIndices.length)];
+                        const candidate = otherWordsMatch[candIdx].replace(/[,."“”''!?;:।॥\u0964\u0965]/g, '');
+
+                        if (candidate.length > 2 && candidate !== targetNativeWord && !candidate.includes('_')) {
+                            distractors.add(candidate);
+                        }
+                    }
+                }
+            }
+            while (distractors.size < 3) distractors.add(Math.random().toString(36).substring(7));
+
+            const options = shuffle([targetNativeWord, ...distractors]);
+
+            // Calculate difficulty level based on length and uniqueness.
+            // Frequency 1-2 = Rare/Difficult (3pts), 3-5 = Moderate (2pts), 6+ = Easy (1pt)
+            let rawTarget = targetNativeWord.toLowerCase();
+            let freq = wordFreq[rawTarget] || 5; 
+            let pts = freq <= 2 ? 3 : (freq <= 5 ? 2 : 1);
+
+            questions.push({
+                qPrefix: labels,
+                q: blankedText,
+                options: options,
+                answer: options.indexOf(targetNativeWord),
+                ref: `${v.bookName} ${v.cNum}:${v.vNum}`,
+                book: bookNum,
+                ch: v.cNum,
+                v: v.vNum,
+                points: pts
+            });
+        }
+
+        return questions;
+    }
+
     // Get verse text
     function getVerse(bibleData, book, chapter, verse) {
         try {
@@ -324,7 +508,8 @@
                 ref: ref,
                 book: char.book,
                 ch: char.verseHint.ch,
-                v: char.verseHint.v
+                v: char.verseHint.v,
+                points: 2 // Character questions are moderate
             });
         }
 
@@ -360,7 +545,8 @@
                 ref: ref,
                 book: vRef.book,
                 ch: vRef.ch,
-                v: vRef.v
+                v: vRef.v,
+                points: 3 // Verse memory questions are difficult
             });
 
             // Question Type 2: Fill-in-the-blank — show verse with missing word
@@ -378,7 +564,8 @@
                         ref: ref,
                         book: vRef.book,
                         ch: vRef.ch,
-                        v: vRef.v
+                        v: vRef.v,
+                        points: 3 // Verse memory questions are difficult
                     });
                 }
             }
@@ -411,7 +598,8 @@
                 ref: `${currentBook.name} → ${nextBook.name}`,
                 book: currentBook.book,
                 ch: 1,
-                v: 1
+                v: 1,
+                points: 2 // Youth questions are moderate
             });
         }
 
@@ -436,7 +624,8 @@
                 ref: `${bookInfo.name}: ${numChapters}`,
                 book: bookInfo.book,
                 ch: 1,
-                v: 1
+                v: 1,
+                points: 2 // Youth questions are moderate
             });
         }
 
@@ -457,7 +646,8 @@
                 ref: correctRef,
                 book: vRef.book,
                 ch: vRef.ch,
-                v: vRef.v
+                v: vRef.v,
+                points: 2 // Youth questions are moderate
             });
         }
 
@@ -493,7 +683,8 @@
                 ref: ref,
                 book: day.book,
                 ch: day.ch,
-                v: day.v
+                v: day.v,
+                points: 1 // Kids questions are easy
             });
         }
 
@@ -524,7 +715,8 @@
                 ref: ref,
                 book: sc.book,
                 ch: sc.ch,
-                v: sc.v
+                v: sc.v,
+                points: 1 // Kids questions are easy
             });
         }
 
@@ -541,7 +733,8 @@
                 qPrefix: getQuestionPrefix(bibleData, 'which_book_verse'),
                 options: options,
                 answer: options.indexOf(bookName),
-                ref: getRef(bibleData, vRef.book, vRef.ch, vRef.v)
+                ref: getRef(bibleData, vRef.book, vRef.ch, vRef.v),
+                points: 1 // Kids questions are easy
             });
         }
 
@@ -796,13 +989,26 @@
 
     // --- Initialize Quiz Module ---
     function initQuiz() {
-        $('openBibleBtn').addEventListener('click', () => showSection('bibleSection'));
-        $('openQuizBtn').addEventListener('click', () => showSection('quizSection'));
-        $('backToHomeBtn').addEventListener('click', () => showSection('landingPage'));
-        $('quizBackToHomeBtn').addEventListener('click', () => {
+        if ($('openBibleBtn')) $('openBibleBtn').addEventListener('click', () => showSection('bibleSection'));
+        if ($('openQuizBtn')) $('openQuizBtn').addEventListener('click', () => showSection('quizSection'));
+        if ($('backToHomeBtn')) $('backToHomeBtn').addEventListener('click', () => showSection('landingPage'));
+        if ($('quizBackToHomeBtn')) $('quizBackToHomeBtn').addEventListener('click', () => {
             clearTimer();
             showSection('landingPage');
         });
+
+        // Populate book dropdown on language change
+        const langSelect = $('quizLanguageSelect');
+        if (langSelect) {
+            langSelect.addEventListener('change', async (e) => {
+                await populateBooksDropdown(e.target.value);
+            });
+        }
+
+        // Initial populate
+        if ($('quizLanguageSelect')) {
+            populateBooksDropdown($('quizLanguageSelect').value);
+        }
 
         // Category is now randomly selected (UI removed)
 
@@ -840,6 +1046,14 @@
                 window._bibleInitialized = true;
                 window.initializeBibleApp();
             }
+
+            // Force secondary controls to be collapsed when navigating to the Bible reader section
+            const secondaryControls = document.querySelector('.secondary-controls');
+            const toggleControlsButton = document.getElementById('toggleControlsButton');
+            if (secondaryControls && toggleControlsButton) {
+                secondaryControls.classList.add('hidden');
+                toggleControlsButton.textContent = '+';
+            }
         }
 
         if (sectionId === 'quizSection') {
@@ -857,6 +1071,8 @@
     // --- Start Quiz ---
     async function startQuiz() {
         quizState.language = $('quizLanguageSelect').value;
+        const bookSelectVal = $('quizBookSelect') ? $('quizBookSelect').value : 'all';
+        quizState.book = bookSelectVal === 'all' ? 'all' : parseInt(bookSelectVal);
         quizState.currentIndex = 0;
         quizState.score = 0;
         quizState.skipped = 0;
@@ -887,30 +1103,40 @@
             quizState.category = categories[Math.floor(Math.random() * categories.length)];
             console.log('[Quiz] Randomly selected category:', quizState.category);
 
-            // Generate questions based on randomly selected category
-            switch (quizState.category) {
-                case 'characters':
-                    quizState.questions = generateCharacterQuestions(bibleData, engData, quizState.questionCount);
-                    break;
-                case 'memory':
-                    quizState.questions = generateVerseMemoryQuestions(bibleData, engData, quizState.questionCount);
-                    break;
-                case 'youth':
-                    quizState.questions = generateYouthQuestions(bibleData, engData, quizState.questionCount);
-                    break;
-                case 'kids':
-                    quizState.questions = generateKidsQuestions(bibleData, engData, quizState.questionCount);
-                    break;
-                default:
-                    quizState.questions = generateCharacterQuestions(bibleData, engData, quizState.questionCount);
+            // Generate questions based on randomly selected category OR selected book
+            if (quizState.book !== 'all') {
+                quizState.questions = generateBookQuestions(bibleData, engData, quizState.questionCount, quizState.book);
+                console.log('[Quiz] Generated questions for specific book:', quizState.book);
+            } else {
+                switch (quizState.category) {
+                    case 'characters':
+                        quizState.questions = generateCharacterQuestions(bibleData, engData, quizState.questionCount);
+                        break;
+                    case 'memory':
+                        quizState.questions = generateVerseMemoryQuestions(bibleData, engData, quizState.questionCount);
+                        break;
+                    case 'youth':
+                        quizState.questions = generateYouthQuestions(bibleData, engData, quizState.questionCount);
+                        break;
+                    case 'kids':
+                        quizState.questions = generateKidsQuestions(bibleData, engData, quizState.questionCount);
+                        break;
+                    default:
+                        quizState.questions = generateCharacterQuestions(bibleData, engData, quizState.questionCount);
+                }
             }
 
             if (quizState.questions.length === 0) {
-                $('quizQuestionText').textContent = 'Could not generate questions. Please try again.';
+                alert("Could not generate enough questions for this selection.");
+                showSection('landingPage');
                 return;
             }
 
-            // Update labels
+            // Sort questions from easy (1) to difficult (3)
+            quizState.questions.sort((a, b) => (a.points || 1) - (b.points || 1));
+
+            // Setup UI
+            showQuizScreen('quizPlayScreen');
             $('quizNextBtn').textContent = labels.next;
             renderQuestion();
 
@@ -976,7 +1202,7 @@
         const isCorrect = selectedIndex === q.answer;
 
         if (isCorrect) {
-            quizState.score++;
+            quizState.score += (q.points || 1); // Add specific points based on difficulty
             clickedBtn.classList.add('correct');
         } else {
             clickedBtn.classList.add('incorrect');
@@ -1005,7 +1231,7 @@
 
     // --- Timer ---
     function startTimer() {
-        quizState.timeLeft = 15;
+        quizState.timeLeft = 20; // Changed timer to 20 seconds
         const timerEl = $('quizTimer');
         timerEl.textContent = `⏱ ${quizState.timeLeft}`;
         timerEl.classList.remove('warning');
@@ -1100,6 +1326,14 @@
         $('retryQuizBtn').textContent = labels.retry;
         $('newQuizBtn').textContent = labels.newq;
         $('quizToHomeBtn').textContent = labels.home;
+
+        // Trigger Gamification Hooks
+        if (window.Gamification) {
+            let englishBookName = 'All';
+            if (quizState.book === 1) englishBookName = 'genesis'; // Cross-lingual Genesis check
+
+            window.Gamification.awardQuizCompletion(correct, total, englishBookName);
+        }
 
         showQuizScreen('quizResultsScreen');
 

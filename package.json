@@ -4,6 +4,9 @@
   "description": "",
   "main": "quiz.js",
   "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "mobile:sync": "npm run build && npx cap sync",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -13,14 +16,19 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "bugs": {
     "url": "https://github.com/obedbardhan/obedbardhan.github.io/issues"
   },
   "homepage": "https://github.com/obedbardhan/obedbardhan.github.io#readme",
   "dependencies": {
+    "@capacitor/android": "^8.2.0",
     "@capacitor/cli": "^8.2.0",
     "@capacitor/core": "^8.2.0",
     "@capacitor/ios": "^8.2.0"
+  },
+  "devDependencies": {
+    "vite": "^7.3.1",
+    "vite-plugin-pwa": "^1.2.0"
   }
 }

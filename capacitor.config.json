@@ -1,7 +1,7 @@
 {
     "appId": "io.github.obedbardhan.linguabible",
-    "appName": "LinguaBible",
-    "webDir": "www",
+    "appName": "Multilingual Bible",
+    "webDir": "dist",
     "server": {
         "androidScheme": "https"
     },
