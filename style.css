@@ -1725,14 +1725,15 @@ header.quiz-header {
 
 /* Floating Navigation Controls */
 .bible-floating-nav {
-    position: sticky;
-    top: 180px; /* High enough to clear the sticky header */
+    position: fixed;
+    top: 110px; /* Offset from sticky header */
+    left: 50%;
+    transform: translateX(-50%);
     z-index: 1100;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 12px;
-    margin: 15px auto;
     width: fit-content;
     pointer-events: none;
 }
