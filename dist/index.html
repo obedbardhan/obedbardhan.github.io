@@ -37,8 +37,8 @@
     <!-- External libraries used globally -->
     <script src="https://cdn.jsdelivr.net/npm/pinyin/dist/pinyin.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hebrew-transliteration/dist/hebrew-transliteration.umd.min.js"></script>
-  <script type="module" crossorigin src="./assets/main-HU9Ih4rN.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/main-7upgXcyQ.css">
+  <script type="module" crossorigin src="./assets/main-BSkAW2hk.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/main-Bd7Uspwn.css">
 <link rel="manifest" href="./manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="./registerSW.js"></script></head>
 
 <body>
@@ -70,15 +70,16 @@
     <!-- ===== BIBLE SECTION ===== -->
     <div id="bibleSection" class="app-section" style="display:none;">
         <header class="bible-reader-header">
-            <div class="bible-top-pill" style="display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; width: 100%;">
+            <div class="bible-header-layout" style="display: grid; grid-template-columns: 80px 1fr 80px; align-items: center; width: 100%;">
                 <div style="text-align: left;">
                     <button id="backToHomeBtn" class="btn-home" style="margin: 0; background: transparent; border: none; font-size: 1.5rem; cursor: pointer; padding: 0.5rem;" title="Back to Home" onclick="document.getElementById('landingPage').style.display=''; document.getElementById('bibleSection').style.display='none'; document.getElementById('quizSection').style.display='none'; window.scrollTo(0,0);">🏠</button>
                 </div>
-                <div style="display: flex; align-items: center; gap: 0.8rem; justify-content: center;">
+                <div class="bible-top-pill">
                     <span class="bible-cross-icon">✝</span> Bible Reader
                 </div>
                 <div></div>
             </div>
+        </header>
             <div class="controls bible-controls-area">
                 <div class="control-row primary-line-controls">
                     <select id="bookSelect"></select>
@@ -105,7 +106,6 @@
                             <option value="esp_rv1909_updated">Spanish</option>
                         </select>
                     </div>
-                    <button id="goButton" style="flex-grow: 0;">Go</button>
                     <button id="toggleControlsButton" title="Show/Hide More Options" style="flex-grow: 0; padding: 0; width: 50px;">-</button>
                 </div>
 
@@ -139,7 +139,10 @@
         </header>
 
         <main>
-            <button id="returnToQuizBtn" class="action-btn return-btn" style="display: none;">🔙 Return to Quiz 🏁</button>
+            <div class="bible-floating-nav">
+                <button id="returnToQuizBtn" class="action-btn return-btn" style="display: none;">🔙 Return to Quiz 🏁</button>
+                <button id="goButton" class="action-btn top-btn">⬆ Go to Top</button>
+            </div>
 
             <div id="bibleTextDiv" class="verse-container">
                 <p id="loadingIndicator">Loading Bible data, please wait...</p>
@@ -159,13 +162,13 @@
     <!-- ===== QUIZ SECTION ===== -->
     <div id="quizSection" class="app-section" style="display:none;">
 
-        <header class="quiz-header" style="background: transparent; padding: 0;">
-            <div class="quiz-top-pill" style="margin: 1rem 1.5rem; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; width: calc(100% - 3rem);">
+        <header class="quiz-header">
+            <div class="quiz-header-layout" style="display: grid; grid-template-columns: 80px 1fr 80px; align-items: center; width: 100%;">
                 <div style="text-align: left;">
                     <button id="quizBackToHomeBtn" class="back-btn" style="position: static; margin: 0; transform: none; background: transparent; border: none; font-size: 1.5rem; cursor: pointer; padding: 0;" title="Back to Home">🏠</button>
                 </div>
-                <div style="display: flex; align-items: center; gap: 0.8rem; justify-content: center;">
-                    <span class="quiz-cross-icon" style="font-size: 1.6rem; color: #cca450; line-height: 1;">✝</span> Quiz
+                <div class="quiz-top-pill">
+                    <span class="quiz-cross-icon">✝</span> Quiz
                 </div>
                 <div style="text-align: right;">
                     <button id="quizProfileBtn" class="profile-hdr-btn" style="position: static; margin: 0; transform: none; background: transparent; border: none; font-size: 1.5rem; cursor: pointer; padding: 0;" title="Achievements">🏆</button>
@@ -224,7 +227,7 @@
         <!-- Quiz Setup Screen -->
         <div id="quizSetupScreen" class="quiz-screen quiz-setup">
             <div class="quiz-card setup-card">
-                <div class="setup-icon"><img src="icons/quiz_bulb.png" alt="Quiz Bulb" style="width: 60px; height: 60px; object-fit: contain;"></div>
+                <div class="setup-icon"><img src="./assets/quiz_bulb-DdJ7RMAb.png" alt="Quiz Bulb" style="width: 60px; height: 60px; object-fit: contain;"></div>
                 <h2>Set Up Your Quiz</h2>
                 <p class="setup-desc">Choose your language and number of questions</p>
 

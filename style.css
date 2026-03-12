@@ -369,7 +369,6 @@ header.bible-reader-header {
 #playEnglishButton,
 #playIndianLangButton,
 #searchButton,
-#goButton,
 #toggleControlsButton {
     background: linear-gradient(to right, #409298, #162f55);
     color: white;
@@ -398,7 +397,6 @@ header.bible-reader-header {
 #playEnglishButton:hover,
 #playIndianLangButton:hover,
 #searchButton:hover,
-#goButton:hover,
 #toggleControlsButton:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
@@ -1725,29 +1723,56 @@ header.quiz-header {
     background: #e2e8f0;
 }
 
-.return-btn {
-    display: block;
-    margin: 10px auto 20px auto;
-    padding: 12px 24px;
-    background: #007bff;
-    color: white;
-    border-radius: 20px;
-    font-weight: bold;
-    border: none;
-    cursor: pointer;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+/* Floating Navigation Controls */
+.bible-floating-nav {
     position: sticky;
-    top: 250px;
-    /* High enough to clear the tall Bible header */
-    z-index: 999;
-    transition: all 0.2s ease;
+    top: 180px; /* High enough to clear the sticky header */
+    z-index: 1100;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin: 15px auto;
+    width: fit-content;
+    pointer-events: none;
 }
 
-.return-btn:hover {
-    background: #0056b3;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+.bible-floating-nav .action-btn {
+    pointer-events: auto;
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    font-family: 'Inter', sans-serif;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+    min-width: 180px;
+    justify-content: center;
 }
+
+.return-btn {
+    background: linear-gradient(135deg, #164e63, #0f172a);
+}
+
+.top-btn {
+    background: linear-gradient(135deg, #43807b, #1e3a3a);
+}
+
+.action-btn:hover {
+    transform: scale(1.05) translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
+}
+
+.action-btn:active {
+    transform: scale(0.98);
+}
+
 
 .highlighted-verse {
     background-color: #E0F7F9;

@@ -106,7 +106,6 @@
                             <option value="esp_rv1909_updated">Spanish</option>
                         </select>
                     </div>
-                    <button id="goButton" style="flex-grow: 0;">Go</button>
                     <button id="toggleControlsButton" title="Show/Hide More Options" style="flex-grow: 0; padding: 0; width: 50px;">-</button>
                 </div>
 
@@ -140,7 +139,10 @@
         </header>
 
         <main>
-            <button id="returnToQuizBtn" class="action-btn return-btn" style="display: none;">🔙 Return to Quiz 🏁</button>
+            <div class="bible-floating-nav">
+                <button id="returnToQuizBtn" class="action-btn return-btn" style="display: none;">🔙 Return to Quiz 🏁</button>
+                <button id="goButton" class="action-btn top-btn">⬆ Go to Top</button>
+            </div>
 
             <div id="bibleTextDiv" class="verse-container">
                 <p id="loadingIndicator">Loading Bible data, please wait...</p>
