@@ -284,7 +284,7 @@ function setupEventListeners() {
     // Scroll-Visibility Logic for Floating Navigation
     const toggleFloatingNav = () => {
         if (!bibleFloatingNav) return;
-        if (window.scrollY > 200) {
+        if (window.scrollY > 100) {
             bibleFloatingNav.classList.remove('hidden');
         } else {
             bibleFloatingNav.classList.add('hidden');

@@ -1737,7 +1737,7 @@ header.quiz-header {
     width: fit-content;
     pointer-events: none;
     transition: opacity 0.3s ease, transform 0.3s ease;
-    opacity: 0; /* Hidden by default */
+    opacity: 1; /* Corrected to 1 so reveal works when .hidden is removed */
 }
 
 .bible-floating-nav.hidden {
