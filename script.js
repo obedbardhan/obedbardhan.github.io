@@ -282,15 +282,16 @@ function setupEventListeners() {
     });
 
     // Scroll-Visibility Logic for Floating Navigation
-    window.addEventListener('scroll', () => {
+    const toggleFloatingNav = () => {
+        if (!bibleFloatingNav) return;
         if (window.scrollY > 200) {
             bibleFloatingNav.classList.remove('hidden');
         } else {
             bibleFloatingNav.classList.add('hidden');
         }
-    });
-    // Initialize state
-    if (window.scrollY <= 200) bibleFloatingNav.classList.add('hidden');
+    };
+    window.addEventListener('scroll', toggleFloatingNav);
+    toggleFloatingNav(); // Initialize visibility state immediately
 }
 
 function setInitialControlsState() {
