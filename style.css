@@ -229,34 +229,29 @@ body {
    BIBLE SECTION — HEADER
    ========================================= */
 header.bible-reader-header {
-    background-color: #f6efe1; /* Match the background in the image */
-    color: #2d3748;
-    padding: 1rem 1.5rem 0.5rem 1.5rem;
+    background-color: #0f1c3f;
+    color: #e2c07a;
+    padding: 0.5rem 1.5rem;
     position: sticky;
     top: 0;
     z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
 }
 
 .bible-top-pill {
-    background: #112040; /* Dark blue almost navy */
-    color: #dcbfa2; /* Slightly softer gold text */
-    padding: 0.8rem 2rem;
-    border-radius: 20px;
-    font-size: 1.4rem;
+    color: #e2c07a;
+    font-size: 1.3rem;
     font-weight: bold;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0.8rem;
-    margin: 0 auto 1.5rem auto;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     font-family: 'Inter', sans-serif;
-    width: 100%;
 }
 
 .bible-cross-icon {
-    font-size: 1.8rem;
-    color: #c4a161; /* Golden cross */
+    font-size: 1.6rem;
+    color: #cca450;
     line-height: 1;
 }
 
@@ -512,7 +507,7 @@ main {
 
 .chapter-title {
     color: #442a1f; /* Dark brown */
-    font-size: 2.8rem;
+    font-size: 2.2rem;
     font-family: 'Inter', sans-serif;
     font-weight: 800;
     border-bottom: 1px solid #e2e8f0;
@@ -1027,24 +1022,27 @@ main {
     padding: 0.5rem 1.5rem 1.5rem;
     display: flex;
     flex-direction: column;
-    gap: 0.625rem;
+    gap: 0.75rem;
+    align-items: stretch; /* Force all buttons to be same width */
 }
 
 .option-btn {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    padding: 0.875rem 1rem;
+    padding: 1rem 1.25rem;
     border: 2px solid #e2e8f0;
-    border-radius: 0.625rem;
+    border-radius: 1rem;
     background: #fff;
     cursor: pointer;
     text-align: left;
     font-family: 'Inter', sans-serif;
-    font-size: 0.95rem;
+    font-size: 1.1rem;
+    font-weight: 500;
     color: #2d3748;
     transition: all 0.2s;
-    width: 100%;
+    width: 100%; /* Ensure it fills the area */
+    min-height: 60px; /* Consistent height */
 }
 
 .option-btn:hover:not(.disabled) {
@@ -1079,19 +1077,20 @@ main {
     background: linear-gradient(to bottom, #fdfcfb, #f3f4f6);
 }
 
-.quiz-top-pill {
+header.quiz-header {
     background: #0f1c3f;
-    /* Dark blue */
+    padding: 0.5rem 1.5rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+
+.quiz-top-pill {
     color: #e2c07a;
-    padding: 0.8rem 2rem;
-    border-radius: 20px;
     font-size: 1.3rem;
     font-weight: bold;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 0.8rem;
-    margin-bottom: 2rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     font-family: 'Merriweather', serif;
 }
 
