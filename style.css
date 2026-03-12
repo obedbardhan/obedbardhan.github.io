@@ -1726,7 +1726,7 @@ header.quiz-header {
 /* Floating Navigation Controls */
 .bible-floating-nav {
     position: fixed;
-    top: 110px; /* Offset from sticky header */
+    top: 110px; /* Desktop offset */
     left: 50%;
     transform: translateX(-50%);
     z-index: 1100;
@@ -1736,7 +1736,23 @@ header.quiz-header {
     gap: 12px;
     width: fit-content;
     pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    opacity: 1;
 }
+
+.bible-floating-nav.hidden {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-10px);
+    pointer-events: none;
+}
+
+/* Mobile responsive offset to clear taller multi-row header */
+@media (max-width: 768px) {
+    .bible-floating-nav {
+        top: 225px; /* Clear mobile multi-row controls */
+    }
+}
+
 
 .bible-floating-nav .action-btn {
     pointer-events: auto;
