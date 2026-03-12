@@ -1229,8 +1229,7 @@ header.quiz-header {
 .quiz-screen-alt .options-area {
     padding: 0;
     display: flex;
-    flex-wrap: wrap;
-    /* Allow wrapping */
+    flex-direction: column; /* Ensure single vertical column */
     gap: 0.8rem;
 }
 
@@ -1251,12 +1250,7 @@ header.quiz-header {
     gap: 1rem;
 }
 
-/* Make options C and D side-by-side like the image */
-.quiz-screen-alt .option-btn:nth-child(3),
-.quiz-screen-alt .option-btn:nth-child(4) {
-    width: calc(50% - 0.4rem);
-    flex-grow: 1;
-}
+
 
 .quiz-screen-alt .option-btn:hover:not(.disabled) {
     background: #f8fafc;
