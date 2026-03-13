@@ -72,11 +72,11 @@
     // Curated list of common generic particles (articles, prepositions, conjunctions, etc.)
     const STATIC_STOP_WORDS = {
         english: ['a', 'an', 'the', 'in', 'on', 'at', 'by', 'for', 'from', 'with', 'to', 'through', 'he', 'she', 'it', 'they', 'we', 'you', 'me', 'him', 'her', 'us', 'them', 'my', 'your', 'his', 'its', 'will', 'and', 'but', 'or', 'so', 'nor', 'yet', 'as', 'of', 'into', 'onto', 'upon', 'about', 'above', 'after', 'against', 'along', 'among', 'around', 'before', 'behind', 'below', 'beneath', 'beside', 'between', 'beyond', 'during', 'except', 'inside', 'outside', 'over', 'past', 'since', 'under', 'until', 'up', 'down', 'near', 'within', 'without'],
-        odia: ['ଏବଂ', 'କିନ୍ତୁ', 'ପାଇଁ', 'ହେଲେ', 'କଲେ', 'ଅଛି', 'ଥିଲା', 'ଥିଲେ', 'ମଧ୍ୟ', 'ଏହି', 'ସେହି', 'ଆଉ', 'ପୁଣି', 'କରି', 'ହୋଇ', 'ତହିଁରେ', 'ସେହିରୂପ', 'ତହୁଁ', 'ଆଗୋ', 'କି', 'ସତ୍ୟ', 'ଉଦ୍ଦେଶ୍ୟରେ', 'ନିମନ୍ତେ', 'ପର୍ଯ୍ୟନ୍ତ', 'ଯେହେତୁ'],
-        hindi: ['और', 'लेकिन', 'किन्तु', 'के', 'की', 'का', 'में', 'से', 'को', 'ने', 'है', 'हैं', 'था', 'थे', 'थी', 'लिए', 'पर', 'भी', 'कि', 'जो', 'तो', 'ही', 'हुआ', 'हुए', 'हुई', 'गया', 'गए', 'गयी'],
-        telugu: ['మరియు', 'కానీ', 'కొరకు', 'లో', 'కు', 'కి', 'తో', 'నుండి', 'వరకు', 'ఈ', 'ఆ', 'ఏ', 'అది', 'ఇది', 'వారు', 'వీరు', 'వారా', 'ఆయన', 'ఆమె'],
-        tamil: ['மற்றும்', 'ஆனால்', 'ஆக', 'இல்', 'க்கு', 'உடன்', 'இருந்து', 'வரை', 'இந்த', 'அந்த', 'அவர்', 'இவர்', 'அது', 'இது', 'தான்', 'கூட'],
-        kannada: ['ಮತ್ತು', 'ಆದರೆ', 'ಗಾಗಿ', 'ಅಲ್ಲಿ', 'ಗೆ', 'ಜ ಜೊತೆ', 'ರಿಂದ', 'ವರೆಗೆ', 'ಈ', 'ಆ', 'ಅವರು', 'ಇವರು', 'ಅದು', 'ಇದು', 'ಮಾಡಲು', 'ಇದೆ'],
+        odia: ['ଏବଂ', 'କିନ୍ତୁ', 'ପାଇଁ', 'ହେଲେ', 'କଲେ', 'ଅଛି', 'ଥିଲା', 'ଥିଲେ', 'ମଧ୍ୟ', 'ଏହି', 'ସେହି', 'ଆଉ', 'ପୁଣି', 'କରି', 'ହୋଇ', 'ତହିଁରେ', 'ସେହିରୂପ', 'ତହୁଁ', 'ଆଗୋ', 'କି', 'ସତ୍ୟ', 'ଉଦ୍ଦେଶ୍ୟରେ', 'ନିମନ୍ତେ', 'ପର୍ଯ୍ୟନ୍ତ', 'ଯେହେତୁ', 'କରିବ', 'ହେବ', 'ପାରିବ', 'କରନ୍ତି', 'ହୁଅନ୍ତି', 'ଲାଗିଲା', 'ଦେଲା', 'ନେଲା', 'ଗଲା', 'ଗଲେ', 'ବୋଲି'],
+        hindi: ['और', 'लेकिन', 'किन्तु', 'के', 'की', 'का', 'में', 'से', 'को', 'ने', 'है', 'हैं', 'था', 'थे', 'थी', 'लिए', 'पर', 'भी', 'कि', 'जो', 'तो', 'ही', 'हुआ', 'हुए', 'हुई', 'गया', 'गए', 'गयी', 'करेगा', 'होगी', 'सकता', 'करते', 'होते', 'लगा', 'दिया', 'लिया', 'होगा'],
+        telugu: ['మరియు', 'కానీ', 'కొరకు', 'లో', 'కు', 'కి', 'తో', 'నుండి', 'వరకు', 'ఈ', 'ఆ', 'ఏ', 'అది', 'ఇది', 'వారు', 'వీరు', 'వారా', 'ఆయన', 'ఆమె', 'చేయు', 'ఉండు', 'అయిన'],
+        tamil: ['மற்றும்', 'ஆனால்', 'ஆக', 'இல்', 'க்கு', 'உடன்', 'இருந்து', 'வரை', 'இந்த', 'அந்த', 'அவர்', 'இவர்', 'அது', 'இது', 'தான்', 'கூட', 'செய்', 'இரு', 'ஆகும்'],
+        kannada: ['ಮತ್ತು', 'ಆದರೆ', 'ಗಾಗಿ', 'ಅಲ್ಲಿ', 'ಗೆ', 'ಜ ಜೊತೆ', 'ರಿಂದ', 'ವರೆಗೆ', 'ಈ', 'ಆ', 'ಅವರು', 'ಇವರು', 'ಅದು', 'ಇದು', 'ಮಾಡಲು', 'ಇದೆ', 'ಮೂಡಲು', 'ಮೂಡಿ'],
         gurmukhi: ['ਅਤੇ', 'ਪਰ', 'ਲਈ', 'ਵਿੱਚ', 'ਨੂੰ', 'ਨਾਲ', 'ਤੋਂ', 'ਤੱਕ', 'ਇਹ', 'ਉਹ', 'ਅਸੀਂ', 'ਤੁਸੀਂ', 'ਸੀ', 'ਸਨ', 'ਹੈ', 'ਹਨ'],
         marathi: ['आणि', 'पण', 'साठी', 'मध्ये', 'ला', 'सह', 'पासून', 'पर्यंत', 'हे', 'ते', 'आम्ही', 'तुम्ही', 'होता', 'होते', 'आहे', 'आहेत'],
         french: ['et', 'mais', 'pour', 'dans', 'avec', 'sans', 'sous', 'sur', 'chez', 'par', 'le', 'la', 'les', 'un', 'une', 'des', 'ce', 'cette', 'ces', 'mon', 'ton', 'son', 'notre', 'votre', 'leur'],
@@ -387,24 +387,26 @@
             // 2. Fallback: Frequency Analysis - Find the rarest word in this verse.
             // Rare words across a book are extremely likely to be specific Places, Proper Nouns, or unique events (like Ark, Noah, Ur, etc)
             if (!targetNativeWord || targetNativeIdx === -1) {
-                let lowestFreq = Infinity;
+                let bestScore = -Infinity;
                 let bestIdx = -1;
 
                 nativeWordsArray.forEach((w, i) => {
                     const cw = w.replace(/[,."“”''!?;:।॥\u0964\u0965]/g, '').toLowerCase();
-                    // We only accept words > 2 chars to avoid single letters or tiny punctuation glitches, 
-                    // but we DO accept 3-letter words like "Ur", "Gad", "Er", "Lot", "Nuh" etc.
-                    // Reject any word that falls into the dynamic stop-words list or static blocklist
                     if (cw.length > 2 && wordFreq[cw] && !dynamicStopWords.has(cw) && isSignificant(w, lang)) {
-                        if (wordFreq[cw] < lowestFreq) {
-                            lowestFreq = wordFreq[cw];
+                        // Combine rarity with semantic weight
+                        const weight = calculateWordWeight(w, lang);
+                        const frequencyScore = Math.max(0, 20 - wordFreq[cw]); // Reward rarer words
+                        const totalScore = weight + frequencyScore;
+
+                        if (totalScore > bestScore) {
+                            bestScore = totalScore;
                             bestIdx = i;
                         }
                     }
                 });
 
-                // If even our "rarest" word is highly common (e.g. freq > 10 in a small book), it's probably a stop word, skip this verse.
-                if (bestIdx !== -1 && lowestFreq <= 10) {
+                // If even our best word is low score, skip this verse.
+                if (bestIdx !== -1 && bestScore > 15) {
                     targetNativeIdx = bestIdx;
                     targetNativeWord = nativeWordsArray[bestIdx].replace(/[,."“”''!?;:।॥\u0964\u0965]/g, '');
                 } else {
@@ -416,20 +418,25 @@
             const blankedText = nativeWordsArray.map((w, i) => i === targetNativeIdx ? '_____' : w).join(' ');
 
             // Generate distractors from other verses in the same book
+            const targetCat = getWordCategory(targetNativeWord, lang);
             const distractors = new Set();
             let attempts = 0;
-            while (distractors.size < 3 && attempts < 50) {
+            while (distractors.size < 3 && attempts < 100) {
                 attempts++;
                 const randVerse = availableVerses[Math.floor(Math.random() * availableVerses.length)];
                 const otherWordsMatch = randVerse.text.replace(/[\u00b6]/g, '').trim().split(/\s+/);
 
                 if (otherWordsMatch.length > 0) {
-                    // Pick a distractor using the same length heuristic to ensure it's also a noun/entity
                     const validCandidateIndices = [];
                     otherWordsMatch.forEach((w, i) => {
                         const cwLower = w.replace(/[,."“”''!?;:।॥\u0964\u0965]/g, '').toLowerCase();
-                        // Reject stop words as distractors
-                        if (cwLower.length >= 3 && !dynamicStopWords.has(cwLower) && isSignificant(w, lang)) validCandidateIndices.push(i);
+                        if (cwLower.length >= 3 && !dynamicStopWords.has(cwLower) && isSignificant(w, lang)) {
+                            // Match category if possible
+                            const cat = getWordCategory(cwLower, lang);
+                            if (targetCat === 'general' || cat === targetCat) {
+                                validCandidateIndices.push(i);
+                            }
+                        }
                     });
 
                     if (validCandidateIndices.length > 0) {
@@ -589,8 +596,8 @@
             // Question Type 2: Fill-in-the-blank — show verse with missing word
             const blankQ = createFillInBlank(verseText);
             if (blankQ) {
-                // Get wrong options from nearby verses
-                const nearbyWords = getNearbyWords(bibleData, vRef.book, vRef.ch, vRef.v, 3);
+                // Get wrong options from nearby verses, matching target type
+                const nearbyWords = getNearbyWords(bibleData, vRef.book, vRef.ch, vRef.v, 3, blankQ.type);
                 if (nearbyWords.length >= 3) {
                     const fillOptions = shuffle([blankQ.answer, ...nearbyWords.slice(0, 3)]);
                     questions.push({
@@ -816,43 +823,96 @@
         const rawWords = clean.split(/\s+/);
         const lang = quizState.language;
         
-        // Filter for significant words
-        const words = rawWords.filter(w => isSignificant(w, lang));
-        if (words.length < 3) return null;
+        // Filter for significant words and rank them by weight
+        // Higher weight = more meaningful word (longer, contains unique chars)
+        const candidates = rawWords
+            .map((w, i) => ({ word: w, index: i, score: calculateWordWeight(w, lang) }))
+            .filter(c => c.score > 10);
 
-        // Pick a significant word from the middle of the verse
-        const midStart = Math.floor(words.length * 0.2);
-        const midEnd = Math.floor(words.length * 0.8);
-        const targetIdx = midStart + Math.floor(Math.random() * (midEnd - midStart));
-        const targetWord = words[targetIdx];
+        if (candidates.length < 1) return null;
+
+        // Sort by score and pick from the top 50% highest scoring words
+        candidates.sort((a, b) => b.score - a.score);
+        const topCandidates = candidates.slice(0, Math.max(1, Math.floor(candidates.length / 2)));
+        const target = topCandidates[Math.floor(Math.random() * topCandidates.length)];
+        
+        const targetIdx = target.index;
+        const targetWord = target.word;
 
         // Clean the target word of punctuation
         const cleanWord = targetWord.replace(/[,."'""''!?;:।॥\u0964\u0965]/g, '');
         if (cleanWord.length < 2) return null;
 
         // Create question with blank
-        const question = words.map((w, i) => i === targetIdx ? '_____' : w).join(' ');
-        return { question, answer: cleanWord };
+        const question = rawWords.map((w, i) => i === targetIdx ? '_____' : w).join(' ');
+        return { question, answer: cleanWord, type: getWordCategory(cleanWord, lang) };
     }
 
-    function getNearbyWords(bibleData, book, chapter, verse, count) {
+    function calculateWordWeight(word, lang) {
+        if (!isSignificant(word, lang)) return 0;
+        let score = word.length * 5;
+        
+        // Bonus for length
+        if (word.length > 5) score += 10;
+        
+        // Penalize very predictable suffix completions (common in many languages)
+        // Heuristic: If it's a very short part of a larger word phrase
+        if (word.length <= 4) score -= 5;
+        
+        return score;
+    }
+
+    function getWordCategory(word, lang) {
+        // Simple heuristic for part-of-speech based matching
+        // In many Indian languages, words ending in 'ରେ', 'ଙ୍କୁ', 'ର' are nouns/pronouns
+        // Words ending in 'ବ', 'ଇ', 'ନ୍ତି' are often verbs
+        const w = word.toLowerCase();
+        if (lang === 'odia') {
+            if (w.endsWith('ବ') || w.endsWith('ନ୍ତି') || w.endsWith('ଲେ')) return 'verb';
+            if (w.endsWith('ରେ') || w.endsWith('ଙ୍କୁ') || w.endsWith('ର')) return 'noun';
+        }
+        return 'general';
+    }
+
+    function getNearbyWords(bibleData, book, chapter, verse, count, targetType) {
         const words = [];
         const lang = quizState.language;
 
-        // Try to get words from verses immediately after the current one
-        for (let i = 1; i <= 5; i++) {
+        // Try to get words from verses immediately surrounding the current one
+        for (let i = -5; i <= 5; i++) {
+            if (i === 0) continue;
             const vText = getVerse(bibleData, book, chapter, verse + i);
             if (vText) {
                 const parts = vText.split(/\s+/).filter(w => isSignificant(w, lang));
                 parts.forEach(p => {
                     const clean = p.replace(/[,."“”''!?;:।॥\u0964\u0965]/g, '').trim();
                     if (clean.length > 3 && !words.includes(clean)) {
-                        words.push(clean);
+                        // Priority matching by category (PoS heuristic)
+                        const cat = getWordCategory(clean, lang);
+                        if (targetType === 'general' || cat === targetType) {
+                            words.push(clean);
+                        }
                     }
                 });
             }
-            if (words.length >= count + 10) break;
+            if (words.length >= count + 20) break;
         }
+        
+        // If we didn't get enough specific type matches, fill with general significant words
+        if (words.length < count) {
+            for (let i = -10; i <= 10; i++) {
+                const vText = getVerse(bibleData, book, chapter, verse + i);
+                if (vText) {
+                   vText.split(/\s+/).forEach(p => {
+                       const clean = p.replace(/[,."“”''!?;:।॥\u0964\u0965]/g, '').trim();
+                       if (clean.length > 3 && !words.includes(clean) && isSignificant(clean, lang)) {
+                           words.push(clean);
+                       }
+                   });
+                }
+            }
+        }
+
         return shuffle(words).slice(0, count);
     }
 
