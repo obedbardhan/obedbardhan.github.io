@@ -228,11 +228,13 @@
         const file = languageFiles[language];
         if (!file) throw new Error('No Bible data file for language: ' + language);
 
+        if (window.debugLog) window.debugLog(`[Quiz] Fetching ${language} from ${file}...`);
         const resp = await fetch(file);
         if (!resp.ok) throw new Error('Failed to load ' + file);
-        const buffer = await resp.arrayBuffer();
-        const text = new TextDecoder('utf-8').decode(buffer);
-        const data = JSON.parse(text);
+        
+        // Better compatibility for mobile WebViews
+        const data = await resp.json();
+        if (window.debugLog) window.debugLog(`[Quiz] ${language} loaded: ${data.length} verses`);
 
         const fixes = bookNameFixes[language] || {};
 
@@ -1233,12 +1235,14 @@
     function startTimer() {
         quizState.timeLeft = 20; // Changed timer to 20 seconds
         const timerEl = $('quizTimer');
-        timerEl.textContent = `⏱ ${quizState.timeLeft}`;
+        const timerIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 4px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;
+        timerEl.innerHTML = `${timerIcon} ${quizState.timeLeft}`;
         timerEl.classList.remove('warning');
 
         quizState.timer = setInterval(() => {
             quizState.timeLeft--;
-            timerEl.textContent = `⏱ ${quizState.timeLeft}`;
+            const timerIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 4px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;
+        timerEl.innerHTML = `${timerIcon} ${quizState.timeLeft}`;
 
             if (quizState.timeLeft <= 5) {
                 timerEl.classList.add('warning');

@@ -37,8 +37,8 @@
     <!-- External libraries used globally -->
     <script src="https://cdn.jsdelivr.net/npm/pinyin/dist/pinyin.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hebrew-transliteration/dist/hebrew-transliteration.umd.min.js"></script>
-  <script type="module" crossorigin src="./assets/main-YiKXPpDK.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/main-C6Zvmw8o.css">
+  <script type="module" crossorigin src="./assets/main-DT1T61hw.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/main-W8KLnfiK.css">
 <link rel="manifest" href="./manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="./registerSW.js"></script></head>
 
 <body>
@@ -54,12 +54,12 @@
                 quizzes</p>
             <div class="landing-buttons">
                 <button id="openBibleBtn" class="landing-btn bible-btn">
-                    <span class="btn-icon">📖</span>
+                    <span class="btn-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M8 7h6"/><path d="M8 11h8"/></svg></span>
                     <span class="btn-label">Bible</span>
                     <span class="btn-desc">Read in 13 languages</span>
                 </button>
                 <button id="openQuizBtn" class="landing-btn quiz-btn">
-                    <span class="btn-icon quiz-icon">?</span>
+                    <span class="btn-icon quiz-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9.06 11.9 8.07-8.06a2.85 2.85 0 1 1 4.03 4.03l-8.06 8.08"/><path d="M7.07 14.94c-3.91 3.91-3.91 10.24 0 14.15l.08.08a.9.9 0 0 0 1.25 0l.08-.08a10.01 10.01 0 0 0 0-14.15Z"/><path d="m9.06 11.9 5.47 5.46"/></svg></span>
                     <span class="btn-label">Quiz</span>
                     <span class="btn-desc">Test your knowledge</span>
                 </button>
@@ -72,10 +72,14 @@
         <header class="bible-reader-header">
             <div class="bible-header-layout" style="display: grid; grid-template-columns: 80px 1fr 80px; align-items: center; width: 100%;">
                 <div style="text-align: left;">
-                    <button id="backToHomeBtn" class="btn-home" style="margin: 0; background: transparent; border: none; font-size: 1.5rem; cursor: pointer; padding: 0.5rem;" title="Back to Home" onclick="document.getElementById('landingPage').style.display=''; document.getElementById('bibleSection').style.display='none'; document.getElementById('quizSection').style.display='none'; window.scrollTo(0,0);">🏠</button>
+                    <button id="backToHomeBtn" class="btn-home" style="margin: 0; background: transparent; border: none; font-size: 1.5rem; cursor: pointer; padding: 0.5rem;" title="Back to Home" onclick="document.getElementById('landingPage').style.display=''; document.getElementById('bibleSection').style.display='none'; document.getElementById('quizSection').style.display='none'; window.scrollTo(0,0);">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    </button>
                 </div>
                 <div class="bible-top-pill">
-                    <span class="bible-cross-icon">✝</span> Bible Reader
+                    <span class="bible-cross-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="22"/><line x1="7" y1="9" x2="17" y2="9"/></svg>
+                    </span> Bible Reader
                 </div>
                 <div></div>
             </div>
@@ -139,13 +143,19 @@
 
         <main>
             <div class="bible-floating-nav hidden">
-                <button id="returnToQuizBtn" class="action-btn return-btn" style="display: none;">🔙 Return to Quiz 🏁</button>
-                <button id="goButton" class="action-btn top-btn">⬆ Go to Top</button>
+                <button id="returnToQuizBtn" class="action-btn return-btn" style="display: none;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 4px;"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg> Return to Quiz 
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-left: 4px;"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+                </button>
+                <button id="goButton" class="action-btn top-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 4px;"><path d="m18 15-6-6-6 6"/></svg> Go to Top
+                </button>
             </div>
 
             <div id="bibleTextDiv" class="verse-container">
                 <p id="loadingIndicator">Loading Bible data, please wait...</p>
             </div>
+
 
             <div id="wordStudyModal" class="modal">
                 <div class="modal-content">
@@ -164,13 +174,19 @@
         <header class="quiz-header">
             <div class="quiz-header-layout" style="display: grid; grid-template-columns: 80px 1fr 80px; align-items: center; width: 100%;">
                 <div style="text-align: left;">
-                    <button id="quizBackToHomeBtn" class="back-btn" style="position: static; margin: 0; transform: none; background: transparent; border: none; font-size: 1.5rem; cursor: pointer; padding: 0;" title="Back to Home">🏠</button>
+                    <button id="quizBackToHomeBtn" class="back-btn" style="position: static; margin: 0; transform: none; background: transparent; border: none; font-size: 1.5rem; cursor: pointer; padding: 0;" title="Back to Home">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    </button>
                 </div>
                 <div class="quiz-top-pill">
-                    <span class="quiz-cross-icon">✝</span> Quiz
+                    <span class="quiz-cross-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="22"/><line x1="7" y1="9" x2="17" y2="9"/></svg>
+                    </span> Quiz
                 </div>
                 <div style="text-align: right;">
-                    <button id="quizProfileBtn" class="profile-hdr-btn" style="position: static; margin: 0; transform: none; background: transparent; border: none; font-size: 1.5rem; cursor: pointer; padding: 0;" title="Achievements">🏆</button>
+                    <button id="quizProfileBtn" class="profile-hdr-btn" style="position: static; margin: 0; transform: none; background: transparent; border: none; font-size: 1.5rem; cursor: pointer; padding: 0;" title="Achievements">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+                    </button>
                 </div>
             </div>
         </header>
@@ -178,7 +194,9 @@
         <!-- Quiz Profile Screen -->
         <div id="quizProfileScreen" class="quiz-screen quiz-profile" style="display:none;">
             <div class="quiz-card profile-card">
-                <div class="setup-icon">🏅</div>
+                <div class="setup-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#cca450" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+                </div>
                 <h2>Your Achievements</h2>
                 <p class="setup-desc">Track your progress and leagues</p>
 
@@ -287,10 +305,10 @@
                     <span id="quizQuestionCounter" class="question-counter">Question 1 of 5</span>
                     <div class="meta-pills">
                         <div class="timer-pill">
-                            <span class="meta-icon">⏱</span> <span id="quizTimer" class="quiz-timer">15</span>
+                            <span class="meta-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span> <span id="quizTimer" class="quiz-timer">15</span>
                         </div>
                         <div class="score-pill">
-                            <span class="meta-icon">🥇</span> <span id="quizScoreLive" class="score-live">Score:
+                            <span class="meta-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg></span> <span id="quizScoreLive" class="score-live">Score:
                                 0</span>
                         </div>
                     </div>
@@ -318,7 +336,9 @@
         <!-- Quiz Results Screen -->
         <div id="quizResultsScreen" class="quiz-screen" style="display:none;">
             <div class="quiz-card results-card">
-                <div id="resultsEmoji" class="results-emoji">🏆</div>
+                <div id="resultsEmoji" class="results-emoji">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#cca450" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+                </div>
                 <h2 id="resultsTitle" class="results-title">Quiz Complete!</h2>
                 <div class="results-score-ring">
                     <svg viewBox="0 0 120 120" class="score-ring-svg">
