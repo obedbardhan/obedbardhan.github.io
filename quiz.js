@@ -502,8 +502,17 @@
 
             const finalOptions = shuffle(uniqueOptions.slice(0, 4));
 
+            // Enhance context if the verse is too short or starting generically
+            let finalQuestionText = blankedVerse;
+            if (blankedVerse.length < 60) {
+                const nextVText = getVerse(bibleData, char.book, char.verseHint.ch, char.verseHint.v + 1);
+                if (nextVText) {
+                    finalQuestionText += " " + nextVText;
+                }
+            }
+
             questions.push({
-                q: `"${truncateVerse(blankedVerse, 100)}"`,
+                q: `"${truncateVerse(finalQuestionText, 300)}"`,
                 qPrefix: getQuestionPrefix(bibleData, 'who_in_verse'),
                 options: finalOptions,
                 answer: finalOptions.indexOf(charNameNative),
@@ -540,7 +549,7 @@
 
             const options = shuffle([bookName, ...otherBooks]);
             questions.push({
-                q: `"${truncateVerse(verseText, 100)}"`,
+                q: `"${truncateVerse(verseText, 300)}"`,
                 qPrefix: getQuestionPrefix(bibleData, 'which_book_verse'),
                 options: options,
                 answer: options.indexOf(bookName),
@@ -641,7 +650,7 @@
                 .map(f => `${getBookName(bibleData, f.book)} ${f.ch}:${f.v}`);
             const options = shuffle([correctRef, ...wrongRefs]);
             questions.push({
-                q: `"${truncateVerse(verseText, 80)}"`,
+                q: `"${truncateVerse(verseText, 250)}"`,
                 qPrefix: getQuestionPrefix(bibleData, 'what_reference'),
                 options: options,
                 answer: options.indexOf(correctRef),
@@ -710,7 +719,7 @@
             const options = shuffle([charName, ...wrongNames]);
             const ref = getRef(bibleData, sc.book, sc.ch, sc.v);
             questions.push({
-                q: `"${truncateVerse(verseText, 80)}"`,
+                q: `"${truncateVerse(verseText, 250)}"`,
                 qPrefix: getQuestionPrefix(bibleData, 'who_in_verse'),
                 options: options,
                 answer: options.indexOf(charName),
@@ -731,7 +740,7 @@
             const otherBooks = pickRandom(bibleData.bookList.filter(b => b.book !== vRef.book), 3).map(b => b.name);
             const options = shuffle([bookName, ...otherBooks]);
             questions.push({
-                q: `"${truncateVerse(verseText, 60)}"`,
+                q: `"${truncateVerse(verseText, 200)}"`,
                 qPrefix: getQuestionPrefix(bibleData, 'which_book_verse'),
                 options: options,
                 answer: options.indexOf(bookName),
@@ -749,6 +758,20 @@
         // Clean up the text first
         let clean = text.replace(/[\u00b6]/g, '').trim();
         if (clean.length <= maxLen) return clean;
+        
+        // Try to find a better cut point (end of sentence or space)
+        let sub = clean.substring(0, maxLen);
+        const lastStop = Math.max(sub.lastIndexOf('.'), sub.lastIndexOf('!'), sub.lastIndexOf('?'), sub.lastIndexOf('।'));
+        
+        if (lastStop > maxLen * 0.7) {
+            return clean.substring(0, lastStop + 1);
+        }
+        
+        const lastSpace = sub.lastIndexOf(' ');
+        if (lastSpace > maxLen * 0.8) {
+            return clean.substring(0, lastSpace) + '...';
+        }
+
         return clean.substring(0, maxLen) + '...';
     }
 
