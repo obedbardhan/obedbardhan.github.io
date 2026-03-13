@@ -75,22 +75,9 @@ async function initializeApp() {
     }
     try {
         loadingIndicator.style.display = 'block';
-        // Load all language data, but only display English initially
-        await Promise.allSettled([
-            fetchAndProcessBibleData('all_web_bible_updated.json', 'english'),
-            fetchAndProcessBibleData('irv_hindi.json', 'hindi'),
-            fetchAndProcessBibleData('odia_all_books.json', 'odia'),
-            fetchAndProcessBibleData('te_irv_updated.json', 'telugu'),
-            fetchAndProcessBibleData('ta_oitce_updated.json', 'tamil'),
-            fetchAndProcessBibleData('kn_irv_updated.json', 'kannada'),
-            fetchAndProcessBibleData('pa_irv_updated.json', 'gurmukhi'),
-            fetchAndProcessBibleData('mr_irv_updated.json', 'marathi'),
-            fetchAndProcessBibleData('hebrew_modern_updated.json', 'hebrew'),
-            fetchAndProcessBibleData('chinese_union_simp_updated.json', 'chinese'),
-            fetchAndProcessBibleData('french_epee_updated.json', 'french'),
-            fetchAndProcessBibleData('german_luther_updated.json', 'german'),
-            fetchAndProcessBibleData('esp_rv1909_updated.json', 'spanish')
-        ]);
+        // Lazy-Loading: Only fetch English data on startup to save memory on mobile devices.
+        // Other languages will be fetched on-demand when selected.
+        await fetchAndProcessBibleData('all_web_bible_updated.json', 'english');
         populateChapterSelect(bookSelect.value);
         // Do NOT call setCurrentIndianLanguageData() here.
         // It will be called when user selects a language from dropdown.
@@ -181,6 +168,7 @@ window.openBibleVerse = async function (reference, explicitBookNum = null, expli
         const mappedLang = langMap[window.quizState.language];
         if (mappedLang && languageSelect.value !== mappedLang) {
             languageSelect.value = mappedLang;
+            await ensureLanguageDataLoaded(mappedLang);
             setCurrentIndianLanguageData();
         }
     }
@@ -243,7 +231,11 @@ window.openBibleVerse = async function (reference, explicitBookNum = null, expli
 function setupEventListeners() {
     bookSelect.addEventListener('change', () => { populateChapterSelect(bookSelect.value); displayChapter(); });
     chapterSelect.addEventListener('change', displayChapter);
-    languageSelect.addEventListener('change', () => {
+    languageSelect.addEventListener('change', async () => {
+        const selectedLang = languageSelect.value;
+        if (selectedLang !== 'none') {
+            await ensureLanguageDataLoaded(selectedLang);
+        }
         setCurrentIndianLanguageData(); // Update currentIndianLanguageData based on selection
         displayChapter(); // Re-render chapter to show/hide secondary language content
         updateIndianLangPlaybackButtonVisibility(); // Update button visibility
@@ -297,6 +289,33 @@ function setupEventListeners() {
 function setInitialControlsState() {
     secondaryControls.classList.remove('hidden');
     toggleControlsButton.textContent = '-';
+}
+
+// NEW: Lazy-loading helper to ensure a secondary language is loaded before use
+async function ensureLanguageDataLoaded(selectedLang) {
+    if (selectedLang === 'none') return;
+
+    const langDataMap = {
+        'irv_hindi': { data: hindiBibleData, path: 'irv_hindi.json', key: 'hindi' },
+        'odia_all_books': { data: odiaBibleData, path: 'odia_all_books.json', key: 'odia' },
+        'te_irv_updated': { data: teluguBibleData, path: 'te_irv_updated.json', key: 'telugu' },
+        'ta_oitce_updated': { data: tamilBibleData, path: 'ta_oitce_updated.json', key: 'tamil' },
+        'kn_irv_updated': { data: kannadaBibleData, path: 'kn_irv_updated.json', key: 'kannada' },
+        'pa_irv_updated': { data: punjabiBibleData, path: 'pa_irv_updated.json', key: 'gurmukhi' },
+        'mr_irv_updated': { data: marathiBibleData, path: 'mr_irv_updated.json', key: 'marathi' },
+        'hebrew_modern_updated': { data: hebrewBibleData, path: 'hebrew_modern_updated.json', key: 'hebrew' },
+        'chinese_union_simp_updated': { data: chineseBibleData, path: 'chinese_union_simp_updated.json', key: 'chinese' },
+        'french_epee_updated': { data: frenchBibleData, path: 'french_epee_updated.json', key: 'french' },
+        'german_luther_updated': { data: germanBibleData, path: 'german_luther_updated.json', key: 'german' },
+        'esp_rv1909_updated': { data: spanishBibleData, path: 'esp_rv1909_updated.json', key: 'spanish' }
+    };
+
+    const config = langDataMap[selectedLang];
+    if (config && (!config.data || config.data.length === 0)) {
+        loadingIndicator.style.display = 'block';
+        await fetchAndProcessBibleData(config.path, config.key);
+        loadingIndicator.style.display = 'none';
+    }
 }
 
 // NEW: Function to update the visibility of the Indian language playback button
