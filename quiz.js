@@ -67,6 +67,22 @@
         { name: 'Paul', book: 44, chapters: [9, 13, 16, 22, 26, 27, 28], verseHint: { ch: 9, v: 15 } },
         { name: 'John', book: 43, chapters: [1, 3, 19, 20, 21], verseHint: { ch: 3, v: 16 } }
     ];
+    
+    // --- Static Stop Words Dictionary ---
+    // Curated list of common generic particles (articles, prepositions, conjunctions, etc.)
+    const STATIC_STOP_WORDS = {
+        english: ['a', 'an', 'the', 'in', 'on', 'at', 'by', 'for', 'from', 'with', 'to', 'through', 'he', 'she', 'it', 'they', 'we', 'you', 'me', 'him', 'her', 'us', 'them', 'my', 'your', 'his', 'its', 'will', 'and', 'but', 'or', 'so', 'nor', 'yet', 'as', 'of', 'into', 'onto', 'upon', 'about', 'above', 'after', 'against', 'along', 'among', 'around', 'before', 'behind', 'below', 'beneath', 'beside', 'between', 'beyond', 'during', 'except', 'inside', 'outside', 'over', 'past', 'since', 'under', 'until', 'up', 'down', 'near', 'within', 'without'],
+        odia: ['ଏବଂ', 'କିନ୍ତୁ', 'ପାଇଁ', 'ହେଲେ', 'କଲେ', 'ଅଛି', 'ଥିଲା', 'ଥିଲେ', 'ମଧ୍ୟ', 'ଏହି', 'ସେହି', 'ଆଉ', 'ପୁଣି', 'କରି', 'ହୋଇ', 'ତହିଁରେ', 'ସେହିରୂପ', 'ତହୁଁ', 'ଆଗୋ', 'କି', 'ସତ୍ୟ', 'ଉଦ୍ଦେଶ୍ୟରେ', 'ନିମନ୍ତେ', 'ପର୍ଯ୍ୟନ୍ତ', 'ଯେହେତୁ'],
+        hindi: ['और', 'लेकिन', 'किन्तु', 'के', 'की', 'का', 'में', 'से', 'को', 'ने', 'है', 'हैं', 'था', 'थे', 'थी', 'लिए', 'पर', 'भी', 'कि', 'जो', 'तो', 'ही', 'हुआ', 'हुए', 'हुई', 'गया', 'गए', 'गयी']
+    };
+
+    function isSignificant(word, lang) {
+        if (!word || word.length < 3) return false;
+        const stopWords = STATIC_STOP_WORDS[lang] || [];
+        const cleanWord = word.replace(/[,."“”''!?;:।॥\u0964\u0965]/g, '').toLowerCase();
+        if (stopWords.includes(cleanWord)) return false;
+        return true;
+    }
 
     // --- Native Character Names Dictionary ---
     // Used to reliably translate character names across languages instead of guessing from verse text
@@ -326,10 +342,10 @@
             });
         }
 
-        // Generate dynamic stop-words (top 100 most frequent words in the book)
+        // Generate dynamic stop-words (top 150 most frequent words in the book)
         // These are statistically guaranteed to be articles, conjunctions, and prepositions across any language.
         const sortedWords = Object.entries(wordFreq).sort((a, b) => b[1] - a[1]);
-        const dynamicStopWords = new Set(sortedWords.slice(0, 100).map(entry => entry[0]));
+        const dynamicStopWords = new Set(sortedWords.slice(0, 150).map(entry => entry[0]));
 
         // We want to generate 'count' questions, but we might skip verses so we iterate until we hit the count or run out
         for (const v of availableVerses) {
@@ -368,8 +384,8 @@
                     const cw = w.replace(/[,."“”''!?;:।॥\u0964\u0965]/g, '').toLowerCase();
                     // We only accept words > 2 chars to avoid single letters or tiny punctuation glitches, 
                     // but we DO accept 3-letter words like "Ur", "Gad", "Er", "Lot", "Nuh" etc.
-                    // Reject any word that falls into the dynamic stop-words list
-                    if (cw.length > 2 && wordFreq[cw] && !dynamicStopWords.has(cw)) {
+                    // Reject any word that falls into the dynamic stop-words list or static blocklist
+                    if (cw.length > 2 && wordFreq[cw] && !dynamicStopWords.has(cw) && isSignificant(w, lang)) {
                         if (wordFreq[cw] < lowestFreq) {
                             lowestFreq = wordFreq[cw];
                             bestIdx = i;
@@ -403,7 +419,7 @@
                     otherWordsMatch.forEach((w, i) => {
                         const cwLower = w.replace(/[,."“”''!?;:।॥\u0964\u0965]/g, '').toLowerCase();
                         // Reject stop words as distractors
-                        if (cwLower.length >= 3 && !dynamicStopWords.has(cwLower)) validCandidateIndices.push(i);
+                        if (cwLower.length >= 3 && !dynamicStopWords.has(cwLower) && isSignificant(w, lang)) validCandidateIndices.push(i);
                     });
 
                     if (validCandidateIndices.length > 0) {
@@ -774,7 +790,6 @@
 
         return clean.substring(0, maxLen) + '...';
     }
-
     function findCharacterName(bibleData, char) {
         // Use the native dictionary if available for 100% accurate character names
         const lang = quizState.language;
@@ -788,12 +803,16 @@
 
     function createFillInBlank(verseText) {
         const clean = verseText.replace(/[\u00b6]/g, '').trim();
-        const words = clean.split(/\s+/).filter(w => w.length > 2);
-        if (words.length < 5) return null;
+        const rawWords = clean.split(/\s+/);
+        const lang = quizState.language;
+        
+        // Filter for significant words
+        const words = rawWords.filter(w => isSignificant(w, lang));
+        if (words.length < 3) return null;
 
-        // Pick a word from the middle of the verse (more meaningful)
-        const midStart = Math.floor(words.length * 0.25);
-        const midEnd = Math.floor(words.length * 0.75);
+        // Pick a significant word from the middle of the verse
+        const midStart = Math.floor(words.length * 0.2);
+        const midEnd = Math.floor(words.length * 0.8);
         const targetIdx = midStart + Math.floor(Math.random() * (midEnd - midStart));
         const targetWord = words[targetIdx];
 
@@ -808,16 +827,23 @@
 
     function getNearbyWords(bibleData, book, chapter, verse, count) {
         const words = [];
-        // Get words from nearby verses
-        for (let v = Math.max(1, verse - 3); v <= verse + 3; v++) {
-            if (v === verse) continue;
-            const text = getVerse(bibleData, book, chapter, v);
-            if (text) {
-                const w = text.split(/\s+/).filter(w => w.length > 2);
-                words.push(...w.map(word => word.replace(/[,."'""''!?;:।॥\u0964\u0965]/g, '')).filter(w => w.length > 1));
+        const lang = quizState.language;
+
+        // Try to get words from verses immediately after the current one
+        for (let i = 1; i <= 5; i++) {
+            const vText = getVerse(bibleData, book, chapter, verse + i);
+            if (vText) {
+                const parts = vText.split(/\s+/).filter(w => isSignificant(w, lang));
+                parts.forEach(p => {
+                    const clean = p.replace(/[,."“”''!?;:।॥\u0964\u0965]/g, '').trim();
+                    if (clean.length > 3 && !words.includes(clean)) {
+                        words.push(clean);
+                    }
+                });
             }
+            if (words.length >= count + 10) break;
         }
-        return [...new Set(shuffle(words))].slice(0, count);
+        return shuffle(words).slice(0, count);
     }
 
     // Get question prefix text based on language
